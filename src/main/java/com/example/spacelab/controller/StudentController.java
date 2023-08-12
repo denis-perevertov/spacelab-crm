@@ -1,6 +1,7 @@
 package com.example.spacelab.controller;
 
 import com.example.spacelab.model.Student;
+import com.example.spacelab.model.dto.TaskDTO;
 import com.example.spacelab.service.StudentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
@@ -29,6 +30,11 @@ public class StudentController {
     @GetMapping("/{id}")
     public Student getStudent(@PathVariable Long id) {
         return studentService.getStudentById(id);
+    }
+
+    @GetMapping("/{id}/tasks")
+    public List<TaskDTO> getStudentTasks(@PathVariable Long id) {
+        return studentService.getStudentTasks(id);
     }
 
     @PostMapping

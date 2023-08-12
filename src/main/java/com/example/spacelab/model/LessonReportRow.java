@@ -7,22 +7,27 @@ import java.util.List;
 
 @Data
 @Entity
-@Table(name="lesson_reports_rows")
+@Table(name="lesson_report_rows")
 public class LessonReportRow {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @OneToMany
+    @ManyToOne
     private Student student;
 
-    private Integer mark;
+    @ManyToOne
+    private Lesson lesson;
+
+    private Boolean wasPresent;
+
+    private Integer rating;
 
     @ManyToMany
     private List<Task> currentTasks;
 
     private Double hours;
-    private String note;
+    private String hoursNote;
     private String comment;
 }

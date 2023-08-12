@@ -9,6 +9,7 @@ import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @Entity
@@ -26,7 +27,6 @@ public class Student {
     private String email;
     private String phone;
     private String telegram;
-    private String viber;
 
     @DateTimeFormat(pattern = "MM/dd/yyyy")
     private LocalDate birthdate;
@@ -48,4 +48,9 @@ public class Student {
     @ManyToOne
     @JoinColumn(name = "course_id")
     private Course course;
+
+    @ManyToMany
+    private List<Task> tasks;
+
+    // private String password
 }

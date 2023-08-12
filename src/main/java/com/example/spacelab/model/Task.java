@@ -14,7 +14,6 @@ public class Task {
 
     /*
     TODO
-    - рекомендованный план выполнения
     - время выполнения
      */
 
@@ -31,8 +30,8 @@ public class Task {
     @Enumerated(value = EnumType.STRING)
     private TaskLevel level;
 
+    private String completion_time;
     private String skills;
-
     private String description;
 
     @OneToMany

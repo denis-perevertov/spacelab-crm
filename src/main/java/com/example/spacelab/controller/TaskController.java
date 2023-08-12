@@ -2,6 +2,7 @@ package com.example.spacelab.controller;
 
 
 import com.example.spacelab.model.Task;
+import com.example.spacelab.model.dto.TaskDTO;
 import com.example.spacelab.service.TaskService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
@@ -22,23 +23,22 @@ public class TaskController {
 
     @GetMapping
     private List<Task> getTasks() {
-        return new ArrayList<>();
+        return taskService.getAllTasks();
     }
 
     @GetMapping("/{id}")
-    private Task getTaskById(@PathVariable Long id) {
-        return new Task();
+    private TaskDTO getTaskById(@PathVariable Long id) {
+        return taskService.getTaskDTOById(id);
     }
 
     @PostMapping
-    private ResponseEntity<String> createNewTask(@RequestBody Task task) {
-
-        return ResponseEntity.status(201).body("New task created");
+    private ResponseEntity<Task> createNewTask(@RequestBody TaskDTO task) {
+        Task newTask = taskService.createNewTask(task);
+        return ResponseEntity.status(201).body(newTask);
     }
 
     @PutMapping
     private ResponseEntity<String> editTask(@RequestBody Task task) {
-
         return ResponseEntity.ok().build();
     }
 
@@ -49,9 +49,9 @@ public class TaskController {
     }
 
     @DeleteMapping("/{id}")
-    private ResponseEntity<String> deleteTask() {
-
-        return ResponseEntity.ok().build();
+    private ResponseEntity<String> deleteTask(@PathVariable Long id) {
+        taskService.deleteTaskById(id);
+        return ResponseEntity.ok("Task deleted");
     }
 
 

@@ -8,6 +8,7 @@ import java.util.List;
 
 @Data
 @Entity
+@Table(name="literature")
 public class Literature {
 
     @Id
@@ -21,6 +22,7 @@ public class Literature {
     @JoinColumn(name = "course_id")
     private Course course;
 
+    @Enumerated(value = EnumType.STRING)
     private LiteratureType type;
 
     private List<String> keywords;  // or just String

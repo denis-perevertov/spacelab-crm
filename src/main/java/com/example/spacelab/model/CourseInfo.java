@@ -14,9 +14,9 @@ public class CourseInfo {
 
     private List<String> topics;
 
-    // completion time
+    private String completion_time;
 
-    // group size
+    private Integer group_size;
 
-    // weekly hours norm
+    private Integer hours_norm;
 }

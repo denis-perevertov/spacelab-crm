@@ -21,12 +21,12 @@ public class CourseController {
 
     @GetMapping
     private List<Course> getCourses() {
-        return new ArrayList<>();
+        return courseService.getCourses();
     }
 
     @GetMapping("/{id}")
     private Course getCourse(@PathVariable Long id) {
-        return new Course();
+        return courseService.getCourseById(id);
     }
 
     @PostMapping
@@ -38,15 +38,16 @@ public class CourseController {
     private ResponseEntity<String> editCourse(@PathVariable Long id, @RequestBody Course course) {
         return new ResponseEntity<>("Course edited", HttpStatus.CREATED);
     }
-
-    @PatchMapping("/{id}")
-    private ResponseEntity<String> editCourse2(@PathVariable Long id) {
-        return ResponseEntity.ok("lol");
-    }
+//
+//    @PatchMapping("/{id}")
+//    private ResponseEntity<String> editCourse2(@PathVariable Long id) {
+//        return ResponseEntity.ok("lol");
+//    }
 
     @DeleteMapping("/{id}")
     private ResponseEntity<String> deleteCourse(@PathVariable Long id) {
-        return new ResponseEntity<>("Course deleted", HttpStatus.ACCEPTED);
+        courseService.deleteCourseById(id);
+        return new ResponseEntity<>("Course deleted", HttpStatus.OK);
     }
 
 }

@@ -39,6 +39,6 @@ public class Course {
     @Embedded
     private CourseInfo courseInfo;
 
-    private CourseStatus status;   // can replace with boolean active field
+    private Boolean is_active;
 
 }
