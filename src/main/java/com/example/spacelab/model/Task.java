@@ -21,31 +21,31 @@ public class Task {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private String name;
-
     @ManyToOne
     @JoinColumn(name = "parent_task_id")
     private Task parentTask;
 
+    @ManyToOne
+    @JoinColumn(name = "course_id")
+    private Course course;
+
+    private String name;
+
     @Enumerated(value = EnumType.STRING)
     private TaskLevel level;
 
-    private String completion_time;
-    private String skills;
-    private String description;
+    private String completionTime;
+    private String skillsDescription;
+    private String taskDescription;
 
     @OneToMany
     private List<Task> subtasks;
 
     @ManyToMany
-    private List<Literature> recommended_literature;
+    private List<Literature> recommendedLiterature;
 
     @ManyToMany
-    private List<Student> active_students;
-
-    @ManyToOne
-    @JoinColumn(name = "course_id")
-    private Course course;
+    private List<Student> activeStudents;
 
     @Enumerated(value = EnumType.STRING)
     private TaskStatus status;

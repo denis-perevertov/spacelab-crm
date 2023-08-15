@@ -25,8 +25,8 @@ public class Literature {
     @Enumerated(value = EnumType.STRING)
     private LiteratureType type;
 
-    private List<String> keywords;  // or just String
-
+    private String keywords;
+    private String description;
     private String resource_link;  // filename for files, URL for links
 
     private Boolean is_verified;

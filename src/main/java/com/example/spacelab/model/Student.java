@@ -49,8 +49,14 @@ public class Student {
     @JoinColumn(name = "course_id")
     private Course course;
 
-    @ManyToMany
-    private List<Task> tasks;
+    @OneToMany(mappedBy = "student")
+    private List<StudentTask> tasks;
 
-    // private String password
+    private String password;
+    @Transient private String confirm_password;
+
+    private String avatar;
+
+    @ManyToOne
+    private UserRole role;  // роль студента
 }

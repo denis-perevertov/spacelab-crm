@@ -21,9 +21,9 @@ public class Course {
     private String name;
 
     @DateTimeFormat(pattern = "MM/dd/yyyy")
-    private LocalDate beginning_date;
+    private LocalDate beginningDate;
     @DateTimeFormat(pattern = "MM/dd/yyyy")
-    private LocalDate end_date;
+    private LocalDate endDate;
 
     @OneToOne
     @JoinColumn(name = "mentor_id")
@@ -36,9 +36,12 @@ public class Course {
     @OneToMany
     private List<Student> students;
 
+    @OneToMany
+    private List<Task> tasks;
+
     @Embedded
     private CourseInfo courseInfo;
 
-    private Boolean is_active;
+    private Boolean isActive;
 
 }

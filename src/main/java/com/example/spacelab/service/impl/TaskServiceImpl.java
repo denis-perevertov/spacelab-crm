@@ -20,18 +20,11 @@ public class TaskServiceImpl implements TaskService {
 
     private final TaskRepository taskRepository;
     private final TaskDTOMapper mapper;
-//    private final TaskMapper mapper;
-//    private final TaskMapper mapper = Mappers.getMapper(TaskMapper.class);
 
     @Override
-    public List<Task> getAllTasks() {
-        return taskRepository.findAll();
+    public List<TaskDTO> getAllTasks() {
+        return taskRepository.findAll().stream().map(mapper::fromTaskToDTO).toList();
     }
-
-//    @Override
-//    public Page<TaskDTO> getTasksByPage(Pageable pageable) {
-//        return taskRepository.findAll(pageable);
-//    }
 
     @Override
     public List<TaskDTO> getTasksByPage(Pageable pageable) {
@@ -43,8 +36,9 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Task getTaskById(Long id) {
-        return taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Task not found"));
+    public TaskDTO getTaskById(Long id) {
+        Task task = taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Task not found"));
+        return mapper.fromTaskToDTO(task);
     }
 
     @Override
@@ -54,23 +48,17 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Task createNewTask(Task task) {
-        return taskRepository.save(task);
+    public TaskDTO createNewTask(TaskDTO dto) {
+        Task task = mapper.fromDTOToTask(dto);
+        task = taskRepository.save(task);
+        return mapper.fromTaskToDTO(task);
     }
 
     @Override
-    public Task createNewTask(TaskDTO task) {
-        return taskRepository.save(mapper.fromDTOToTask(task));
-    }
-
-    @Override
-    public Task editTask(Task task) {
-        return null;
-    }
-
-    @Override
-    public Task editTask(TaskDTO task) {
-        return null;
+    public TaskDTO editTask(TaskDTO dto) {
+        Task task = mapper.fromDTOToTask(dto);
+        task = taskRepository.save(task);
+        return mapper.fromTaskToDTO(task);
     }
 
     @Override

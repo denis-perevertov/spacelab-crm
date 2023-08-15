@@ -23,9 +23,11 @@ public class LessonReportRow {
     private Boolean wasPresent;
 
     private Integer rating;
-
+/*
+    TODO исправить
     @ManyToMany
     private List<Task> currentTasks;
+*/
 
     private Double hours;
     private String hoursNote;

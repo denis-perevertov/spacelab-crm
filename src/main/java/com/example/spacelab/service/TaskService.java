@@ -9,14 +9,12 @@ import java.util.List;
 
 public interface TaskService {
 
-    List<Task> getAllTasks();
+    List<TaskDTO> getAllTasks();
     List<TaskDTO> getTasksByPage(Pageable pageable);
-    Task getTaskById(Long id);
+    TaskDTO getTaskById(Long id);
     TaskDTO getTaskDTOById(Long id);
-    Task createNewTask(Task task);
-    Task createNewTask(TaskDTO task);
-    Task editTask(Task task);
-    Task editTask(TaskDTO task);
+    TaskDTO createNewTask(TaskDTO task);
+    TaskDTO editTask(TaskDTO task);
     void deleteTaskById(Long id);
 
 }

@@ -11,12 +11,8 @@ import java.util.List;
 public class CourseInfo {
 
     private String main_description;
-
     private List<String> topics;
-
-    private String completion_time;
-
-    private Integer group_size;
-
-    private Integer hours_norm;
+    private String completionTime;
+    private Integer groupSize;
+    private Integer hoursNorm;
 }

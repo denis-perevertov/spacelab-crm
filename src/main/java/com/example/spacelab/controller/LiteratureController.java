@@ -26,21 +26,25 @@ public class LiteratureController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Literature> getLiteratureById(@PathVariable Long id) {
-        return new ResponseEntity<>(literatureService.getLiteratureById(id), HttpStatus.FOUND);
+        Literature lit = literatureService.getLiteratureById(id);
+        return new ResponseEntity<>(lit, HttpStatus.FOUND);
     }
 
     @PostMapping
     public ResponseEntity<String> createNewLiterature(@RequestBody Literature literature) {
+        literatureService.createNewLiterature(literature);
         return new ResponseEntity<>("Created", HttpStatus.CREATED);
     }
 
     @PutMapping
     public ResponseEntity<String> editLiterature(@RequestBody Literature literature) {
+        literatureService.editLiterature(literature);
         return new ResponseEntity<>("Edited", HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteLiterature(@PathVariable Long id) {
+        literatureService.deleteLiteratureById(id);
         return new ResponseEntity<>("Deleted", HttpStatus.OK);
     }
 }

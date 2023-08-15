@@ -26,8 +26,8 @@ public class StudentServiceImpl implements StudentService {
     private final TaskDTOMapper taskMapper;
 
     @Override
-    public List<Student> getStudents() {
-        return studentRepository.findAll();
+    public List<StudentDTO> getStudents() {
+        return studentRepository.findAll().stream().map(studentMapper::fromStudentToDTO).toList();
     }
 
     @Override
@@ -37,7 +37,7 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public Student getStudentById(Long id) {
-        return null;
+        return studentRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Student not found"));
     }
 
     @Override
@@ -45,20 +45,18 @@ public class StudentServiceImpl implements StudentService {
         Student student = studentRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Student not found"));
         return studentMapper.fromStudentToDTO(student);
     }
-
     @Override
-    public Student createNewStudent(Student student) {
-        return studentRepository.save(student);
+    public StudentDTO createNewStudent(StudentDTO dto) {
+        Student student = studentMapper.fromDTOToStudent(dto);
+        student = studentRepository.save(student);
+        return studentMapper.fromStudentToDTO(student);
     }
 
     @Override
-    public Student createNewStudent(StudentDTO dto) {
-        return studentRepository.save(studentMapper.fromDTOToStudent(dto));
-    }
-
-    @Override
-    public Student editStudent(Student student) {
-        return null;
+    public StudentDTO editStudent(StudentDTO dto) {
+        Student student = studentMapper.fromDTOToStudent(dto);
+        student = studentRepository.save(student);
+        return studentMapper.fromStudentToDTO(student);
     }
 
     @Override

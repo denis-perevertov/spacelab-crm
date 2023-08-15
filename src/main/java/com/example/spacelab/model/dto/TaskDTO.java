@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 
 @Data
 //@Builder
-@RequiredArgsConstructor
 public class TaskDTO {
 
     private Long id;

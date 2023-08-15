@@ -14,13 +14,14 @@ public class Admin {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private String first_name;
-    private String last_name;
+    private String firstName;
+    private String lastName;
 
     private String phone;
     private String email;
 
     private String password;
+    @Transient private String confirmPassword;
 
     @ManyToOne
     private UserRole role;

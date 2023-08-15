@@ -9,8 +9,8 @@ import java.time.LocalDate;
 
 @Data
 @Entity
-@Table(name="user_tasks")
-public class UserTask {
+@Table(name="student_tasks")
+public class StudentTask {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -18,6 +18,9 @@ public class UserTask {
 
     @ManyToOne
     private Task task;
+
+    @ManyToOne
+    private Student student;
 
     @DateTimeFormat(pattern = "MM/dd/yyyy")
     private LocalDate begin_date;

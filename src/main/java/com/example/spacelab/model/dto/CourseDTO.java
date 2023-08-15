@@ -10,7 +10,6 @@ import java.util.List;
 
 @Data
 //@Builder
-@RequiredArgsConstructor
 public class CourseDTO {
 
     private Long id;
