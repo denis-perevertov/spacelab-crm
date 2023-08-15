@@ -9,6 +9,7 @@ import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -20,9 +21,9 @@ public class Student {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private String first_name;
-    private String last_name;
-    private String fathers_name;
+    private String firstName;
+    private String lastName;
+    private String fathersName;
 
     private String email;
     private String phone;
@@ -32,28 +33,28 @@ public class Student {
     private LocalDate birthdate;
 
     @Enumerated(value = EnumType.STRING)
-    private StudentEducationLevel education_level;
+    private StudentEducationLevel educationLevel;
 
     @Enumerated(value = EnumType.STRING)
-    private StudentEnglishLevel english_level;
+    private StudentEnglishLevel englishLevel;
 
     @Enumerated(value = EnumType.STRING)
-    private StudentWorkStatus work_status;
+    private StudentWorkStatus workStatus;
 
     private Integer rating;
 
     @Enumerated(value = EnumType.STRING)
-    private StudentAccountStatus account_status;
+    private StudentAccountStatus accountStatus;
 
     @ManyToOne
     @JoinColumn(name = "course_id")
     private Course course;
 
     @OneToMany(mappedBy = "student")
-    private List<StudentTask> tasks;
+    private List<StudentTask> tasks = new ArrayList<>();
 
     private String password;
-    @Transient private String confirm_password;
+    @Transient private String confirmPassword;
 
     private String avatar;
 

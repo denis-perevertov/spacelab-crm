@@ -11,8 +11,8 @@ public class CourseDTOMapper {
         CourseDTO dto = new CourseDTO();
 
         dto.setId(course.getId());
-        dto.setBegin_date(course.getBeginning_date());
-        dto.setEnd_date(course.getEnd_date());
+        dto.setBegin_date(course.getBeginningDate());
+        dto.setEnd_date(course.getEndDate());
 //        dto.setStatus(course.getStatus());
 
         /*

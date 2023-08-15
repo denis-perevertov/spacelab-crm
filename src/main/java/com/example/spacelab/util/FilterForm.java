@@ -1,17 +1,14 @@
-package com.example.spacelab.model.dto;
+package com.example.spacelab.util;
 
 import lombok.Data;
 
 @Data
-public class StudentDTO {
-
-    private Long id;
-    private String fullName;
-    private CourseDTO courseDTO;
+public class FilterForm {
+    private String name;
+    private Long course;
     private String email;
     private String phone;
     private String telegram;
     private Integer rating;
     private String status;
-
 }
