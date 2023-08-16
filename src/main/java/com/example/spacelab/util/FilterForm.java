@@ -13,4 +13,6 @@ public class FilterForm {
     private String status;
     private String type;
     private String keywords;
+    private Long role;
+    private String date;
 }

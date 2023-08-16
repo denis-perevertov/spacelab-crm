@@ -1,9 +1,13 @@
 package com.example.spacelab.controller;
 
 import com.example.spacelab.model.Admin;
+import com.example.spacelab.model.dto.AdminDTO;
 import com.example.spacelab.service.AdminService;
+import com.example.spacelab.util.FilterForm;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
+import org.apache.coyote.Response;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -21,27 +25,33 @@ public class AdminController {
     private final AdminService adminService;
 
     @GetMapping
-    public List<Admin> getAdmins() {
-        return new ArrayList<>();
+    public ResponseEntity<List<AdminDTO>> getAdmins(FilterForm filters,
+                              @RequestParam(required = false) Integer page,
+                              @RequestParam(required = false) Integer size) {
+        List<AdminDTO> adminList = adminService.getAdmins(filters, PageRequest.of(page, size));
+        return new ResponseEntity<>(adminList, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public Admin getAdmin(@PathVariable Long id) {
-        return new Admin();
+    public ResponseEntity<AdminDTO> getAdmin(@PathVariable Long id) {
+        return new ResponseEntity<>(adminService.getAdminById(id), HttpStatus.OK);
     }
 
     @PostMapping
-    public Admin createNewAdmin(@RequestBody Admin admin) {
-        return new Admin();
+    public ResponseEntity<AdminDTO> createNewAdmin(@RequestBody AdminDTO admin) {
+        AdminDTO savedAdmin = adminService.createAdmin(admin);
+        return new ResponseEntity<>(savedAdmin, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public Admin updateAdmin(@RequestBody Admin admin) {
-        return new Admin();
+    public ResponseEntity<AdminDTO> updateAdmin(@RequestBody AdminDTO admin) {
+        AdminDTO savedAdmin = adminService.updateAdmin(admin);
+        return new ResponseEntity<>(savedAdmin, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteAdmin(@PathVariable Long id) {
+        adminService.deleteAdminById(id);
         return new ResponseEntity<>("Deleted", HttpStatus.OK);
     }
 }
