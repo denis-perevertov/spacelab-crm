@@ -15,4 +15,7 @@ public class FilterForm {
     private String keywords;
     private Long role;
     private String date;
+    private Long mentor;
+    private Long manager;
+    private Boolean active;
 }
