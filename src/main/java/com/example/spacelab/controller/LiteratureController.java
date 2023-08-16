@@ -4,6 +4,7 @@ import com.example.spacelab.model.Literature;
 import com.example.spacelab.model.dto.LiteratureDTO;
 import com.example.spacelab.service.LiteratureService;
 import com.example.spacelab.util.FilterForm;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.data.domain.PageRequest;
@@ -43,13 +44,13 @@ public class LiteratureController {
     }
 
     @PostMapping
-    public ResponseEntity<LiteratureDTO> createNewLiterature(@RequestBody LiteratureDTO literature) {
+    public ResponseEntity<LiteratureDTO> createNewLiterature(@Valid @RequestBody LiteratureDTO literature) {
         literature = literatureService.createNewLiterature(literature);
         return new ResponseEntity<>(literature, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<LiteratureDTO> editLiterature(@PathVariable Long id, @RequestBody LiteratureDTO literature) {
+    public ResponseEntity<LiteratureDTO> editLiterature(@PathVariable Long id, @Valid @RequestBody LiteratureDTO literature) {
         literature = literatureService.editLiterature(literature);
         return new ResponseEntity<>(literature, HttpStatus.OK);
     }

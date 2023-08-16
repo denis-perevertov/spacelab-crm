@@ -6,9 +6,11 @@ import com.example.spacelab.model.Task;
 import com.example.spacelab.model.dto.TaskDTO;
 import com.example.spacelab.repository.TaskRepository;
 import com.example.spacelab.service.TaskService;
+import com.example.spacelab.util.FilterForm;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,12 +24,12 @@ public class TaskServiceImpl implements TaskService {
     private final TaskDTOMapper mapper;
 
     @Override
-    public List<TaskDTO> getAllTasks() {
+    public List<TaskDTO> getTasks() {
         return taskRepository.findAll().stream().map(mapper::fromTaskToDTO).toList();
     }
 
     @Override
-    public List<TaskDTO> getTasksByPage(Pageable pageable) {
+    public List<TaskDTO> getTasks(Pageable pageable) {
         return taskRepository.findAll(pageable)
                 .getContent()
                 .stream()
@@ -36,13 +38,17 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public TaskDTO getTaskById(Long id) {
-        Task task = taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Task not found"));
-        return mapper.fromTaskToDTO(task);
+    public List<TaskDTO> getTasks(FilterForm filters, Pageable pageable) {
+        Specification<Task> spec = buildSpecificationFromFilters(filters);
+        return taskRepository.findAll(spec, pageable)
+                .getContent()
+                .stream()
+                .map(mapper::fromTaskToDTO)
+                .toList();
     }
 
     @Override
-    public TaskDTO getTaskDTOById(Long id) {
+    public TaskDTO getTaskById(Long id) {
         Task task = taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Task not found"));
         return mapper.fromTaskToDTO(task);
     }
@@ -64,5 +70,10 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public void deleteTaskById(Long id) {
         taskRepository.deleteById(id);
+    }
+
+    @Override
+    public Specification<Task> buildSpecificationFromFilters(FilterForm filters) {
+        return null;
     }
 }

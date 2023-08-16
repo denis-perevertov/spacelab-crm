@@ -4,6 +4,7 @@ import com.example.spacelab.model.Admin;
 import com.example.spacelab.model.dto.AdminDTO;
 import com.example.spacelab.service.AdminService;
 import com.example.spacelab.util.FilterForm;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.apache.coyote.Response;
@@ -38,13 +39,14 @@ public class AdminController {
     }
 
     @PostMapping
-    public ResponseEntity<AdminDTO> createNewAdmin(@RequestBody AdminDTO admin) {
+    public ResponseEntity<AdminDTO> createNewAdmin(@Valid @RequestBody AdminDTO admin) {
         AdminDTO savedAdmin = adminService.createAdmin(admin);
         return new ResponseEntity<>(savedAdmin, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<AdminDTO> updateAdmin(@RequestBody AdminDTO admin) {
+    public ResponseEntity<AdminDTO> updateAdmin(@PathVariable Long id,
+                                                @Valid @RequestBody AdminDTO admin) {
         AdminDTO savedAdmin = adminService.updateAdmin(admin);
         return new ResponseEntity<>(savedAdmin, HttpStatus.OK);
     }

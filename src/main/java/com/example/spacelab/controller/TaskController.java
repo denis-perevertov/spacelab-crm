@@ -3,8 +3,13 @@ package com.example.spacelab.controller;
 
 import com.example.spacelab.model.dto.TaskDTO;
 import com.example.spacelab.service.TaskService;
+import com.example.spacelab.util.FilterForm;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,25 +24,29 @@ public class TaskController {
     private final TaskService taskService;
 
     @GetMapping
-    private List<TaskDTO> getTasks() {
-        return taskService.getAllTasks();
+    private ResponseEntity<List<TaskDTO>> getTasks(FilterForm filters,
+                                                   @RequestParam(required = false) Integer page,
+                                                   @RequestParam(required = false) Integer size) {
+        List<TaskDTO> taskList = taskService.getTasks(filters, PageRequest.of(page, size));
+        return new ResponseEntity<>(taskList, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    private TaskDTO getTaskById(@PathVariable Long id) {
-        return taskService.getTaskDTOById(id);
+    private ResponseEntity<TaskDTO> getTaskById(@PathVariable Long id) {
+        TaskDTO task = taskService.getTaskById(id);
+        return new ResponseEntity<>(task, HttpStatus.OK);
     }
 
     @PostMapping
-    private ResponseEntity<TaskDTO> createNewTask(@RequestBody TaskDTO task) {
+    private ResponseEntity<TaskDTO> createNewTask(@Valid @RequestBody TaskDTO task) {
         TaskDTO newTask = taskService.createNewTask(task);
-        return ResponseEntity.status(201).body(newTask);
+        return new ResponseEntity<>(newTask, HttpStatus.CREATED);
     }
 
     @PutMapping
-    private ResponseEntity<TaskDTO> editTask(@RequestBody TaskDTO task) {
-        TaskDTO editedTask = taskService.createNewTask(task);
-        return ResponseEntity.status(200).body(editedTask);
+    private ResponseEntity<TaskDTO> editTask(@Valid @RequestBody TaskDTO task) {
+        TaskDTO editedTask = taskService.editTask(task);
+        return new ResponseEntity<>(editedTask, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")

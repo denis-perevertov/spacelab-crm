@@ -10,6 +10,7 @@ import com.example.spacelab.service.StudentService;
 import com.example.spacelab.util.FilterForm;
 import com.example.spacelab.util.StudentTaskStatus;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.data.domain.PageRequest;
@@ -77,7 +78,7 @@ public class StudentController {
     */
 
     @PostMapping
-    public ResponseEntity<StudentDTO> createNewStudent(@RequestBody StudentDTO student) {
+    public ResponseEntity<StudentDTO> createNewStudent(@Valid @RequestBody StudentDTO student) {
         return new ResponseEntity<>(studentService.createNewStudent(student), HttpStatus.CREATED);
     }
 
@@ -90,7 +91,8 @@ public class StudentController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<StudentDTO> editStudent(@PathVariable Long id, @RequestBody StudentDTO student) {
+    public ResponseEntity<StudentDTO> editStudent(@PathVariable Long id,
+                                                  @Valid @RequestBody StudentDTO student) {
         return new ResponseEntity<>(studentService.editStudent(student), HttpStatus.OK);
     }
 
