@@ -11,4 +11,6 @@ public class FilterForm {
     private String telegram;
     private Integer rating;
     private String status;
+    private String type;
+    private String keywords;
 }
