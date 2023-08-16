@@ -1,10 +1,13 @@
 package com.example.spacelab.mapper;
 
 import com.example.spacelab.model.Course;
+import com.example.spacelab.model.StudentTask;
 import com.example.spacelab.model.Task;
 import com.example.spacelab.model.dto.CourseDTO;
+import com.example.spacelab.model.dto.StudentTaskDTO;
 import com.example.spacelab.model.dto.TaskDTO;
 import com.example.spacelab.repository.CourseRepository;
+import com.example.spacelab.repository.StudentTaskRepository;
 import com.example.spacelab.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -24,6 +27,18 @@ public class TaskDTOMapper {
         dto.setStatus(task.getStatus());
 
         dto.setCourse(new CourseDTO());   // todo
+
+        return dto;
+    }
+
+    public StudentTaskDTO fromStudentTaskToStudentTaskDTO(StudentTask studentTask) {
+        StudentTaskDTO dto = new StudentTaskDTO();
+
+        dto.setId(studentTask.getId());
+        dto.setTask(fromTaskToDTO(studentTask.getTask()));
+        dto.setBeginDate(studentTask.getBeginDate());
+        dto.setEndDate(studentTask.getEndDate());
+        dto.setStatus(studentTask.getStatus().toString());
 
         return dto;
     }

@@ -1,9 +1,12 @@
 package com.example.spacelab.service;
 
+import com.example.spacelab.model.InviteStudentRequest;
 import com.example.spacelab.model.Student;
 import com.example.spacelab.model.dto.StudentDTO;
+import com.example.spacelab.model.dto.StudentTaskDTO;
 import com.example.spacelab.model.dto.TaskDTO;
 import com.example.spacelab.util.FilterForm;
+import com.example.spacelab.util.StudentTaskStatus;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
@@ -20,5 +23,9 @@ public interface StudentService extends EntityService<Student>{
 
     void deleteStudentById(Long id);
 
-    List<TaskDTO> getStudentTasks(Long id);
+    List<StudentTaskDTO> getStudentTasks(Long id);
+    List<StudentTaskDTO> getStudentTasks(Long id, StudentTaskStatus status);
+    StudentTaskDTO getStudentTask(Long taskID);
+
+    String createInviteStudentToken(InviteStudentRequest request);
 }

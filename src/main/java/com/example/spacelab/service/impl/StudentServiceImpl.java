@@ -4,15 +4,18 @@ import com.example.spacelab.exception.ResourceNotFoundException;
 import com.example.spacelab.mapper.StudentDTOMapper;
 import com.example.spacelab.mapper.TaskDTOMapper;
 import com.example.spacelab.model.Course;
+import com.example.spacelab.model.InviteStudentRequest;
 import com.example.spacelab.model.Student;
+import com.example.spacelab.model.StudentTask;
 import com.example.spacelab.model.dto.StudentDTO;
+import com.example.spacelab.model.dto.StudentTaskDTO;
 import com.example.spacelab.model.dto.TaskDTO;
-import com.example.spacelab.repository.CourseRepository;
-import com.example.spacelab.repository.StudentRepository;
+import com.example.spacelab.repository.*;
 import com.example.spacelab.service.StudentService;
 import com.example.spacelab.service.specification.StudentSpecifications;
 import com.example.spacelab.util.FilterForm;
 import com.example.spacelab.util.StudentAccountStatus;
+import com.example.spacelab.util.StudentTaskStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +23,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @Log
@@ -28,6 +32,8 @@ public class StudentServiceImpl implements StudentService {
 
     private final StudentRepository studentRepository;
     private final CourseRepository courseRepository;
+    private final InviteStudentRequestRepository inviteRepository;
+    private final StudentTaskRepository studentTaskRepository;
 
     private final StudentDTOMapper studentMapper;
     private final TaskDTOMapper taskMapper;
@@ -71,15 +77,41 @@ public class StudentServiceImpl implements StudentService {
     public void deleteStudentById(Long id) {
         studentRepository.deleteById(id);
     }
-//
-//    @Override
-//    public List<TaskDTO> getStudentTasks(Long id) {
-//        return getStudentById(id).getTasks().stream().map(taskMapper::fromTaskToDTO).toList();
-//    }
+
+
+    /*
+        TODO
+        пагинация заданий
+     */
+    @Override
+    public List<StudentTaskDTO> getStudentTasks(Long studentID) {
+        return studentTaskRepository.findStudentTasks(studentID)
+                .stream()
+                .map(taskMapper::fromStudentTaskToStudentTaskDTO)
+                .toList();
+    }
 
     @Override
-    public List<TaskDTO> getStudentTasks(Long id) {
-        return null;
+    public List<StudentTaskDTO> getStudentTasks(Long studentID, StudentTaskStatus status) {
+        return studentTaskRepository.findStudentTasks(studentID, status)
+                .stream()
+                .map(taskMapper::fromStudentTaskToStudentTaskDTO)
+                .toList();
+    }
+
+
+    @Override
+    public StudentTaskDTO getStudentTask(Long taskID) {
+        StudentTask task = studentTaskRepository.findById(taskID).orElseThrow(() -> new ResourceNotFoundException("Student task not found"));
+        return taskMapper.fromStudentTaskToStudentTaskDTO(task);
+    }
+
+    @Override
+    public String createInviteStudentToken(InviteStudentRequest request) {
+        UUID id = UUID.randomUUID();
+        request.setId(id.toString());
+        request = inviteRepository.save(request);
+        return request.getId();
     }
 
     @Override

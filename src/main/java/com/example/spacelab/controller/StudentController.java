@@ -1,10 +1,15 @@
 package com.example.spacelab.controller;
 
+import com.example.spacelab.model.InviteStudentRequest;
+import com.example.spacelab.model.LessonReportRow;
 import com.example.spacelab.model.Student;
 import com.example.spacelab.model.dto.StudentDTO;
+import com.example.spacelab.model.dto.StudentTaskDTO;
 import com.example.spacelab.model.dto.TaskDTO;
 import com.example.spacelab.service.StudentService;
 import com.example.spacelab.util.FilterForm;
+import com.example.spacelab.util.StudentTaskStatus;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.data.domain.PageRequest;
@@ -36,19 +41,52 @@ public class StudentController {
         return new ResponseEntity<>(studentService.getStudents(filters, PageRequest.of(page, size)), HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<StudentDTO> getStudent(@PathVariable Long id) {
-        return new ResponseEntity<>(studentService.getStudentDTOById(id), HttpStatus.OK);
+    @GetMapping("/{studentID}")
+    public ResponseEntity<StudentDTO> getStudent(@PathVariable Long studentID) {
+        return new ResponseEntity<>(studentService.getStudentDTOById(studentID), HttpStatus.OK);
     }
-//
-//    @GetMapping("/{id}/tasks")
-//    public ResponseEntity<List<TaskDTO>> getStudentTasks(@PathVariable Long id) {
-//        return new ResponseEntity<>(studentService.getStudentTasks(id), HttpStatus.FOUND);
-//    }
+
+    @GetMapping("/{studentID}/tasks")
+    public ResponseEntity<List<StudentTaskDTO>> getStudentTasks(@PathVariable Long studentID,
+                                                                @RequestParam(required = false) StudentTaskStatus status) {
+        List<StudentTaskDTO> taskList;
+        if(status == null) taskList = studentService.getStudentTasks(studentID);
+        else taskList = studentService.getStudentTasks(studentID, status);
+
+        return new ResponseEntity<>(taskList, HttpStatus.OK);
+    }
+
+    @GetMapping("/{studentID}/tasks/{taskID}")
+    public ResponseEntity<StudentTaskDTO> getStudentTask(@PathVariable Long studentID,
+                                                         @PathVariable Long taskID) {
+        StudentTaskDTO task = studentService.getStudentTask(taskID);
+        return new ResponseEntity<>(task, HttpStatus.OK);
+    }
+
+    /*
+
+        TODO
+        занятия
+
+    @GetMapping("/{studentID}/lessons")
+    public ResponseEntity<LessonReportRow> getStudentLessons(@PathVariable Long studentID) {
+
+        return new ResponseEntity<>();
+    }
+
+    */
 
     @PostMapping
     public ResponseEntity<StudentDTO> createNewStudent(@RequestBody StudentDTO student) {
         return new ResponseEntity<>(studentService.createNewStudent(student), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/invite")
+    public ResponseEntity<String> createStudentInviteLink(@RequestBody InviteStudentRequest inviteRequest,
+                                                          HttpServletRequest servletRequest) {
+        String token = studentService.createInviteStudentToken(inviteRequest);
+        String url = "http://" + servletRequest.getServerName() + ":" + servletRequest.getServerPort() + "/register/" + token;
+        return new ResponseEntity<>(url, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")

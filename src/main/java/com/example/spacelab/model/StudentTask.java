@@ -1,6 +1,6 @@
 package com.example.spacelab.model;
 
-import com.example.spacelab.util.UserTaskStatus;
+import com.example.spacelab.util.StudentTaskStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -23,11 +23,11 @@ public class StudentTask {
     private Student student;
 
     @DateTimeFormat(pattern = "MM/dd/yyyy")
-    private LocalDate begin_date;
+    private LocalDate beginDate;
 
     @DateTimeFormat(pattern = "MM/dd/yyyy")
-    private LocalDate end_date;
+    private LocalDate endDate;
 
     @Enumerated(value = EnumType.STRING)
-    private UserTaskStatus status;
+    private StudentTaskStatus status;
 }
