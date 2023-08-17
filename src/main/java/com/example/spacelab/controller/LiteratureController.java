@@ -25,8 +25,8 @@ public class LiteratureController {
 
     @GetMapping
     public ResponseEntity<List<LiteratureDTO>> getLiterature(FilterForm filters,
-                                                             @RequestParam Integer page,
-                                                             @RequestParam Integer size) {
+                                                             @RequestParam(required = false) Integer page,
+                                                             @RequestParam(required = false) Integer size) {
         List<LiteratureDTO> litList = literatureService.getLiterature(filters, PageRequest.of(page, size));
         return new ResponseEntity<>(litList, HttpStatus.OK);
     }

@@ -63,9 +63,19 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public AdminDTO createAdmin(AdminDTO dto) {
-        Admin admin = adminMapper.fromDTOToAdmin(dto);
-        admin = adminRepository.save(admin);
-        return adminMapper.fromAdminToDTO(admin);
+        try {
+            Admin admin = adminMapper.fromDTOToAdmin(dto);
+            log.info(admin.toString());
+            admin = adminRepository.save(admin);
+            log.info("Saved admin: " + admin);
+            return adminMapper.fromAdminToDTO(admin);
+        } catch (ResourceNotFoundException e) {
+            log.severe(e.getMessage());
+            throw new ResourceNotFoundException("Admin with ID: " + dto.getId() + " not found");
+        } catch (Exception e) {
+            log.severe(e.getMessage());
+            throw new RuntimeException("Unknown error during saving");
+        }
     }
 
     @Override

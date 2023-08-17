@@ -29,7 +29,9 @@ public class AdminController {
     public ResponseEntity<List<AdminDTO>> getAdmins(FilterForm filters,
                               @RequestParam(required = false) Integer page,
                               @RequestParam(required = false) Integer size) {
-        List<AdminDTO> adminList = adminService.getAdmins(filters, PageRequest.of(page, size));
+        List<AdminDTO> adminList;
+        if(page == null || size == null) adminList = adminService.getAdmins();
+        else adminList = adminService.getAdmins(filters, PageRequest.of(page, size));
         return new ResponseEntity<>(adminList, HttpStatus.OK);
     }
 

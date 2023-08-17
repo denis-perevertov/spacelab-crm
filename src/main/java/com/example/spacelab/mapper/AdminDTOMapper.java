@@ -24,8 +24,6 @@ public class AdminDTOMapper {
         if(dto.getId() != null) return adminRepository.getReferenceById(dto.getId());
         else {
             Admin admin = new Admin();
-
-
             return admin;
         }
     }
