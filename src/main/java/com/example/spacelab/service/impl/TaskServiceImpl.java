@@ -1,7 +1,7 @@
 package com.example.spacelab.service.impl;
 
 import com.example.spacelab.exception.ResourceNotFoundException;
-import com.example.spacelab.mapper.TaskDTOMapper;
+import com.example.spacelab.mapper.TaskMapper;
 import com.example.spacelab.model.Task;
 import com.example.spacelab.model.dto.TaskDTO;
 import com.example.spacelab.repository.TaskRepository;
@@ -21,7 +21,7 @@ import java.util.List;
 public class TaskServiceImpl implements TaskService {
 
     private final TaskRepository taskRepository;
-    private final TaskDTOMapper mapper;
+    private final TaskMapper mapper;
 
     @Override
     public List<TaskDTO> getTasks() {

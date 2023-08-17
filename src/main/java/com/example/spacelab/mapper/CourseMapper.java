@@ -5,7 +5,7 @@ import com.example.spacelab.model.dto.CourseDTO;
 import org.springframework.stereotype.Component;
 
 @Component
-public class CourseDTOMapper {
+public class CourseMapper {
 
     public CourseDTO fromCourseToDTO(Course course) {
         CourseDTO dto = new CourseDTO();

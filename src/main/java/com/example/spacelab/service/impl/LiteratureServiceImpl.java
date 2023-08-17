@@ -1,7 +1,7 @@
 package com.example.spacelab.service.impl;
 
 import com.example.spacelab.exception.ResourceNotFoundException;
-import com.example.spacelab.mapper.LiteratureDTOMapper;
+import com.example.spacelab.mapper.LiteratureMapper;
 import com.example.spacelab.model.Course;
 import com.example.spacelab.model.Literature;
 import com.example.spacelab.model.dto.LiteratureDTO;
@@ -27,7 +27,7 @@ public class LiteratureServiceImpl implements LiteratureService{
     private final CourseRepository courseRepository;
     private final LiteratureRepository literatureRepository;
 
-    private final LiteratureDTOMapper literatureMapper;
+    private final LiteratureMapper literatureMapper;
 
     @Override
     public List<LiteratureDTO> getLiterature() {

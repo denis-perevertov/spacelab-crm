@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class TaskDTOMapper {
+public class TaskMapper {
 
     private final TaskRepository taskRepository;
     private final CourseRepository courseRepository;

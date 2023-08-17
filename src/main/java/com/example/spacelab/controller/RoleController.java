@@ -1,9 +1,13 @@
 package com.example.spacelab.controller;
 
 import com.example.spacelab.model.UserRole;
+import com.example.spacelab.model.dto.UserRoleDTO;
 import com.example.spacelab.service.UserRoleService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
+import org.apache.coyote.Response;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -21,28 +25,34 @@ public class RoleController {
     private final UserRoleService userRoleService;
 
     @GetMapping
-    public List<UserRole> getRoles() {
-        return new ArrayList<>();
+    public ResponseEntity<List<UserRoleDTO>> getRoles() {
+        List<UserRoleDTO> list = userRoleService.getRoles();
+        return new ResponseEntity<>(list, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public UserRole getRoleById(@PathVariable Long id) {
-        return new UserRole();
+    public ResponseEntity<UserRoleDTO> getRoleById(@PathVariable Long id) {
+        UserRoleDTO role = userRoleService.getRoleById(id);
+        return new ResponseEntity<>(role, HttpStatus.OK);
     }
 
     @PostMapping
-    public ResponseEntity<String> createNewRole(@RequestBody UserRole role) {
-        return new ResponseEntity<>("Created", HttpStatusCode.valueOf(201));
+    public ResponseEntity<UserRoleDTO> createNewRole(@Valid @RequestBody UserRoleDTO role) {
+        role = userRoleService.createNewRole(role);
+        return new ResponseEntity<>(role, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<String> updateRole(@RequestBody UserRole role) {
-        return new ResponseEntity<>("Updated", HttpStatusCode.valueOf(200));
+    public ResponseEntity<UserRoleDTO> updateRole(@PathVariable Long id,
+                                                  @Valid @RequestBody UserRoleDTO role) {
+        role = userRoleService.createNewRole(role);
+        return new ResponseEntity<>(role, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteRole(@PathVariable Long id ){
-        return new ResponseEntity<>("Deleted", HttpStatusCode.valueOf(200));
+        userRoleService.deleteRoleById(id);
+        return new ResponseEntity<>("Deleted", HttpStatus.OK);
     }
 
 

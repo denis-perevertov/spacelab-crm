@@ -1,8 +1,8 @@
 package com.example.spacelab.service.impl;
 
 import com.example.spacelab.exception.ResourceNotFoundException;
-import com.example.spacelab.mapper.StudentDTOMapper;
-import com.example.spacelab.mapper.TaskDTOMapper;
+import com.example.spacelab.mapper.StudentMapper;
+import com.example.spacelab.mapper.TaskMapper;
 import com.example.spacelab.model.Course;
 import com.example.spacelab.model.InviteStudentRequest;
 import com.example.spacelab.model.Student;
@@ -35,8 +35,8 @@ public class StudentServiceImpl implements StudentService {
     private final InviteStudentRequestRepository inviteRepository;
     private final StudentTaskRepository studentTaskRepository;
 
-    private final StudentDTOMapper studentMapper;
-    private final TaskDTOMapper taskMapper;
+    private final StudentMapper studentMapper;
+    private final TaskMapper taskMapper;
 
     @Override
     public List<StudentDTO> getStudents() {

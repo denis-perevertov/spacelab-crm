@@ -1,7 +1,7 @@
 package com.example.spacelab.service.impl;
 
 import com.example.spacelab.exception.ResourceNotFoundException;
-import com.example.spacelab.mapper.CourseDTOMapper;
+import com.example.spacelab.mapper.CourseMapper;
 import com.example.spacelab.model.Admin;
 import com.example.spacelab.model.Course;
 import com.example.spacelab.model.dto.CourseDTO;
@@ -26,7 +26,7 @@ public class CourseServiceImpl implements CourseService {
 
     private final AdminRepository adminRepository;
     private final CourseRepository courseRepository;
-    private final CourseDTOMapper courseMapper;
+    private final CourseMapper courseMapper;
 
     @Override
     public List<CourseDTO> getCourses() {

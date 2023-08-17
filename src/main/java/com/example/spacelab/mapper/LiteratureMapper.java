@@ -6,7 +6,7 @@ import lombok.Data;
 import org.springframework.stereotype.Component;
 
 @Component
-public class LiteratureDTOMapper {
+public class LiteratureMapper {
 
     public LiteratureDTO fromLiteratureToDTO(Literature literature) {
 

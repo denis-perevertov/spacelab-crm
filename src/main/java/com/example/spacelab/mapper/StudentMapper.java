@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class StudentDTOMapper {
+public class StudentMapper {
 
     private final StudentRepository studentRepository;
 

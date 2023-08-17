@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class AdminDTOMapper {
+public class AdminMapper {
 
     private final AdminRepository adminRepository;
 
