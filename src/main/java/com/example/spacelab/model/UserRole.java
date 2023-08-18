@@ -1,5 +1,6 @@
 package com.example.spacelab.model;
 
+import com.example.spacelab.model.role.PermissionSet;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -17,6 +18,6 @@ public class UserRole {
 
     private String name;
 
-    @ElementCollection
-    private Set<String> permissions;
+    @Embedded
+    private PermissionSet permissions;
 }

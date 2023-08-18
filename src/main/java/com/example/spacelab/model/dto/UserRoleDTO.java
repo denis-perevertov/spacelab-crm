@@ -1,5 +1,6 @@
 package com.example.spacelab.model.dto;
 
+import com.example.spacelab.model.role.PermissionSet;
 import lombok.Data;
 
 import java.util.Set;
@@ -9,6 +10,6 @@ public class UserRoleDTO {
 
     private Long id;
     private String name;
-    private Set<String> permissions;
+    private PermissionSet permissions;
 
 }

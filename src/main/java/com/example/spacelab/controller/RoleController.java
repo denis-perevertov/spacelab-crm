@@ -45,6 +45,7 @@ public class RoleController {
     @PutMapping("/{id}")
     public ResponseEntity<UserRoleDTO> updateRole(@PathVariable Long id,
                                                   @Valid @RequestBody UserRoleDTO role) {
+        role.setId(id);
         role = userRoleService.createNewRole(role);
         return new ResponseEntity<>(role, HttpStatus.OK);
     }

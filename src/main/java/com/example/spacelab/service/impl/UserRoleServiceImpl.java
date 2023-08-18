@@ -22,32 +22,39 @@ public class UserRoleServiceImpl implements UserRoleService {
 
     @Override
     public List<UserRoleDTO> getRoles() {
+        log.info("Getting all user roles");
         return userRoleRepository.findAll().stream()
                 .map(roleMapper::fromRoleToDTO).toList();
     }
 
     @Override
     public UserRoleDTO getRoleById(Long id) {
+        log.info("Getting role with ID: " + id);
         UserRole role = userRoleRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Role not found"));
         return roleMapper.fromRoleToDTO(role);
     }
 
     @Override
     public UserRoleDTO createNewRole(UserRoleDTO dto) {
+        log.info("Creating new user role from DTO: " + dto);
         UserRole role = roleMapper.fromDTOToRole(dto);
         role = userRoleRepository.save(role);
+        log.info("Created role: " + role);
         return roleMapper.fromRoleToDTO(role);
     }
 
     @Override
     public UserRoleDTO updateRole(UserRoleDTO dto) {
+        log.info("Updating user role from DTO: " + dto);
         UserRole role = roleMapper.fromDTOToRole(dto);
         role = userRoleRepository.save(role);
+        log.info("Updated role: " + role);
         return roleMapper.fromRoleToDTO(role);
     }
 
     @Override
     public void deleteRoleById(Long id) {
+        log.info("Deleting user role with ID: " + id);
         userRoleRepository.deleteById(id);
     }
 }
