@@ -12,6 +12,7 @@ import java.util.List;
 public class CourseDTO {
 
     private Long id;
+    private String name;
     private List<StudentDTO> students;
     private LocalDate begin_date;
     private LocalDate end_date;

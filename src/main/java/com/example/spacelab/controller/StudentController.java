@@ -1,11 +1,10 @@
 package com.example.spacelab.controller;
 
-import com.example.spacelab.model.InviteStudentRequest;
-import com.example.spacelab.model.LessonReportRow;
-import com.example.spacelab.model.Student;
+import com.example.spacelab.model.*;
 import com.example.spacelab.model.dto.StudentDTO;
 import com.example.spacelab.model.dto.StudentTaskDTO;
 import com.example.spacelab.model.dto.TaskDTO;
+import com.example.spacelab.model.role.PermissionType;
 import com.example.spacelab.service.StudentService;
 import com.example.spacelab.util.FilterForm;
 import com.example.spacelab.util.StudentTaskStatus;
@@ -16,10 +15,14 @@ import lombok.extern.java.Log;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 
 @Controller
 @Log
@@ -81,16 +84,51 @@ public class StudentController {
     // возможно здесь заменить StudentDTO на дто специально для регистрации
     @PostMapping
     public ResponseEntity<StudentDTO> createNewStudent(@Valid @RequestBody StudentDTO student) {
-        return new ResponseEntity<>(studentService.createNewStudent(student), HttpStatus.CREATED);
+
+        Admin admin = (Admin) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        PermissionType permissionType = admin.getRole().getPermissions().getWriteStudents();
+        if(permissionType == PermissionType.NO_ACCESS) throw new AccessDeniedException("No access to creating new students!");
+        else if(permissionType == PermissionType.PARTIAL) {
+            Long studentCourseID = student.getCourse().getId();
+            if(!admin.getCourses().stream().map(Course::getId).toList().contains(studentCourseID))
+                throw new AccessDeniedException("No access to creating new students for course "+student.getCourse().getName()+"!");
+            else return new ResponseEntity<>(studentService.createNewStudent(student), HttpStatus.CREATED);
+        }
+        else return new ResponseEntity<>(studentService.createNewStudent(student), HttpStatus.CREATED);
     }
 
     @PostMapping("/invite")
-    public ResponseEntity<String> createStudentInviteLink(@RequestBody InviteStudentRequest inviteRequest,
+    public ResponseEntity<String> createStudentInviteLink(@AuthenticationPrincipal Admin admin,
+                                                          @RequestBody InviteStudentRequest inviteRequest,
                                                           HttpServletRequest servletRequest) {
+
         String token = studentService.createInviteStudentToken(inviteRequest);
         String url = "http://" + servletRequest.getServerName() + ":" + servletRequest.getServerPort() + "/register/" + token;
         return new ResponseEntity<>(url, HttpStatus.CREATED);
+
     }
+
+    /*
+
+    рановато еще доставать админа из контекста
+
+    @PostMapping("/invite")
+    public ResponseEntity<String> createStudentInviteLink(@AuthenticationPrincipal Admin admin,
+                                                          @RequestBody InviteStudentRequest inviteRequest,
+                                                          HttpServletRequest servletRequest) {
+
+        checkAccess(inviteRequest.getCourse().getId(),
+                inviteRequest.getCourse().getName(),
+                admin,
+                admin.getRole().getPermissions().getWriteStudents());
+
+        String token = studentService.createInviteStudentToken(inviteRequest);
+        String url = "http://" + servletRequest.getServerName() + ":" + servletRequest.getServerPort() + "/register/" + token;
+        return new ResponseEntity<>(url, HttpStatus.CREATED);
+
+    }
+
+    */
 
     @PutMapping("/{id}")
     public ResponseEntity<StudentDTO> editStudent(@PathVariable Long id,
@@ -104,4 +142,14 @@ public class StudentController {
         studentService.deleteStudentById(id);
         return new ResponseEntity<>("Student with ID:"+id+" deleted", HttpStatus.OK);
     }
+
+    private void checkAccess(Long courseID, String courseName, Admin admin, PermissionType permissionType) {
+
+        if(permissionType == PermissionType.NO_ACCESS) throw new AccessDeniedException("No access to this operation!");
+        else if(permissionType == PermissionType.PARTIAL) {
+            if(!admin.getCourses().stream().map(Course::getId).toList().contains(courseID))
+                throw new AccessDeniedException("No access to creating new students for course "+courseName+"!");
+        }
+    }
+
 }

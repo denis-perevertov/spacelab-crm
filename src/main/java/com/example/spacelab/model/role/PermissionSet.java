@@ -19,6 +19,7 @@ public class PermissionSet {
     // студенты
     PermissionType readStudents = PermissionType.UNDEFINED;
     PermissionType writeStudents = PermissionType.UNDEFINED;
+    PermissionType inviteStudents = PermissionType.UNDEFINED;
     PermissionType editStudents = PermissionType.UNDEFINED;
     PermissionType deleteStudents = PermissionType.UNDEFINED;
 
@@ -38,6 +39,7 @@ public class PermissionSet {
     PermissionType readLiteratures = PermissionType.UNDEFINED;
     PermissionType writeLiteratures = PermissionType.UNDEFINED;
     PermissionType editLiteratures = PermissionType.UNDEFINED;
+    PermissionType verifyLiteratures = PermissionType.UNDEFINED;
     PermissionType deleteLiteratures = PermissionType.UNDEFINED;
 
     // роли

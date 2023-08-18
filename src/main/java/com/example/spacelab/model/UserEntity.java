@@ -2,8 +2,11 @@ package com.example.spacelab.model;
 
 import com.example.spacelab.model.dto.UserRoleDTO;
 import jakarta.persistence.*;
+import lombok.Data;
 
-@MappedSuperclass
+@Data
+@Entity
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 public class UserEntity {
 
     @Id

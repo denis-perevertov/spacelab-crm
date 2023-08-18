@@ -2,6 +2,7 @@ package com.example.spacelab.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.List;
 
