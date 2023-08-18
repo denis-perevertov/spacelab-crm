@@ -25,9 +25,10 @@ public class TaskController {
 
     @GetMapping
     private ResponseEntity<List<TaskDTO>> getTasks(FilterForm filters,
-                                                   @RequestParam(required = false) Integer page,
+                                                   @RequestParam Integer page,
                                                    @RequestParam(required = false) Integer size) {
-        List<TaskDTO> taskList = taskService.getTasks(filters, PageRequest.of(page, size));
+
+        List<TaskDTO> taskList = taskService.getTasks(filters, PageRequest.of(page, (size == null) ? 10 : size));
         return new ResponseEntity<>(taskList, HttpStatus.OK);
     }
 

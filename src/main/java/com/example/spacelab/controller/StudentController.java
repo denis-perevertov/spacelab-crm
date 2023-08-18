@@ -77,6 +77,8 @@ public class StudentController {
 
     */
 
+
+    // возможно здесь заменить StudentDTO на дто специально для регистрации
     @PostMapping
     public ResponseEntity<StudentDTO> createNewStudent(@Valid @RequestBody StudentDTO student) {
         return new ResponseEntity<>(studentService.createNewStudent(student), HttpStatus.CREATED);
@@ -93,6 +95,7 @@ public class StudentController {
     @PutMapping("/{id}")
     public ResponseEntity<StudentDTO> editStudent(@PathVariable Long id,
                                                   @Valid @RequestBody StudentDTO student) {
+        student.setId(id);
         return new ResponseEntity<>(studentService.editStudent(student), HttpStatus.OK);
     }
 

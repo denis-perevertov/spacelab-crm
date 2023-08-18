@@ -40,76 +40,105 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public List<StudentDTO> getStudents() {
+        log.info("Getting all students' info without filters or pages...");
         return studentRepository.findAll().stream().map(studentMapper::fromStudentToDTO).toList();
     }
 
     @Override
     public List<StudentDTO> getStudents(Pageable pageable) {
+        log.info("Getting all students' info with page " + pageable.getPageNumber() +
+                " / size " + pageable.getPageSize());
         return studentRepository.findAll(pageable).get().map(studentMapper::fromStudentToDTO).toList();
     }
 
     public List<StudentDTO> getStudents(FilterForm filters, Pageable pageable) {
+        log.info("Getting all students' info with page " + pageable.getPageNumber() +
+                " / size " + pageable.getPageSize() + " and filters: " + filters);
         Specification<Student> spec = buildSpecificationFromFilters(filters);
         return studentRepository.findAll(spec, pageable).get().map(studentMapper::fromStudentToDTO).toList();
     }
 
     @Override
     public StudentDTO getStudentDTOById(Long id) {
+        log.info("Getting student with ID: " + id);
         Student student = studentRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Student not found"));
         return studentMapper.fromStudentToDTO(student);
     }
 
     @Override
     public StudentDTO createNewStudent(StudentDTO dto) {
+        log.info("Creating new student from DTO: " + dto);
         Student student = studentMapper.fromDTOToStudent(dto);
+        student.setRating(0);
+        student.setAccountStatus(StudentAccountStatus.ACTIVE);
         student = studentRepository.save(student);
+        log.info("Created student: " + student);
         return studentMapper.fromStudentToDTO(student);
     }
 
     @Override
     public StudentDTO editStudent(StudentDTO dto) {
+        log.info("Editing student with ID: " + dto.getId());
         Student student = studentMapper.fromDTOToStudent(dto);
         student = studentRepository.save(student);
+        log.info("Edited student: " + student);
         return studentMapper.fromStudentToDTO(student);
     }
 
     @Override
     public void deleteStudentById(Long id) {
+        log.info("Deleting student with ID: " + id);
         studentRepository.deleteById(id);
     }
 
-
     /*
-        TODO
-        пагинация заданий
+     = = = = = Задания студента = = = = =
      */
+
+
     @Override
     public List<StudentTaskDTO> getStudentTasks(Long studentID) {
+        log.info("Getting tasks of student w/ ID: " + studentID);
         return studentTaskRepository.findStudentTasks(studentID)
                 .stream()
-                .map(taskMapper::fromStudentTaskToStudentTaskDTO)
+                .map(taskMapper::fromStudentTaskToDTO)
                 .toList();
     }
 
     @Override
     public List<StudentTaskDTO> getStudentTasks(Long studentID, StudentTaskStatus status) {
+        log.info("Getting tasks(STATUS:"+status.toString()+") of student w/ ID: " + studentID);
         return studentTaskRepository.findStudentTasks(studentID, status)
                 .stream()
-                .map(taskMapper::fromStudentTaskToStudentTaskDTO)
+                .map(taskMapper::fromStudentTaskToDTO)
+                .toList();
+    }
+
+    @Override
+    public List<StudentTaskDTO> getStudentTasks(Long studentID, StudentTaskStatus status, Pageable pageable) {
+        log.info("Getting "+pageable.getPageSize()+" tasks(STATUS:"+status.toString()+")" +
+                " of student w/ ID: " + studentID +
+                " || page " + pageable.getPageNumber());
+        return studentTaskRepository.findStudentTasks(studentID, status, pageable)
+                .stream()
+                .map(taskMapper::fromStudentTaskToDTO)
                 .toList();
     }
 
 
     @Override
     public StudentTaskDTO getStudentTask(Long taskID) {
+        log.info("Getting student task with taskID: " + taskID);
         StudentTask task = studentTaskRepository.findById(taskID).orElseThrow(() -> new ResourceNotFoundException("Student task not found"));
-        return taskMapper.fromStudentTaskToStudentTaskDTO(task);
+        return taskMapper.fromStudentTaskToDTO(task);
     }
 
     @Override
     public String createInviteStudentToken(InviteStudentRequest request) {
+        log.info("Creating token to use in Student invite URL...");
         UUID id = UUID.randomUUID();
         request.setId(id.toString());
+        log.info("Created token: " + id + ", saving token with set parameters in DB");
         request = inviteRepository.save(request);
         return request.getId();
     }
@@ -117,6 +146,8 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public Specification<Student> buildSpecificationFromFilters(FilterForm filters) {
 
+        log.info("Building specification from filters: " + filters);
+        
         String nameEmailInput = filters.getName();
         Long courseID = filters.getCourse();
         String phoneInput = filters.getPhone();

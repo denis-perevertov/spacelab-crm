@@ -25,6 +25,7 @@ public interface StudentService extends EntityService<Student>{
 
     List<StudentTaskDTO> getStudentTasks(Long id);
     List<StudentTaskDTO> getStudentTasks(Long id, StudentTaskStatus status);
+    List<StudentTaskDTO> getStudentTasks(Long id, StudentTaskStatus status, Pageable pageable);
     StudentTaskDTO getStudentTask(Long taskID);
 
     String createInviteStudentToken(InviteStudentRequest request);

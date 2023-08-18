@@ -5,13 +5,17 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 public class AdminDTO {
 
     private Long id;
 
-    @NotBlank
     private String full_name;
+
+    @NotBlank
     private String firstName, lastName;
 
     @Pattern(regexp = "\\d{10,}")
@@ -22,12 +26,12 @@ public class AdminDTO {
     @NotBlank
     private String email;
 
-    private String password;
+    private String password, confirmPassword;
 
     @NotBlank
     private String role;
 
     @NotBlank
-    private String course;
+    private List<CourseDTO> courses = new ArrayList<>();
 
 }

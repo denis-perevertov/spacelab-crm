@@ -32,6 +32,7 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public List<AdminDTO> getAdmins() {
+        log.info("Getting admins without filtering or pages");
         return adminRepository.findAll()
                 .stream()
                 .map(adminMapper::fromAdminToDTO)
@@ -40,6 +41,8 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public List<AdminDTO> getAdmins(Pageable pageable) {
+        log.info("Getting admins with page " + pageable.getPageNumber() + "/ size " + pageable
+                .getPageSize());
         return adminRepository.findAll(pageable)
                 .stream()
                 .map(adminMapper::fromAdminToDTO)
@@ -48,6 +51,8 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public List<AdminDTO> getAdmins(FilterForm filters, Pageable pageable) {
+        log.info("Getting admins with page " + pageable.getPageNumber() + "/ size " + pageable
+                .getPageSize() + " and filters: " + filters);
         Specification<Admin> spec = buildSpecificationFromFilters(filters);
         return adminRepository.findAll(spec,pageable)
                 .stream()
@@ -57,12 +62,14 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public AdminDTO getAdminById(Long id) {
+        log.info("Getting admin with ID: " + id);
         Admin admin = adminRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Admin not found!"));
         return adminMapper.fromAdminToDTO(admin);
     }
 
     @Override
     public AdminDTO createAdmin(AdminDTO dto) {
+        log.info("Creating new admin");
         try {
             Admin admin = adminMapper.fromDTOToAdmin(dto);
             log.info(admin.toString());
@@ -80,18 +87,32 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public AdminDTO updateAdmin(AdminDTO dto) {
-        Admin admin = adminMapper.fromDTOToAdmin(dto);
-        admin = adminRepository.save(admin);
-        return adminMapper.fromAdminToDTO(admin);
+        log.info("Updating admin");
+        try {
+            Admin admin = adminMapper.fromDTOToAdmin(dto);
+            log.info(admin.toString());
+            admin = adminRepository.save(admin);
+            log.info("Saved admin: " + admin);
+            return adminMapper.fromAdminToDTO(admin);
+        } catch (ResourceNotFoundException e) {
+            log.severe(e.getMessage());
+            throw new ResourceNotFoundException("Admin with ID: " + dto.getId() + " not found");
+        } catch (Exception e) {
+            log.severe(e.getMessage());
+            throw new RuntimeException("Unknown error during saving");
+        }
     }
 
     @Override
     public void deleteAdminById(Long id) {
+        log.info("Deleting admin with ID: " + id);
         adminRepository.deleteById(id);
     }
 
     @Override
     public Specification<Admin> buildSpecificationFromFilters(FilterForm filters) {
+
+        log.info("Building specification from filters: " + filters);
 
         String name = filters.getName();
         Long roleID = filters.getRole();

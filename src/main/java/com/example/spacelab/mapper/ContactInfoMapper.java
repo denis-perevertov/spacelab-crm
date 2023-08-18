@@ -5,7 +5,9 @@ import com.example.spacelab.model.dto.ContactInfoDTO;
 import com.example.spacelab.repository.AdminRepository;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
+@Component
 @Data
 @RequiredArgsConstructor
 public class ContactInfoMapper {
