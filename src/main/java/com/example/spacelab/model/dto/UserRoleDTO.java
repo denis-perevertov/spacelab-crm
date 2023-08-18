@@ -3,8 +3,6 @@ package com.example.spacelab.model.dto;
 import com.example.spacelab.model.role.PermissionSet;
 import lombok.Data;
 
-import java.util.Set;
-
 @Data
 public class UserRoleDTO {
 

@@ -8,11 +8,7 @@ import java.util.List;
 @Data
 @Entity
 @Table(name="admins")
-public class Admin {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+public class Admin extends UserEntity {
 
     private String firstName;
     private String lastName;
@@ -22,9 +18,6 @@ public class Admin {
 
     private String password;
     @Transient private String confirmPassword;
-
-    @ManyToOne
-    private UserRole role;
 
     @ManyToMany
     private List<Course> courses;

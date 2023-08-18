@@ -23,7 +23,6 @@ public class StudentMapper {
         StudentDTO dto = new StudentDTO();
 
         try {
-            dto.setId(student.getId());
             dto.setFullName(String.join(" ", student.getFirstName(), student.getFathersName(), student.getLastName()));
             dto.setFirstName(student.getFirstName());
             dto.setFathersName(student.getFathersName());

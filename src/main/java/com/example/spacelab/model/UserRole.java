@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.security.Permission;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -17,6 +18,9 @@ public class UserRole {
     private Long id;
 
     private String name;
+
+    @OneToMany
+    private List<UserEntity> userList;
 
     @Embedded
     private PermissionSet permissions;

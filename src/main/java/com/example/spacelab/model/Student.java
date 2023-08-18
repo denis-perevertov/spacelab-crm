@@ -15,11 +15,7 @@ import java.util.List;
 @Data
 @Entity
 @Table(name="students")
-public class Student {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+public class Student extends UserEntity {
 
     private String firstName;
     private String lastName;
@@ -56,8 +52,4 @@ public class Student {
     private String password;
     @Transient private String confirmPassword;
 
-    private String avatar;
-
-    @ManyToOne
-    private UserRole role;  // роль студента
 }

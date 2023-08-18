@@ -19,6 +19,8 @@ public class RoleMapper {
         UserRoleDTO dto = new UserRoleDTO();
 
         try {
+            dto.setName(role.getName());
+            dto.setPermissions(role.getPermissions());
 
         } catch (Exception e) {
             log.severe("Mapping error: " + e.getMessage());
@@ -36,6 +38,9 @@ public class RoleMapper {
                 : roleRepository.getReferenceById(dto.getId());
 
         try {
+
+            role.setName(dto.getName());
+            role.setPermissions(dto.getPermissions());
 
         } catch (Exception e) {
             log.severe("Mapping error: " + e.getMessage());
