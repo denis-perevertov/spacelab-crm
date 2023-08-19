@@ -34,7 +34,7 @@ public class StudentMapper {
             dto.setStatus(student.getAccountStatus().toString());
 
             if(student.getCourse() != null) {
-                dto.setCourse(courseMapper.fromCourseToDTO(student.getCourse()));
+                dto.setCourse(courseMapper.fromCourseToListDTO(student.getCourse()));
             }
         } catch (Exception e) {
             log.severe("Mapping error: " + e.getMessage());

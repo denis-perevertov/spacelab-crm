@@ -42,6 +42,6 @@ public class Course {
     @Embedded
     private CourseInfo courseInfo;
 
-    private Boolean isActive;
+    private CourseStatus status;
 
 }

@@ -3,7 +3,7 @@ package com.example.spacelab.mapper;
 import com.example.spacelab.exception.MappingException;
 import com.example.spacelab.model.Admin;
 import com.example.spacelab.model.dto.AdminDTO;
-import com.example.spacelab.model.dto.CourseDTO;
+import com.example.spacelab.model.dto.CourseDTO.CourseListDTO;
 import com.example.spacelab.repository.AdminRepository;
 import com.example.spacelab.repository.CourseRepository;
 import com.example.spacelab.repository.UserRoleRepository;
@@ -11,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -36,7 +35,7 @@ public class AdminMapper {
             dto.setEmail(admin.getEmail());
             dto.setRole(admin.getRole().toString());
 
-            List<CourseDTO> courses = dto.getCourses();
+            List<CourseListDTO> courses = dto.getCourses();
             admin.getCourses().forEach(course -> courses.add(courseMapper.fromCourseToDTO(course)));
         } catch (Exception e) {
             log.severe("Mapping error: " + e.getMessage());

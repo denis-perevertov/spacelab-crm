@@ -9,7 +9,6 @@ import com.example.spacelab.model.Student;
 import com.example.spacelab.model.StudentTask;
 import com.example.spacelab.model.dto.StudentDTO;
 import com.example.spacelab.model.dto.StudentTaskDTO;
-import com.example.spacelab.model.dto.TaskDTO;
 import com.example.spacelab.repository.*;
 import com.example.spacelab.service.StudentService;
 import com.example.spacelab.service.specification.StudentSpecifications;

@@ -1,7 +1,6 @@
 package com.example.spacelab.controller;
 
-import com.example.spacelab.model.Literature;
-import com.example.spacelab.model.dto.LiteratureDTO;
+import com.example.spacelab.model.dto.LiteratureDTO.LiteratureListDTO;
 import com.example.spacelab.service.LiteratureService;
 import com.example.spacelab.util.FilterForm;
 import jakarta.validation.Valid;
@@ -24,16 +23,16 @@ public class LiteratureController {
     private final LiteratureService literatureService;
 
     @GetMapping
-    public ResponseEntity<List<LiteratureDTO>> getLiterature(FilterForm filters,
-                                                             @RequestParam(required = false) Integer page,
-                                                             @RequestParam(required = false) Integer size) {
-        List<LiteratureDTO> litList = literatureService.getLiterature(filters, PageRequest.of(page, size));
+    public ResponseEntity<List<LiteratureListDTO>> getLiterature(FilterForm filters,
+                                                                 @RequestParam(required = false) Integer page,
+                                                                 @RequestParam(required = false) Integer size) {
+        List<LiteratureListDTO> litList = literatureService.getLiterature(filters, PageRequest.of(page, size));
         return new ResponseEntity<>(litList, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<LiteratureDTO> getLiteratureById(@PathVariable Long id) {
-        LiteratureDTO lit = literatureService.getLiteratureById(id);
+    public ResponseEntity<LiteratureListDTO> getLiteratureById(@PathVariable Long id) {
+        LiteratureListDTO lit = literatureService.getLiteratureById(id);
         return new ResponseEntity<>(lit, HttpStatus.OK);
     }
 
@@ -44,13 +43,13 @@ public class LiteratureController {
     }
 
     @PostMapping
-    public ResponseEntity<LiteratureDTO> createNewLiterature(@Valid @RequestBody LiteratureDTO literature) {
+    public ResponseEntity<LiteratureListDTO> createNewLiterature(@Valid @RequestBody LiteratureListDTO literature) {
         literature = literatureService.createNewLiterature(literature);
         return new ResponseEntity<>(literature, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<LiteratureDTO> editLiterature(@PathVariable Long id, @Valid @RequestBody LiteratureDTO literature) {
+    public ResponseEntity<LiteratureListDTO> editLiterature(@PathVariable Long id, @Valid @RequestBody LiteratureListDTO literature) {
         literature = literatureService.editLiterature(literature);
         return new ResponseEntity<>(literature, HttpStatus.OK);
     }

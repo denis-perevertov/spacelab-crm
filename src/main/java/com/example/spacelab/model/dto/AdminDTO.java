@@ -1,5 +1,6 @@
 package com.example.spacelab.model.dto;
 
+import com.example.spacelab.model.dto.CourseDTO.CourseListDTO;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -32,6 +33,6 @@ public class AdminDTO {
     private String role;
 
     @NotBlank
-    private List<CourseDTO> courses = new ArrayList<>();
+    private List<CourseListDTO> courses = new ArrayList<>();
 
 }

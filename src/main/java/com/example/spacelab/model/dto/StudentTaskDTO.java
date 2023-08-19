@@ -1,5 +1,6 @@
 package com.example.spacelab.model.dto;
 
+import com.example.spacelab.model.dto.TaskDTO.TaskListDTO;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -8,7 +9,7 @@ import java.time.LocalDate;
 public class StudentTaskDTO {
 
     private Long id;
-    private TaskDTO task;
+    private TaskListDTO task;
     private LocalDate beginDate;
     private LocalDate endDate;
     private String status;

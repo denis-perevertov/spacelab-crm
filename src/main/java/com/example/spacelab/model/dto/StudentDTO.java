@@ -1,5 +1,6 @@
 package com.example.spacelab.model.dto;
 
+import com.example.spacelab.model.dto.CourseDTO.CourseListDTO;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -14,7 +15,7 @@ public class StudentDTO {
     @NotBlank
     private String firstName, lastName, fathersName;
 
-    private CourseDTO course;
+    private CourseListDTO course;
 
     @NotBlank
     @Email

@@ -4,15 +4,15 @@ import com.example.spacelab.exception.ResourceNotFoundException;
 import com.example.spacelab.mapper.CourseMapper;
 import com.example.spacelab.model.Admin;
 import com.example.spacelab.model.Course;
-import com.example.spacelab.model.dto.CourseDTO;
+import com.example.spacelab.model.dto.CourseDTO.CourseListDTO;
 import com.example.spacelab.repository.AdminRepository;
 import com.example.spacelab.repository.CourseRepository;
 import com.example.spacelab.service.CourseService;
-import com.example.spacelab.service.specification.AdminSpecifications;
 import com.example.spacelab.service.specification.CourseSpecifications;
 import com.example.spacelab.util.FilterForm;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -29,24 +29,20 @@ public class CourseServiceImpl implements CourseService {
     private final CourseMapper courseMapper;
 
     @Override
-    public List<CourseDTO> getCourses() {
-        return courseRepository.findAll().stream()
-                .map(courseMapper::fromCourseToDTO)
-                .toList();
+    public List<Course> getCourses() {
+        return courseRepository.findAll();
     }
 
     @Override
-    public List<CourseDTO> getCourses(Pageable pageable) {
-        return courseRepository.findAll(pageable).get()
-                .map(courseMapper::fromCourseToDTO).toList();
+    public Page<Course> getCourses(Pageable pageable) {
+        return courseRepository.findAll(pageable);
     }
 
     @Override
-    public List<CourseDTO> getCourses(FilterForm filters, Pageable pageable) {
+    public Page<Course> getCourses(FilterForm filters, Pageable pageable) {
         Specification<Course> spec = buildSpecificationFromFilters(filters);
 
-        return courseRepository.findAll(spec, pageable).get()
-                .map(courseMapper::fromCourseToDTO).toList();
+        return courseRepository.findAll(spec, pageable);
     }
 
     @Override
@@ -76,23 +72,18 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public CourseDTO getCourseById(Long id) {
-        Course course = courseRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Course not found"));
-        return courseMapper.fromCourseToDTO(course);
+    public Course getCourseById(Long id) {
+        return courseRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Course not found"));
     }
 
     @Override
-    public CourseDTO createNewCourse(CourseDTO dto) {
-        Course course = courseMapper.fromDTOToCourse(dto);
-        course = courseRepository.save(course);
-        return courseMapper.fromCourseToDTO(course);
+    public Course createNewCourse(Course course) {
+        return courseRepository.save(course);
     }
 
     @Override
-    public CourseDTO editCourse(CourseDTO dto) {
-        Course course = courseMapper.fromDTOToCourse(dto);
-        course = courseRepository.save(course);
-        return courseMapper.fromCourseToDTO(course);
+    public Course editCourse(Course course) {
+        return courseRepository.save(course);
     }
 
     @Override
