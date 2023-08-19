@@ -2,8 +2,9 @@ package com.example.spacelab.mapper;
 
 import com.example.spacelab.exception.MappingException;
 import com.example.spacelab.model.Admin;
-import com.example.spacelab.model.dto.AdminDTO;
+import com.example.spacelab.model.dto.admin.AdminDTO;
 import com.example.spacelab.model.dto.CourseDTO;
+import com.example.spacelab.model.dto.admin.ContactAdminDTO;
 import com.example.spacelab.repository.AdminRepository;
 import com.example.spacelab.repository.CourseRepository;
 import com.example.spacelab.repository.UserRoleRepository;
@@ -11,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -48,6 +48,25 @@ public class AdminMapper {
         return dto;
     }
 
+    public ContactAdminDTO fromAdminToContactDTO(Admin admin) {
+        ContactAdminDTO dto = new ContactAdminDTO();
+
+        try {
+
+            dto.setId(admin.getId());
+            dto.setAvatar(admin.getAvatar());
+            dto.setFullName(admin.getFirstName() + " " + admin.getLastName());
+            dto.setRoleName(admin.getRole().getName());
+
+        } catch (Exception e) {
+            log.severe("Mapping error: " + e.getMessage());
+            log.warning("DTO: " + dto);
+            throw new MappingException(e.getMessage());
+        }
+
+        return dto;
+    }
+
 
     public Admin fromDTOToAdmin(AdminDTO dto) {
         if(dto.getId() != null) return adminRepository.getReferenceById(dto.getId());
@@ -67,6 +86,7 @@ public class AdminMapper {
                 TODO
                 курсы
              */
+
             } catch (Exception e) {
                 log.severe("Mapping error: " + e.getMessage());
                 log.warning("Entity: " + admin);

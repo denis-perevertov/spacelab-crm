@@ -1,6 +1,9 @@
 package com.example.spacelab.model.role;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.Data;
 
 @Embeddable
@@ -8,47 +11,47 @@ import lombok.Data;
 public class PermissionSet {
 
     // статистика
-    PermissionType readStatistics = PermissionType.UNDEFINED;
+    PermissionType readStatistics;
 
     // задания
-    PermissionType readTasks = PermissionType.UNDEFINED;
-    PermissionType writeTasks = PermissionType.UNDEFINED;
-    PermissionType editTasks = PermissionType.UNDEFINED;
-    PermissionType deleteTasks = PermissionType.UNDEFINED;
+    PermissionType readTasks;
+    PermissionType writeTasks;
+    PermissionType editTasks;
+    PermissionType deleteTasks;
 
     // студенты
-    PermissionType readStudents = PermissionType.UNDEFINED;
-    PermissionType writeStudents = PermissionType.UNDEFINED;
-    PermissionType inviteStudents = PermissionType.UNDEFINED;
-    PermissionType editStudents = PermissionType.UNDEFINED;
-    PermissionType deleteStudents = PermissionType.UNDEFINED;
+    PermissionType readStudents;
+    PermissionType writeStudents;
+    PermissionType inviteStudents;
+    PermissionType editStudents;
+    PermissionType deleteStudents;
 
     // курсы
-    PermissionType readCourses = PermissionType.UNDEFINED;
-    PermissionType writeCourses = PermissionType.UNDEFINED;
-    PermissionType editCourses = PermissionType.UNDEFINED;
-    PermissionType deleteCourses = PermissionType.UNDEFINED;
+    PermissionType readCourses;
+    PermissionType writeCourses;
+    PermissionType editCourses;
+    PermissionType deleteCourses;
 
     // занятия
-    PermissionType readLessons = PermissionType.UNDEFINED;
-    PermissionType writeLessons = PermissionType.UNDEFINED;
-    PermissionType editLessons = PermissionType.UNDEFINED;
-    PermissionType deleteLessons = PermissionType.UNDEFINED;
+    PermissionType readLessons;
+    PermissionType writeLessons;
+    PermissionType editLessons;
+    PermissionType deleteLessons;
 
     // литература
-    PermissionType readLiteratures = PermissionType.UNDEFINED;
-    PermissionType writeLiteratures = PermissionType.UNDEFINED;
-    PermissionType editLiteratures = PermissionType.UNDEFINED;
-    PermissionType verifyLiteratures = PermissionType.UNDEFINED;
-    PermissionType deleteLiteratures = PermissionType.UNDEFINED;
+    PermissionType readLiteratures;
+    PermissionType writeLiteratures;
+    PermissionType editLiteratures;
+    PermissionType verifyLiteratures;
+    PermissionType deleteLiteratures;
 
     // роли
-    PermissionType readRoles = PermissionType.UNDEFINED;
-    PermissionType writeRoles = PermissionType.UNDEFINED;
-    PermissionType editRoles = PermissionType.UNDEFINED;
-    PermissionType deleteRoles = PermissionType.UNDEFINED;
+    PermissionType readRoles;
+    PermissionType writeRoles;
+    PermissionType editRoles;
+    PermissionType deleteRoles;
 
     // настройки системы
-    PermissionType readSettings = PermissionType.UNDEFINED;
-    PermissionType editSettings = PermissionType.UNDEFINED;
+    PermissionType readSettings;
+    PermissionType editSettings;
 }

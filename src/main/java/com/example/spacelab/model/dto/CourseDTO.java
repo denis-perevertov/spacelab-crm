@@ -1,9 +1,9 @@
 package com.example.spacelab.model.dto;
 
+import com.example.spacelab.model.dto.admin.AdminDTO;
+import com.example.spacelab.model.dto.student.StudentDTO;
 import com.example.spacelab.util.CourseStatus;
-import lombok.Builder;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.List;

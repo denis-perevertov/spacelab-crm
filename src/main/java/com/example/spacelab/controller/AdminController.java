@@ -1,20 +1,19 @@
 package com.example.spacelab.controller;
 
-import com.example.spacelab.model.Admin;
-import com.example.spacelab.model.dto.AdminDTO;
+import com.example.spacelab.model.dto.admin.AdminDTO;
 import com.example.spacelab.service.AdminService;
 import com.example.spacelab.util.FilterForm;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
-import org.apache.coyote.Response;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -26,11 +25,11 @@ public class AdminController {
     private final AdminService adminService;
 
     @GetMapping
-    public ResponseEntity<List<AdminDTO>> getAdmins(FilterForm filters,
-                              @RequestParam(required = false) Integer page,
-                              @RequestParam(required = false) Integer size) {
-        List<AdminDTO> adminList;
-        if(page == null || size == null) adminList = adminService.getAdmins();
+    public ResponseEntity<Page<AdminDTO>> getAdmins(FilterForm filters,
+                                                    @RequestParam(required = false) Integer page,
+                                                    @RequestParam(required = false) Integer size) {
+        Page<AdminDTO> adminList;
+        if(page == null || size == null) adminList = new PageImpl<>(adminService.getAdmins());
         else adminList = adminService.getAdmins(filters, PageRequest.of(page, size));
         return new ResponseEntity<>(adminList, HttpStatus.OK);
     }

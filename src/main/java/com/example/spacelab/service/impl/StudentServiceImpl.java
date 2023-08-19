@@ -7,9 +7,10 @@ import com.example.spacelab.model.Course;
 import com.example.spacelab.model.InviteStudentRequest;
 import com.example.spacelab.model.Student;
 import com.example.spacelab.model.StudentTask;
-import com.example.spacelab.model.dto.StudentDTO;
+import com.example.spacelab.model.dto.student.StudentCardDTO;
+import com.example.spacelab.model.dto.student.StudentDTO;
 import com.example.spacelab.model.dto.StudentTaskDTO;
-import com.example.spacelab.model.dto.TaskDTO;
+import com.example.spacelab.model.dto.student.StudentRegisterDTO;
 import com.example.spacelab.repository.*;
 import com.example.spacelab.service.StudentService;
 import com.example.spacelab.service.specification.StudentSpecifications;
@@ -18,6 +19,8 @@ import com.example.spacelab.util.StudentAccountStatus;
 import com.example.spacelab.util.StudentTaskStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -34,6 +37,7 @@ public class StudentServiceImpl implements StudentService {
     private final CourseRepository courseRepository;
     private final InviteStudentRequestRepository inviteRepository;
     private final StudentTaskRepository studentTaskRepository;
+    private final UserRoleRepository userRoleRepository;
 
     private final StudentMapper studentMapper;
     private final TaskMapper taskMapper;
@@ -45,21 +49,21 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public List<StudentDTO> getStudents(Pageable pageable) {
+    public Page<StudentDTO> getStudents(Pageable pageable) {
         log.info("Getting all students' info with page " + pageable.getPageNumber() +
                 " / size " + pageable.getPageSize());
-        return studentRepository.findAll(pageable).get().map(studentMapper::fromStudentToDTO).toList();
+        return new PageImpl<>(studentRepository.findAll(pageable).get().map(studentMapper::fromStudentToDTO).toList());
     }
 
-    public List<StudentDTO> getStudents(FilterForm filters, Pageable pageable) {
+    public Page<StudentDTO> getStudents(FilterForm filters, Pageable pageable) {
         log.info("Getting all students' info with page " + pageable.getPageNumber() +
                 " / size " + pageable.getPageSize() + " and filters: " + filters);
         Specification<Student> spec = buildSpecificationFromFilters(filters);
-        return studentRepository.findAll(spec, pageable).get().map(studentMapper::fromStudentToDTO).toList();
+        return new PageImpl<>(studentRepository.findAll(spec, pageable).get().map(studentMapper::fromStudentToDTO).toList());
     }
 
     @Override
-    public StudentDTO getStudentDTOById(Long id) {
+    public StudentDTO getStudentById(Long id) {
         log.info("Getting student with ID: " + id);
         Student student = studentRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Student not found"));
         return studentMapper.fromStudentToDTO(student);
@@ -69,8 +73,22 @@ public class StudentServiceImpl implements StudentService {
     public StudentDTO createNewStudent(StudentDTO dto) {
         log.info("Creating new student from DTO: " + dto);
         Student student = studentMapper.fromDTOToStudent(dto);
+
         student.setRating(0);
-        student.setAccountStatus(StudentAccountStatus.ACTIVE);
+        student.setRole(userRoleRepository.getReferenceByName("STUDENT"));
+        student.getDetails().setAccountStatus(StudentAccountStatus.ACTIVE);
+
+        student = studentRepository.save(student);
+        log.info("Created student: " + student);
+        return studentMapper.fromStudentToDTO(student);
+    }
+
+    @Override
+    public StudentDTO registerStudent(StudentRegisterDTO dto) {
+        log.info("Registering student from DTO: " + dto);
+        Student student = studentMapper.fromRegisterDTOToStudent(dto);
+        student.setRating(0);
+        student.getDetails().setAccountStatus(StudentAccountStatus.ACTIVE);
         student = studentRepository.save(student);
         log.info("Created student: " + student);
         return studentMapper.fromStudentToDTO(student);
@@ -86,9 +104,16 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
+    public StudentCardDTO getCard(Long id) {
+        Student student = studentRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+        return studentMapper.fromStudentToCardDTO(student);
+    }
+
+    @Override
     public void deleteStudentById(Long id) {
+        Student student = studentRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Student not found"));
         log.info("Deleting student with ID: " + id);
-        studentRepository.deleteById(id);
+        studentRepository.delete(student);
     }
 
     /*

@@ -4,8 +4,8 @@ import com.example.spacelab.exception.ResourceNotFoundException;
 import com.example.spacelab.mapper.AdminMapper;
 import com.example.spacelab.model.Admin;
 import com.example.spacelab.model.Course;
-import com.example.spacelab.model.UserRole;
-import com.example.spacelab.model.dto.AdminDTO;
+import com.example.spacelab.model.role.UserRole;
+import com.example.spacelab.model.dto.admin.AdminDTO;
 import com.example.spacelab.repository.AdminRepository;
 import com.example.spacelab.repository.CourseRepository;
 import com.example.spacelab.repository.UserRoleRepository;
@@ -14,6 +14,8 @@ import com.example.spacelab.service.specification.AdminSpecifications;
 import com.example.spacelab.util.FilterForm;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -40,24 +42,24 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public List<AdminDTO> getAdmins(Pageable pageable) {
+    public Page<AdminDTO> getAdmins(Pageable pageable) {
         log.info("Getting admins with page " + pageable.getPageNumber() + "/ size " + pageable
                 .getPageSize());
-        return adminRepository.findAll(pageable)
+        return new PageImpl<>(adminRepository.findAll(pageable)
                 .stream()
                 .map(adminMapper::fromAdminToDTO)
-                .toList();
+                .toList());
     }
 
     @Override
-    public List<AdminDTO> getAdmins(FilterForm filters, Pageable pageable) {
+    public Page<AdminDTO> getAdmins(FilterForm filters, Pageable pageable) {
         log.info("Getting admins with page " + pageable.getPageNumber() + "/ size " + pageable
                 .getPageSize() + " and filters: " + filters);
         Specification<Admin> spec = buildSpecificationFromFilters(filters);
-        return adminRepository.findAll(spec,pageable)
+        return new PageImpl<>(adminRepository.findAll(spec,pageable)
                 .stream()
                 .map(adminMapper::fromAdminToDTO)
-                .toList();
+                .toList());
     }
 
     @Override
@@ -130,7 +132,7 @@ public class AdminServiceImpl implements AdminService {
         */
 
         Specification<Admin> spec = Specification.where(
-                AdminSpecifications.hasNameLike(name)
+                        AdminSpecifications.hasNameLike(name)
                         .and(AdminSpecifications.hasRole(role))
                         .and(AdminSpecifications.hasCourse(course))
                         .and(AdminSpecifications.hasEmailLike(email))

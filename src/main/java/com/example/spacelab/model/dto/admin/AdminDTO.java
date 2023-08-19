@@ -1,5 +1,6 @@
-package com.example.spacelab.model.dto;
+package com.example.spacelab.model.dto.admin;
 
+import com.example.spacelab.model.dto.CourseDTO;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;

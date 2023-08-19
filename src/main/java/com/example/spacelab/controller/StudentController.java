@@ -1,9 +1,10 @@
 package com.example.spacelab.controller;
 
 import com.example.spacelab.model.*;
-import com.example.spacelab.model.dto.StudentDTO;
+import com.example.spacelab.model.dto.student.StudentCardDTO;
+import com.example.spacelab.model.dto.student.StudentDTO;
 import com.example.spacelab.model.dto.StudentTaskDTO;
-import com.example.spacelab.model.dto.TaskDTO;
+import com.example.spacelab.model.dto.student.StudentRegisterDTO;
 import com.example.spacelab.model.role.PermissionType;
 import com.example.spacelab.service.StudentService;
 import com.example.spacelab.util.FilterForm;
@@ -12,6 +13,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +25,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Objects;
 
 @Controller
 @Log
@@ -32,24 +34,29 @@ public class StudentController {
 
     private final StudentService studentService;
 
+    // Получение студентов (с фильтрами/страницами)
     @GetMapping
     public ResponseEntity<?> getStudents(FilterForm filters,
                                          @RequestParam(required = false) Integer page,
                                          @RequestParam(required = false) Integer size) {
 
-        System.out.println(filters.toString());
+        Page<StudentDTO> students;
 
-        if(page == null) return ResponseEntity.badRequest().body("Page is not specified");
-        else if(size == null) return ResponseEntity.badRequest().body("Size is not specified");
+        if(page == null && size == null) students = new PageImpl<>(studentService.getStudents());
+        else if(page != null && size == null) students = studentService.getStudents(filters, PageRequest.of(page, 10));
+        else if(page == null) return ResponseEntity.badRequest().body("Size parameter present without page");
+        else students = studentService.getStudents(filters, PageRequest.of(page, size));
 
-        return new ResponseEntity<>(studentService.getStudents(filters, PageRequest.of(page, size)), HttpStatus.OK);
+        return new ResponseEntity<>(students, HttpStatus.OK);
     }
 
+    // Получение одного студента
     @GetMapping("/{studentID}")
     public ResponseEntity<StudentDTO> getStudent(@PathVariable Long studentID) {
-        return new ResponseEntity<>(studentService.getStudentDTOById(studentID), HttpStatus.OK);
+        return new ResponseEntity<>(studentService.getStudentById(studentID), HttpStatus.OK);
     }
 
+    // Получение заданий одного студента
     @GetMapping("/{studentID}/tasks")
     public ResponseEntity<List<StudentTaskDTO>> getStudentTasks(@PathVariable Long studentID,
                                                                 @RequestParam(required = false) StudentTaskStatus status) {
@@ -60,11 +67,20 @@ public class StudentController {
         return new ResponseEntity<>(taskList, HttpStatus.OK);
     }
 
+
+    // Получение одного задания одного студента
     @GetMapping("/{studentID}/tasks/{taskID}")
     public ResponseEntity<StudentTaskDTO> getStudentTask(@PathVariable Long studentID,
                                                          @PathVariable Long taskID) {
         StudentTaskDTO task = studentService.getStudentTask(taskID);
         return new ResponseEntity<>(task, HttpStatus.OK);
+    }
+
+    // Получение карточки информации о студенте
+    @GetMapping("/{studentID}/card")
+    public ResponseEntity<StudentCardDTO> getStudentCard(@PathVariable Long studentID) {
+        StudentCardDTO card = studentService.getCard(studentID);
+        return new ResponseEntity<>(card, HttpStatus.OK);
     }
 
     /*
@@ -81,22 +97,27 @@ public class StudentController {
     */
 
 
-    // возможно здесь заменить StudentDTO на дто специально для регистрации
+    // Создание нового студента (не регистрация)
     @PostMapping
     public ResponseEntity<StudentDTO> createNewStudent(@Valid @RequestBody StudentDTO student) {
 
-        Admin admin = (Admin) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        PermissionType permissionType = admin.getRole().getPermissions().getWriteStudents();
-        if(permissionType == PermissionType.NO_ACCESS) throw new AccessDeniedException("No access to creating new students!");
-        else if(permissionType == PermissionType.PARTIAL) {
-            Long studentCourseID = student.getCourse().getId();
-            if(!admin.getCourses().stream().map(Course::getId).toList().contains(studentCourseID))
-                throw new AccessDeniedException("No access to creating new students for course "+student.getCourse().getName()+"!");
-            else return new ResponseEntity<>(studentService.createNewStudent(student), HttpStatus.CREATED);
-        }
-        else return new ResponseEntity<>(studentService.createNewStudent(student), HttpStatus.CREATED);
+//        Admin admin = (Admin) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+//        PermissionType permissionType = admin.getRole().getPermissions().getWriteStudents();
+//
+//        if(permissionType == PermissionType.NO_ACCESS) throw new AccessDeniedException("No access to creating new students!");
+//        else if(permissionType == PermissionType.PARTIAL) {
+//            Long studentCourseID = student.getCourse().getId();
+//            if(!admin.getCourses().stream().map(Course::getId).toList().contains(studentCourseID))
+//                throw new AccessDeniedException("No access to creating new students for course "+student.getCourse().getName()+"!");
+//            else return new ResponseEntity<>(studentService.createNewStudent(student), HttpStatus.CREATED);
+//        }
+//        else return new ResponseEntity<>(studentService.createNewStudent(student), HttpStatus.CREATED);
+
+        return new ResponseEntity<>(studentService.createNewStudent(student), HttpStatus.CREATED);
+
     }
 
+    // Формирование ссылки на приглашение студента
     @PostMapping("/invite")
     public ResponseEntity<String> createStudentInviteLink(@AuthenticationPrincipal Admin admin,
                                                           @RequestBody InviteStudentRequest inviteRequest,
@@ -106,6 +127,12 @@ public class StudentController {
         String url = "http://" + servletRequest.getServerName() + ":" + servletRequest.getServerPort() + "/register/" + token;
         return new ResponseEntity<>(url, HttpStatus.CREATED);
 
+    }
+
+    // Регистрация студента
+    @PostMapping("/register")
+    public ResponseEntity<StudentDTO> registerStudent(@Valid @RequestBody StudentRegisterDTO student) {
+        return new ResponseEntity<>(studentService.registerStudent(student), HttpStatus.CREATED);
     }
 
     /*
@@ -130,6 +157,7 @@ public class StudentController {
 
     */
 
+    // Редактирование студента
     @PutMapping("/{id}")
     public ResponseEntity<StudentDTO> editStudent(@PathVariable Long id,
                                                   @Valid @RequestBody StudentDTO student) {
@@ -137,12 +165,14 @@ public class StudentController {
         return new ResponseEntity<>(studentService.editStudent(student), HttpStatus.OK);
     }
 
+    // Удаление студента
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteStudent(@PathVariable Long id) {
         studentService.deleteStudentById(id);
         return new ResponseEntity<>("Student with ID:"+id+" deleted", HttpStatus.OK);
     }
 
+    // Проверка доступа
     private void checkAccess(Long courseID, String courseName, Admin admin, PermissionType permissionType) {
 
         if(permissionType == PermissionType.NO_ACCESS) throw new AccessDeniedException("No access to this operation!");

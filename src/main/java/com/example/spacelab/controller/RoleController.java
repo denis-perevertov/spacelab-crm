@@ -1,20 +1,15 @@
 package com.example.spacelab.controller;
 
-import com.example.spacelab.model.UserRole;
 import com.example.spacelab.model.dto.UserRoleDTO;
 import com.example.spacelab.service.UserRoleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
-import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Controller

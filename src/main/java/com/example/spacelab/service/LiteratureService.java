@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
-public interface LiteratureService extends EntityService<Literature>{
+public interface LiteratureService extends EntityFilterService<Literature>{
     List<LiteratureDTO> getLiterature();
     List<LiteratureDTO> getLiterature(Pageable pageable);
     List<LiteratureDTO> getLiterature(FilterForm filters, Pageable pageable);

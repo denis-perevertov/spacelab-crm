@@ -1,6 +1,5 @@
 package com.example.spacelab.service;
 
-import com.example.spacelab.model.UserRole;
 import com.example.spacelab.model.dto.UserRoleDTO;
 
 import java.util.List;
