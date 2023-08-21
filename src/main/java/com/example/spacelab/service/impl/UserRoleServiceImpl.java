@@ -55,7 +55,8 @@ public class UserRoleServiceImpl implements UserRoleService {
 
     @Override
     public void deleteRoleById(Long id) {
+        UserRole role = userRoleRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Role not found"));
         log.info("Deleting user role with ID: " + id);
-        userRoleRepository.deleteById(id);
+        userRoleRepository.delete(role);
     }
 }
