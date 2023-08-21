@@ -25,42 +25,36 @@ public class ContactInfoServiceImpl implements ContactInfoService {
 
 
     @Override
-    public List<ContactInfoDTO> getContacts() {
+    public List<ContactInfo> getContacts() {
         log.info("Getting all contacts...");
-        return contactRepository.findAll().stream()
-                .map(contactInfoMapper::fromContactToContactDTO).toList();
+        return contactRepository.findAll();
     }
 
     @Override
-    public Page<ContactInfoDTO> getContacts(Pageable pageable) {
+    public Page<ContactInfo> getContacts(Pageable pageable) {
         log.info("Getting contacts (page "+pageable.getPageNumber()+")");
-        return new PageImpl<>(contactRepository.findAll(pageable).stream()
-                .map(contactInfoMapper::fromContactToContactDTO).toList());
+        return contactRepository.findAll(pageable);
     }
 
     @Override
-    public ContactInfoDTO getContact(Long id) {
+    public ContactInfo getContact(Long id) {
         log.info("Getting contact with ID: " + id);
         ContactInfo info = contactRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Contact not found"));
-        return contactInfoMapper.fromContactToContactDTO(info);
+        return info;
     }
 
     @Override
-    public ContactInfoDTO saveContact(ContactInfoDTO dto) {
-        log.info("Creating new contact from DTO: " + dto);
-        ContactInfo info = contactInfoMapper.fromContactDTOToContact(dto);
+    public ContactInfo saveContact(ContactInfo info) {
         info = contactRepository.save(info);
         log.info("Created contact: " + info);
-        return contactInfoMapper.fromContactToContactDTO(info);
+        return info;
     }
 
     @Override
-    public ContactInfoDTO editContact(ContactInfoDTO dto) {
-        log.info("Editing contact with ID: " + dto.getId());
-        ContactInfo info = contactInfoMapper.fromContactDTOToContact(dto);
+    public ContactInfo editContact(ContactInfo info) {
         info = contactRepository.save(info);
         log.info("Edited contact: " + info);
-        return contactInfoMapper.fromContactToContactDTO(info);
+        return info;
     }
 
     @Override

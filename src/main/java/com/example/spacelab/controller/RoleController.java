@@ -1,6 +1,8 @@
 package com.example.spacelab.controller;
 
+import com.example.spacelab.mapper.RoleMapper;
 import com.example.spacelab.model.dto.UserRoleDTO;
+import com.example.spacelab.model.role.UserRole;
 import com.example.spacelab.service.UserRoleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,31 +21,32 @@ import java.util.List;
 public class RoleController {
 
     private final UserRoleService userRoleService;
+    private final RoleMapper roleMapper;
 
     @GetMapping
     public ResponseEntity<List<UserRoleDTO>> getRoles() {
-        List<UserRoleDTO> list = userRoleService.getRoles();
+        List<UserRoleDTO> list = userRoleService.getRoles().stream().map(roleMapper::fromRoleToDTO).toList();
         return new ResponseEntity<>(list, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<UserRoleDTO> getRoleById(@PathVariable Long id) {
-        UserRoleDTO role = userRoleService.getRoleById(id);
+        UserRoleDTO role = roleMapper.fromRoleToDTO(userRoleService.getRoleById(id));
         return new ResponseEntity<>(role, HttpStatus.OK);
     }
 
     @PostMapping
-    public ResponseEntity<UserRoleDTO> createNewRole(@Valid @RequestBody UserRoleDTO role) {
-        role = userRoleService.createNewRole(role);
-        return new ResponseEntity<>(role, HttpStatus.CREATED);
+    public ResponseEntity<UserRoleDTO> createNewRole(@Valid @RequestBody UserRoleDTO dto) {
+        UserRole role = userRoleService.createNewRole(roleMapper.fromDTOToRole(dto));
+        return new ResponseEntity<>(roleMapper.fromRoleToDTO(role), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<UserRoleDTO> updateRole(@PathVariable Long id,
-                                                  @Valid @RequestBody UserRoleDTO role) {
-        role.setId(id);
-        role = userRoleService.createNewRole(role);
-        return new ResponseEntity<>(role, HttpStatus.OK);
+                                                  @Valid @RequestBody UserRoleDTO dto) {
+        dto.setId(id);
+        UserRole role = userRoleService.updateRole(roleMapper.fromDTOToRole(dto));
+        return new ResponseEntity<>(roleMapper.fromRoleToDTO(role), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
