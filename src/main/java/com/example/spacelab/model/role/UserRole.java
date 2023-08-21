@@ -1,5 +1,6 @@
-package com.example.spacelab.model;
+package com.example.spacelab.model.role;
 
+import com.example.spacelab.model.UserEntity;
 import com.example.spacelab.model.role.PermissionSet;
 import jakarta.persistence.*;
 import lombok.Data;

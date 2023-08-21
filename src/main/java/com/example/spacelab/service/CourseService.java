@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-public interface CourseService extends EntityService<Course> {
+public interface CourseService extends EntityFilterService<Course> {
 
     List<CourseDTO> getCourses();
     List<CourseDTO> getCourses(Pageable pageable);
