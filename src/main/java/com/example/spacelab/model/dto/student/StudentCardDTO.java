@@ -14,15 +14,8 @@ public class StudentCardDTO {
 
     private StudentDetails studentDetails;
 
-    private String role;
+    private String roleName;
     private String courseName;
 
-    private StudentAccountStatus status;
-
-    private LocalDate birthdate;
-
-    private StudentEducationLevel educationLevel;
-    private StudentEnglishLevel englishLevel;
-    private StudentWorkStatus workStatus;
 
 }

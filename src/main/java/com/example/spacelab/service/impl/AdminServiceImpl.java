@@ -4,6 +4,7 @@ import com.example.spacelab.exception.ResourceNotFoundException;
 import com.example.spacelab.mapper.AdminMapper;
 import com.example.spacelab.model.Admin;
 import com.example.spacelab.model.Course;
+import com.example.spacelab.model.dto.admin.AdminEditDTO;
 import com.example.spacelab.model.role.UserRole;
 import com.example.spacelab.model.dto.admin.AdminDTO;
 import com.example.spacelab.repository.AdminRepository;
@@ -30,57 +31,42 @@ public class AdminServiceImpl implements AdminService {
     private final AdminRepository adminRepository;
     private final UserRoleRepository userRoleRepository;
     private final CourseRepository courseRepository;
-    private final AdminMapper adminMapper;
 
     @Override
-    public List<AdminDTO> getAdmins() {
+    public List<Admin> getAdmins() {
         log.info("Getting admins without filtering or pages");
-        return adminRepository.findAll()
-                .stream()
-                .map(adminMapper::fromAdminToDTO)
-                .toList();
+        return adminRepository.findAll();
     }
 
     @Override
-    public Page<AdminDTO> getAdmins(Pageable pageable) {
+    public Page<Admin> getAdmins(Pageable pageable) {
         log.info("Getting admins with page " + pageable.getPageNumber() + "/ size " + pageable
                 .getPageSize());
-        return new PageImpl<>(adminRepository.findAll(pageable)
-                .stream()
-                .map(adminMapper::fromAdminToDTO)
-                .toList());
+        return adminRepository.findAll(pageable);
     }
 
     @Override
-    public Page<AdminDTO> getAdmins(FilterForm filters, Pageable pageable) {
+    public Page<Admin> getAdmins(FilterForm filters, Pageable pageable) {
         log.info("Getting admins with page " + pageable.getPageNumber() + "/ size " + pageable
                 .getPageSize() + " and filters: " + filters);
         Specification<Admin> spec = buildSpecificationFromFilters(filters);
-        return new PageImpl<>(adminRepository.findAll(spec,pageable)
-                .stream()
-                .map(adminMapper::fromAdminToDTO)
-                .toList());
+        return adminRepository.findAll(spec,pageable);
     }
 
     @Override
-    public AdminDTO getAdminById(Long id) {
+    public Admin getAdminById(Long id) {
         log.info("Getting admin with ID: " + id);
         Admin admin = adminRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Admin not found!"));
-        return adminMapper.fromAdminToDTO(admin);
+        return admin;
     }
 
     @Override
-    public AdminDTO createAdmin(AdminDTO dto) {
+    public Admin createAdmin(Admin admin) {
         log.info("Creating new admin");
         try {
-            Admin admin = adminMapper.fromDTOToAdmin(dto);
-            log.info(admin.toString());
             admin = adminRepository.save(admin);
             log.info("Saved admin: " + admin);
-            return adminMapper.fromAdminToDTO(admin);
-        } catch (ResourceNotFoundException e) {
-            log.severe(e.getMessage());
-            throw new ResourceNotFoundException("Admin with ID: " + dto.getId() + " not found");
+            return admin;
         } catch (Exception e) {
             log.severe(e.getMessage());
             throw new RuntimeException("Unknown error during saving");
@@ -88,17 +74,12 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public AdminDTO updateAdmin(AdminDTO dto) {
+    public Admin updateAdmin(Admin admin) {
         log.info("Updating admin");
         try {
-            Admin admin = adminMapper.fromDTOToAdmin(dto);
-            log.info(admin.toString());
             admin = adminRepository.save(admin);
             log.info("Saved admin: " + admin);
-            return adminMapper.fromAdminToDTO(admin);
-        } catch (ResourceNotFoundException e) {
-            log.severe(e.getMessage());
-            throw new ResourceNotFoundException("Admin with ID: " + dto.getId() + " not found");
+            return admin;
         } catch (Exception e) {
             log.severe(e.getMessage());
             throw new RuntimeException("Unknown error during saving");
@@ -107,8 +88,9 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public void deleteAdminById(Long id) {
+        Admin admin = adminRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Admin not found!"));
         log.info("Deleting admin with ID: " + id);
-        adminRepository.deleteById(id);
+        adminRepository.delete(admin);
     }
 
     @Override

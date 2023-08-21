@@ -1,5 +1,7 @@
 package com.example.spacelab.controller;
 
+import com.example.spacelab.mapper.StudentMapper;
+import com.example.spacelab.mapper.TaskMapper;
 import com.example.spacelab.model.*;
 import com.example.spacelab.model.dto.student.StudentCardDTO;
 import com.example.spacelab.model.dto.student.StudentDTO;
@@ -33,6 +35,8 @@ import java.util.List;
 public class StudentController {
 
     private final StudentService studentService;
+    private final StudentMapper studentMapper;
+    private final TaskMapper taskMapper;
 
     // Получение студентов (с фильтрами/страницами)
     @GetMapping
@@ -42,10 +46,10 @@ public class StudentController {
 
         Page<StudentDTO> students;
 
-        if(page == null && size == null) students = new PageImpl<>(studentService.getStudents());
-        else if(page != null && size == null) students = studentService.getStudents(filters, PageRequest.of(page, 10));
+        if(page == null && size == null) students = new PageImpl<>(studentService.getStudents().stream().map(studentMapper::fromStudentToDTO).toList());
+        else if(page != null && size == null) students = new PageImpl<>(studentService.getStudents(filters, PageRequest.of(page, 10)).stream().map(studentMapper::fromStudentToDTO).toList());
         else if(page == null) return ResponseEntity.badRequest().body("Size parameter present without page");
-        else students = studentService.getStudents(filters, PageRequest.of(page, size));
+        else students = new PageImpl<>(studentService.getStudents(filters, PageRequest.of(page, size)).stream().map(studentMapper::fromStudentToDTO).toList());
 
         return new ResponseEntity<>(students, HttpStatus.OK);
     }
@@ -53,7 +57,8 @@ public class StudentController {
     // Получение одного студента
     @GetMapping("/{studentID}")
     public ResponseEntity<StudentDTO> getStudent(@PathVariable Long studentID) {
-        return new ResponseEntity<>(studentService.getStudentById(studentID), HttpStatus.OK);
+        Student student = studentService.getStudentById(studentID);
+        return new ResponseEntity<>(studentMapper.fromStudentToDTO(student), HttpStatus.OK);
     }
 
     // Получение заданий одного студента
@@ -61,8 +66,8 @@ public class StudentController {
     public ResponseEntity<List<StudentTaskDTO>> getStudentTasks(@PathVariable Long studentID,
                                                                 @RequestParam(required = false) StudentTaskStatus status) {
         List<StudentTaskDTO> taskList;
-        if(status == null) taskList = studentService.getStudentTasks(studentID);
-        else taskList = studentService.getStudentTasks(studentID, status);
+        if(status == null) taskList = studentService.getStudentTasks(studentID).stream().map(taskMapper::fromStudentTaskToDTO).toList();
+        else taskList = studentService.getStudentTasks(studentID, status).stream().map(taskMapper::fromStudentTaskToDTO).toList();
 
         return new ResponseEntity<>(taskList, HttpStatus.OK);
     }
@@ -72,7 +77,7 @@ public class StudentController {
     @GetMapping("/{studentID}/tasks/{taskID}")
     public ResponseEntity<StudentTaskDTO> getStudentTask(@PathVariable Long studentID,
                                                          @PathVariable Long taskID) {
-        StudentTaskDTO task = studentService.getStudentTask(taskID);
+        StudentTaskDTO task = taskMapper.fromStudentTaskToDTO(studentService.getStudentTask(taskID));
         return new ResponseEntity<>(task, HttpStatus.OK);
     }
 
@@ -99,7 +104,7 @@ public class StudentController {
 
     // Создание нового студента (не регистрация)
     @PostMapping
-    public ResponseEntity<StudentDTO> createNewStudent(@Valid @RequestBody StudentDTO student) {
+    public ResponseEntity<StudentDTO> createNewStudent(@Valid @RequestBody StudentDTO dto) {
 
 //        Admin admin = (Admin) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 //        PermissionType permissionType = admin.getRole().getPermissions().getWriteStudents();
@@ -113,7 +118,8 @@ public class StudentController {
 //        }
 //        else return new ResponseEntity<>(studentService.createNewStudent(student), HttpStatus.CREATED);
 
-        return new ResponseEntity<>(studentService.createNewStudent(student), HttpStatus.CREATED);
+        Student student = studentService.createNewStudent(studentMapper.fromDTOToStudent(dto));
+        return new ResponseEntity<>(studentMapper.fromStudentToDTO(student), HttpStatus.CREATED);
 
     }
 
@@ -131,13 +137,12 @@ public class StudentController {
 
     // Регистрация студента
     @PostMapping("/register")
-    public ResponseEntity<StudentDTO> registerStudent(@Valid @RequestBody StudentRegisterDTO student) {
-        return new ResponseEntity<>(studentService.registerStudent(student), HttpStatus.CREATED);
+    public ResponseEntity<StudentDTO> registerStudent(@Valid @RequestBody StudentRegisterDTO dto) {
+        Student student = studentService.registerStudent(studentMapper.fromRegisterDTOToStudent(dto));
+        return new ResponseEntity<>(studentMapper.fromStudentToDTO(student), HttpStatus.CREATED);
     }
 
     /*
-
-    рановато еще доставать админа из контекста
 
     @PostMapping("/invite")
     public ResponseEntity<String> createStudentInviteLink(@AuthenticationPrincipal Admin admin,
@@ -160,9 +165,10 @@ public class StudentController {
     // Редактирование студента
     @PutMapping("/{id}")
     public ResponseEntity<StudentDTO> editStudent(@PathVariable Long id,
-                                                  @Valid @RequestBody StudentDTO student) {
-        student.setId(id);
-        return new ResponseEntity<>(studentService.editStudent(student), HttpStatus.OK);
+                                                  @Valid @RequestBody StudentDTO dto) {
+        dto.setId(id);
+        Student student = studentService.editStudent(studentMapper.fromDTOToStudent(dto));
+        return new ResponseEntity<>(studentMapper.fromStudentToDTO(student), HttpStatus.OK);
     }
 
     // Удаление студента

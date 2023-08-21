@@ -21,6 +21,7 @@ public class ContactController {
 
     private final ContactInfoService contactService;
 
+    // Получение всех контактов
     @GetMapping
     public ResponseEntity<Page<ContactInfoDTO>> getContacts(@RequestParam(required = false) Integer page,
                                                             @RequestParam(required = false) Integer size) {
@@ -31,18 +32,21 @@ public class ContactController {
         return new ResponseEntity<>(contactList, HttpStatus.OK);
     }
 
+    // Получение одного контакта
     @GetMapping("/{id}")
     public ResponseEntity<ContactInfoDTO> getContact(@PathVariable Long id) {
         ContactInfoDTO info = contactService.getContact(id);
         return new ResponseEntity<>(info, HttpStatus.OK);
     }
 
+    // Добавление нового контакта
     @PostMapping
     public ResponseEntity<ContactInfoDTO> createNewContact(@Valid @RequestBody ContactInfoDTO contactInfoDTO) {
         ContactInfoDTO info = contactService.saveContact(contactInfoDTO);
         return new ResponseEntity<>(info, HttpStatus.OK);
     }
 
+    // Редактирование контакта
     @PutMapping("/{id}")
     public ResponseEntity<ContactInfoDTO> editContact(@PathVariable Long id,
                                                       @Valid @RequestBody ContactInfoDTO contactInfoDTO) {
@@ -51,9 +55,10 @@ public class ContactController {
         return new ResponseEntity<>(info, HttpStatus.OK);
     }
 
+    // Удаление контакта
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteContact(@PathVariable Long id) {
         contactService.deleteContact(id);
-        return new ResponseEntity<>("Deleted successfully!", HttpStatus.OK);
+        return new ResponseEntity<>("Contact with ID: " + id + " deleted", HttpStatus.OK);
     }
 }

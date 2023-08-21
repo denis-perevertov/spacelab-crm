@@ -4,6 +4,7 @@ import com.example.spacelab.exception.MappingException;
 import com.example.spacelab.model.ContactInfo;
 import com.example.spacelab.model.dto.contact.ContactInfoDTO;
 import com.example.spacelab.repository.AdminRepository;
+import com.example.spacelab.repository.ContactInfoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.stereotype.Component;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
 public class ContactInfoMapper {
 
     private final AdminRepository adminRepository;
+    private final ContactInfoRepository contactInfoRepository;
     private final AdminMapper adminMapper;
 
     public  ContactInfoDTO fromContactToContactDTO(ContactInfo info) {
@@ -39,7 +41,9 @@ public class ContactInfoMapper {
 
     public  ContactInfo fromContactDTOToContact(ContactInfoDTO dto) {
 
-        ContactInfo info = new ContactInfo();
+        ContactInfo info = (dto.getId() != null) ?
+                            contactInfoRepository.getReferenceById(dto.getId()) :
+                            new ContactInfo();
 
         try {
 

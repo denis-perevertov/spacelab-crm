@@ -17,14 +17,14 @@ public interface StudentService extends StudentTaskService,
                                         StudentCardService,
                                         EntityFilterService<Student> {
 
-    List<StudentDTO> getStudents();
-    Page<StudentDTO> getStudents(Pageable pageable);
-    Page<StudentDTO> getStudents(FilterForm filters, Pageable pageable);
+    List<Student> getStudents();
+    Page<Student> getStudents(Pageable pageable);
+    Page<Student> getStudents(FilterForm filters, Pageable pageable);
 
-    StudentDTO getStudentById(Long id);
-    StudentDTO createNewStudent(StudentDTO dto);
-    StudentDTO registerStudent(StudentRegisterDTO dto);
-    StudentDTO editStudent(StudentDTO student);
+    Student getStudentById(Long id);
+    Student createNewStudent(Student student);
+    Student registerStudent(Student student);
+    Student editStudent(Student student);
 
     void deleteStudentById(Long id);
 

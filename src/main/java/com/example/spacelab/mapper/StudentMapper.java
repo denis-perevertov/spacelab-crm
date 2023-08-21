@@ -64,14 +64,11 @@ public class StudentMapper {
         try {
 
             dto.setStudentDetails(student.getDetails());
-            dto.setRole(student.getRole().getName());
-            dto.setCourseName(student.getCourse().getName());
-//            dto.setStatus(student.getAccountStatus());
-//            dto.setBirthdate(student.getBirthdate());
 
-//            dto.setEducationLevel(student.getEducationLevel());
-//            dto.setEnglishLevel(student.getEnglishLevel());
-//            dto.setWorkStatus(student.getWorkStatus());
+            if(student.getRole() != null)
+                dto.setRoleName(student.getRole().getName());
+            if(student.getCourse() != null)
+                dto.setCourseName(student.getCourse().getName());
 
         } catch (Exception e) {
             log.severe("Mapping error: " + e.getMessage());

@@ -65,7 +65,8 @@ public class ContactInfoServiceImpl implements ContactInfoService {
 
     @Override
     public void deleteContact(Long id) {
+        ContactInfo info = contactRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Contact not found"));
         log.info("Deleting contact with ID: " + id);
-        contactRepository.deleteById(id);
+        contactRepository.delete(info);
     }
 }
