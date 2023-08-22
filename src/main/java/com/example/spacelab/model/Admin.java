@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -21,5 +22,5 @@ public class Admin extends UserEntity {
     @Transient private String confirmPassword;
 
     @ManyToMany
-    private List<Course> courses;
+    private List<Course> courses = new ArrayList<>();
 }
