@@ -9,27 +9,14 @@ import lombok.Data;
 public class StudentDTO {
 
     private Long id;
-
     private String fullName;
-
-    @NotBlank
     private String firstName, lastName, fathersName;
-
-    private CourseDTO course;
-
-    @NotBlank
-    @Email
+    private CourseDTO course;  // ?
     private String email;
-
-    @NotBlank
     private String phone;
-
     private String telegram;
-
     private Integer rating;
-
     private String status;
-
     private String avatar;
 
 }

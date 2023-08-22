@@ -6,11 +6,14 @@ import com.example.spacelab.model.*;
 import com.example.spacelab.model.dto.student.StudentCardDTO;
 import com.example.spacelab.model.dto.student.StudentDTO;
 import com.example.spacelab.model.dto.StudentTaskDTO;
+import com.example.spacelab.model.dto.student.StudentEditDTO;
 import com.example.spacelab.model.dto.student.StudentRegisterDTO;
 import com.example.spacelab.model.role.PermissionType;
 import com.example.spacelab.service.StudentService;
 import com.example.spacelab.util.FilterForm;
 import com.example.spacelab.util.StudentTaskStatus;
+import com.example.spacelab.validator.StudentValidator;
+import com.example.spacelab.validator.ValidationErrorMessage;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,9 +27,12 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @Log
@@ -36,6 +42,7 @@ public class StudentController {
 
     private final StudentService studentService;
     private final StudentMapper studentMapper;
+    private final StudentValidator studentValidator;
     private final TaskMapper taskMapper;
 
     // Получение студентов (с фильтрами/страницами)
@@ -104,21 +111,18 @@ public class StudentController {
 
     // Создание нового студента (не регистрация)
     @PostMapping
-    public ResponseEntity<StudentDTO> createNewStudent(@Valid @RequestBody StudentDTO dto) {
+    public ResponseEntity<?> createNewStudent(@RequestBody StudentEditDTO dto,
+                                               BindingResult bindingResult) {
 
-//        Admin admin = (Admin) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-//        PermissionType permissionType = admin.getRole().getPermissions().getWriteStudents();
-//
-//        if(permissionType == PermissionType.NO_ACCESS) throw new AccessDeniedException("No access to creating new students!");
-//        else if(permissionType == PermissionType.PARTIAL) {
-//            Long studentCourseID = student.getCourse().getId();
-//            if(!admin.getCourses().stream().map(Course::getId).toList().contains(studentCourseID))
-//                throw new AccessDeniedException("No access to creating new students for course "+student.getCourse().getName()+"!");
-//            else return new ResponseEntity<>(studentService.createNewStudent(student), HttpStatus.CREATED);
-//        }
-//        else return new ResponseEntity<>(studentService.createNewStudent(student), HttpStatus.CREATED);
+        studentValidator.validate(dto, bindingResult);
 
-        Student student = studentService.createNewStudent(studentMapper.fromDTOToStudent(dto));
+        if(bindingResult.hasErrors()) {
+            Map<String, String> errors = new HashMap<>();
+            bindingResult.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
+            return new ResponseEntity<>(new ValidationErrorMessage(HttpStatus.BAD_REQUEST.value(), errors), HttpStatus.BAD_REQUEST);
+        }
+
+        Student student = studentService.createNewStudent(studentMapper.fromEditDTOToStudent(dto));
         return new ResponseEntity<>(studentMapper.fromStudentToDTO(student), HttpStatus.CREATED);
 
     }
@@ -137,37 +141,37 @@ public class StudentController {
 
     // Регистрация студента
     @PostMapping("/register")
-    public ResponseEntity<StudentDTO> registerStudent(@Valid @RequestBody StudentRegisterDTO dto) {
+    public ResponseEntity<?> registerStudent(@RequestBody StudentRegisterDTO dto,
+                                                      BindingResult bindingResult) {
+
+        studentValidator.validate(dto, bindingResult);
+
+        if(bindingResult.hasErrors()) {
+            Map<String, String> errors = new HashMap<>();
+            bindingResult.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
+            return new ResponseEntity<>(new ValidationErrorMessage(HttpStatus.BAD_REQUEST.value(), errors), HttpStatus.BAD_REQUEST);
+        }
+
         Student student = studentService.registerStudent(studentMapper.fromRegisterDTOToStudent(dto));
         return new ResponseEntity<>(studentMapper.fromStudentToDTO(student), HttpStatus.CREATED);
     }
 
-    /*
-
-    @PostMapping("/invite")
-    public ResponseEntity<String> createStudentInviteLink(@AuthenticationPrincipal Admin admin,
-                                                          @RequestBody InviteStudentRequest inviteRequest,
-                                                          HttpServletRequest servletRequest) {
-
-        checkAccess(inviteRequest.getCourse().getId(),
-                inviteRequest.getCourse().getName(),
-                admin,
-                admin.getRole().getPermissions().getWriteStudents());
-
-        String token = studentService.createInviteStudentToken(inviteRequest);
-        String url = "http://" + servletRequest.getServerName() + ":" + servletRequest.getServerPort() + "/register/" + token;
-        return new ResponseEntity<>(url, HttpStatus.CREATED);
-
-    }
-
-    */
-
     // Редактирование студента
     @PutMapping("/{id}")
-    public ResponseEntity<StudentDTO> editStudent(@PathVariable Long id,
-                                                  @Valid @RequestBody StudentDTO dto) {
-        dto.setId(id);
-        Student student = studentService.editStudent(studentMapper.fromDTOToStudent(dto));
+    public ResponseEntity<?> editStudent(@PathVariable Long id,
+                                          @RequestBody StudentEditDTO dto,
+                                          BindingResult bindingResult) {
+        StudentEditDTO dtoWithID = new StudentEditDTO(id, dto);
+
+        studentValidator.validate(dtoWithID, bindingResult);
+
+        if(bindingResult.hasErrors()) {
+            Map<String, String> errors = new HashMap<>();
+            bindingResult.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
+            return new ResponseEntity<>(new ValidationErrorMessage(HttpStatus.BAD_REQUEST.value(), errors), HttpStatus.BAD_REQUEST);
+        }
+
+        Student student = studentService.editStudent(studentMapper.fromEditDTOToStudent(dtoWithID));
         return new ResponseEntity<>(studentMapper.fromStudentToDTO(student), HttpStatus.OK);
     }
 

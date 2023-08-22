@@ -5,6 +5,7 @@ import com.example.spacelab.model.Student;
 import com.example.spacelab.model.StudentDetails;
 import com.example.spacelab.model.dto.student.StudentCardDTO;
 import com.example.spacelab.model.dto.student.StudentDTO;
+import com.example.spacelab.model.dto.student.StudentEditDTO;
 import com.example.spacelab.model.dto.student.StudentRegisterDTO;
 import com.example.spacelab.repository.CourseRepository;
 import com.example.spacelab.repository.StudentRepository;
@@ -105,6 +106,32 @@ public class StudentMapper {
             log.warning("Entity: " + student);
             throw new MappingException(e.getMessage());
 
+        }
+
+        return student;
+    }
+
+    public Student fromEditDTOToStudent(StudentEditDTO dto) {
+        Student student = (dto.id() != null) ?
+                studentRepository.getReferenceById(dto.id()) :
+                new Student();
+
+        try {
+            StudentDetails studentDetails = student.getDetails();
+            studentDetails.setFirstName(dto.firstName());
+            studentDetails.setFathersName(dto.fathersName());
+            studentDetails.setLastName(dto.lastName());
+            studentDetails.setEmail(dto.email());
+            studentDetails.setPhone(dto.phone());
+            studentDetails.setTelegram(dto.telegram());
+
+            if(dto.courseID() != null && dto.courseID() != 0)
+                student.setCourse(courseRepository.getReferenceById(dto.courseID()));
+
+        } catch (Exception e) {
+            log.severe("Mapping error: " + e.getMessage());
+            log.warning("Entity: " + student);
+            throw new MappingException(e.getMessage());
         }
 
         return student;

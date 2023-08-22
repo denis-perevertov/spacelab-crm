@@ -95,6 +95,7 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public Student editStudent(Student student) {
+
         student = studentRepository.save(student);
         log.info("Edited student: " + student);
         return student;
