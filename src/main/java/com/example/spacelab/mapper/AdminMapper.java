@@ -1,6 +1,7 @@
 package com.example.spacelab.mapper;
 
 import com.example.spacelab.exception.MappingException;
+import com.example.spacelab.exception.ResourceNotFoundException;
 import com.example.spacelab.model.Admin;
 import com.example.spacelab.model.dto.admin.AdminDTO;
 import com.example.spacelab.model.dto.CourseDTO;
@@ -9,6 +10,7 @@ import com.example.spacelab.model.dto.admin.AdminEditDTO;
 import com.example.spacelab.repository.AdminRepository;
 import com.example.spacelab.repository.CourseRepository;
 import com.example.spacelab.repository.UserRoleRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.stereotype.Component;
@@ -30,12 +32,15 @@ public class AdminMapper {
         AdminDTO dto = new AdminDTO();
 
         try {
+            dto.setId(admin.getId());
             dto.setFirstName(admin.getFirstName());
             dto.setLastName(admin.getLastName());
-            dto.setFull_name(admin.getFirstName() + " " + admin.getLastName());
+            dto.setFullName(admin.getFirstName() + " " + admin.getLastName());
             dto.setPhone(admin.getPhone());
             dto.setEmail(admin.getEmail());
-            dto.setRole(admin.getRole().toString());
+
+            if(admin.getRole() != null)
+                dto.setRole(admin.getRole().getName());
 
             List<CourseDTO> courses = dto.getCourses();
             admin.getCourses().forEach(course -> courses.add(courseMapper.fromCourseToDTO(course)));
@@ -102,7 +107,9 @@ public class AdminMapper {
             admin.setLastName(dto.getLastName());
             admin.setPhone(dto.getPhone());
             admin.setEmail(dto.getEmail());
-            admin.setPassword(dto.getPassword());
+            if((admin.getPassword() == null || admin.getPassword().isEmpty()) ||
+                (dto.getPassword() != null && !dto.getPassword().isEmpty()))
+                admin.setPassword(dto.getPassword());
 
             /*
                 TODO
@@ -111,6 +118,9 @@ public class AdminMapper {
 
             if(dto.getRoleID() != null) admin.setRole(userRoleRepository.getReferenceById(dto.getRoleID()));
 
+        } catch (EntityNotFoundException e) {
+            log.severe("Mapping error: " + e.getMessage());
+            throw new ResourceNotFoundException(e.getMessage());
         } catch (Exception e) {
             log.severe("Mapping error: " + e.getMessage());
             log.warning("Entity: " + admin);
@@ -120,7 +130,7 @@ public class AdminMapper {
         return admin;
     }
 
-
+/*
     public Admin fromDTOToAdmin(AdminDTO dto) {
         if(dto.getId() != null) return adminRepository.getReferenceById(dto.getId());
         else {
@@ -131,14 +141,13 @@ public class AdminMapper {
                 admin.setLastName(dto.getLastName());
                 admin.setPhone(dto.getPhone());
                 admin.setEmail(dto.getEmail());
-                admin.setPassword(dto.getPassword());
 
                 if(dto.getRole() != null) admin.setRole(userRoleRepository.getReferenceByName(dto.getRole()));
 
-            /*
+            *//*
                 TODO
                 курсы
-             */
+             *//*
 
             } catch (Exception e) {
                 log.severe("Mapping error: " + e.getMessage());
@@ -150,5 +159,5 @@ public class AdminMapper {
 
 
         }
-    }
+    }*/
 }

@@ -51,31 +51,48 @@ public class AdminValidator implements Validator {
             e.rejectValue("email", "email.empty", "Enter email!");
         else if(!dto.getEmail().matches(EMAIL_PATTERN))
             e.rejectValue("email", "email.no-match", "Incorrect email format!");
-        else if(adminRepository.existsByEmail(dto.getEmail()))
+        else if(adminRepository.existsByEmail(dto.getEmail()) &&
+                !adminRepository.findById(dto.getId()).get().getEmail().equals(dto.getEmail()))
             e.rejectValue("email", "email.exists", "Admin with this email already exists!");
 
-        if(dto.getId() == null && (dto.getPassword() == null || dto.getPassword().isEmpty()))
-            e.rejectValue("password", "password.empty", "Enter password!");
-        else if(dto.getPassword().length() < 8 || dto.getPassword().length() > 50)
-            e.rejectValue("password", "password.length", "Password length: 8-50");
-        else if(dto.getConfirmPassword() == null || dto.getConfirmPassword().isEmpty())
-            e.rejectValue("confirmPassword", "password.confirm", "Confirm password!");
-        else if(!dto.getConfirmPassword().equals(dto.getPassword())) {
-            e.rejectValue("password", "password.no-match", "Passwords don't match!");
-            e.rejectValue("confirmPassword", "password.no-match", "Passwords don't match!");
+        if(dto.getId() == null) {
+            if(dto.getPassword() == null || dto.getPassword().isEmpty())
+                e.rejectValue("password", "password.empty", "Enter password!");
+            else if(dto.getPassword().length() < 8 || dto.getPassword().length() > 50)
+                e.rejectValue("password", "password.length", "Password length: 8-50");
+            else if(dto.getConfirmPassword() == null || dto.getConfirmPassword().isEmpty())
+                e.rejectValue("confirmPassword", "password.confirm", "Confirm password!");
+            else if(!dto.getConfirmPassword().equals(dto.getPassword())) {
+                e.rejectValue("password", "password.no-match", "Passwords don't match!");
+                e.rejectValue("confirmPassword", "password.no-match", "Passwords don't match!");
+            }
+        }
+        else if(dto.getPassword() != null && !dto.getPassword().isBlank()) {
+            if(dto.getPassword().length() < 8 || dto.getPassword().length() > 50)
+                e.rejectValue("password", "password.length", "Password length: 8-50");
+            else if(dto.getConfirmPassword() == null || dto.getConfirmPassword().isEmpty())
+                e.rejectValue("confirmPassword", "password.confirm", "Confirm password!");
+            else if(!dto.getConfirmPassword().equals(dto.getPassword())) {
+                e.rejectValue("password", "password.no-match", "Passwords don't match!");
+                e.rejectValue("confirmPassword", "password.no-match", "Passwords don't match!");
+            }
         }
 
-//        if(dto.getRoleID() == null || dto.getRoleID() == 0)
-//            e.rejectValue("roleID", "roleID.empty", "No role selected");
-//        else if(!roleRepository.existsById(dto.getRoleID()))
-//            e.rejectValue("roleID", "roleID.no-match", "No role with this ID exists");
-//
-//        if(dto.getCourseID() == null || dto.getCourseID() == 0)
-//            e.rejectValue("courseID", "courseID.empty", "No course selected");
-//        else if(!courseRepository.existsById(dto.getCourseID()))
-//            e.rejectValue("courseID", "courseID.no-match", "No course with this ID exists");
+        if(dto.getRoleID() == null || dto.getRoleID() == 0)
+            e.rejectValue("roleID", "roleID.empty", "No role selected");
+        else if(!roleRepository.existsById(dto.getRoleID()))
+            e.rejectValue("roleID", "roleID.no-match", "No role with this ID exists");
 
+        /*
 
+        пока не сделаны курсы - нет проверки на курсы
+
+        if(dto.getCourseID() == null || dto.getCourseID() == 0)
+            e.rejectValue("courseID", "courseID.empty", "No course selected");
+        else if(!courseRepository.existsById(dto.getCourseID()))
+            e.rejectValue("courseID", "courseID.no-match", "No course with this ID exists");
+
+        */
 
 
     }

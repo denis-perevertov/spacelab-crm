@@ -19,7 +19,6 @@ public class Admin extends UserEntity {
     private String email;
 
     private String password;
-    @Transient private String confirmPassword;
 
     @ManyToMany
     private List<Course> courses = new ArrayList<>();

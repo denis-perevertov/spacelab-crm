@@ -76,6 +76,8 @@ public class AdminController {
                                         @RequestBody AdminEditDTO admin,
                                         BindingResult bindingResult) {
 
+        admin.setId(id);
+
         adminValidator.validate(admin, bindingResult);
 
         if(bindingResult.hasErrors()) {
@@ -84,7 +86,6 @@ public class AdminController {
             return new ResponseEntity<>(new ValidationErrorMessage(HttpStatus.BAD_REQUEST.value(), errors), HttpStatus.BAD_REQUEST);
         }
 
-        admin.setId(id);
         Admin savedAdmin = adminService.updateAdmin(adminMapper.fromEditDTOToAdmin(admin));
         return new ResponseEntity<>(adminMapper.fromAdminToDTO(savedAdmin), HttpStatus.OK);
     }
