@@ -1,9 +1,7 @@
 package com.example.spacelab.service.impl;
 
 import com.example.spacelab.exception.ResourceNotFoundException;
-import com.example.spacelab.mapper.RoleMapper;
 import com.example.spacelab.model.role.UserRole;
-import com.example.spacelab.model.dto.UserRoleDTO;
 import com.example.spacelab.repository.UserRoleRepository;
 import com.example.spacelab.service.UserRoleService;
 import lombok.RequiredArgsConstructor;

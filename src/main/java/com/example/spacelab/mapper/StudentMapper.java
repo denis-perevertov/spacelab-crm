@@ -1,6 +1,7 @@
 package com.example.spacelab.mapper;
 
 import com.example.spacelab.exception.MappingException;
+import com.example.spacelab.exception.ResourceNotFoundException;
 import com.example.spacelab.model.Student;
 import com.example.spacelab.model.StudentDetails;
 import com.example.spacelab.model.dto.student.StudentCardDTO;
@@ -10,6 +11,7 @@ import com.example.spacelab.model.dto.student.StudentRegisterDTO;
 import com.example.spacelab.repository.CourseRepository;
 import com.example.spacelab.repository.StudentRepository;
 import com.example.spacelab.util.StudentAccountStatus;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.stereotype.Component;
@@ -101,6 +103,9 @@ public class StudentMapper {
             if(studentDTO.getCourse() != null) {
                 student.setCourse(courseRepository.getReferenceById(studentDTO.getCourse().getId()));
             }
+        } catch (EntityNotFoundException e) {
+            log.severe("Error: " + e.getMessage());
+            throw new ResourceNotFoundException(e.getMessage());
         } catch (Exception e) {
             log.severe("Mapping error: " + e.getMessage());
             log.warning("Entity: " + student);
@@ -128,6 +133,9 @@ public class StudentMapper {
             if(dto.courseID() != null && dto.courseID() != 0)
                 student.setCourse(courseRepository.getReferenceById(dto.courseID()));
 
+        } catch (EntityNotFoundException e) {
+            log.severe("Error: " + e.getMessage());
+            throw new ResourceNotFoundException(e.getMessage());
         } catch (Exception e) {
             log.severe("Mapping error: " + e.getMessage());
             log.warning("Entity: " + student);

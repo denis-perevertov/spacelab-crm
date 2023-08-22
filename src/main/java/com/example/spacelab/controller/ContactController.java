@@ -3,7 +3,10 @@ package com.example.spacelab.controller;
 import com.example.spacelab.mapper.ContactInfoMapper;
 import com.example.spacelab.model.ContactInfo;
 import com.example.spacelab.model.dto.contact.ContactInfoDTO;
+import com.example.spacelab.model.dto.contact.ContactInfoEditDTO;
 import com.example.spacelab.service.ContactInfoService;
+import com.example.spacelab.validator.ContactValidator;
+import com.example.spacelab.validator.ValidationErrorMessage;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
@@ -13,7 +16,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Controller
 @Log
@@ -23,6 +30,7 @@ public class ContactController {
 
     private final ContactInfoService contactService;
     private final ContactInfoMapper contactMapper;
+    private final ContactValidator contactValidator;
 
     // Получение всех контактов
     @GetMapping
@@ -44,17 +52,37 @@ public class ContactController {
 
     // Добавление нового контакта
     @PostMapping
-    public ResponseEntity<ContactInfoDTO> createNewContact(@Valid @RequestBody ContactInfoDTO contactInfoDTO) {
-        ContactInfo info = contactService.saveContact(contactMapper.fromContactDTOToContact(contactInfoDTO));
+    public ResponseEntity<?> createNewContact(@RequestBody ContactInfoEditDTO contactInfoDTO,
+                                                           BindingResult bindingResult) {
+
+        contactValidator.validate(contactInfoDTO, bindingResult);
+
+        if(bindingResult.hasErrors()) {
+            Map<String, String> errors = new HashMap<>();
+            bindingResult.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
+            return new ResponseEntity<>(new ValidationErrorMessage(HttpStatus.BAD_REQUEST.value(), errors), HttpStatus.BAD_REQUEST);
+        }
+
+        ContactInfo info = contactService.saveContact(contactMapper.fromEditDTOToContact(contactInfoDTO));
         return new ResponseEntity<>(contactMapper.fromContactToContactDTO(info), HttpStatus.OK);
     }
 
     // Редактирование контакта
     @PutMapping("/{id}")
-    public ResponseEntity<ContactInfoDTO> editContact(@PathVariable Long id,
-                                                      @Valid @RequestBody ContactInfoDTO contactInfoDTO) {
+    public ResponseEntity<?> editContact(@PathVariable Long id,
+                                          @RequestBody ContactInfoEditDTO contactInfoDTO,
+                                          BindingResult bindingResult) {
         contactInfoDTO.setId(id);
-        ContactInfo info = contactService.editContact(contactMapper.fromContactDTOToContact(contactInfoDTO));
+
+        contactValidator.validate(contactInfoDTO, bindingResult);
+
+        if(bindingResult.hasErrors()) {
+            Map<String, String> errors = new HashMap<>();
+            bindingResult.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
+            return new ResponseEntity<>(new ValidationErrorMessage(HttpStatus.BAD_REQUEST.value(), errors), HttpStatus.BAD_REQUEST);
+        }
+
+        ContactInfo info = contactService.editContact(contactMapper.fromEditDTOToContact(contactInfoDTO));
         return new ResponseEntity<>(contactMapper.fromContactToContactDTO(info), HttpStatus.OK);
     }
 
