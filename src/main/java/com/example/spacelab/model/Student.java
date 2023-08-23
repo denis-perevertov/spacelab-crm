@@ -17,30 +17,12 @@ import java.util.List;
 @Table(name="students")
 public class Student extends UserEntity {
 
-    private String firstName;
-    private String lastName;
-    private String fathersName;
+    @Embedded
+    private StudentDetails details = new StudentDetails();
 
-    private String email;
-    private String phone;
-    private String telegram;
-
-    @DateTimeFormat(pattern = "MM/dd/yyyy")
-    private LocalDate birthdate;
-
-    @Enumerated(value = EnumType.STRING)
-    private StudentEducationLevel educationLevel;
-
-    @Enumerated(value = EnumType.STRING)
-    private StudentEnglishLevel englishLevel;
-
-    @Enumerated(value = EnumType.STRING)
-    private StudentWorkStatus workStatus;
+    private String password;
 
     private Integer rating;
-
-    @Enumerated(value = EnumType.STRING)
-    private StudentAccountStatus accountStatus;
 
     @ManyToOne
     @JoinColumn(name = "course_id")
@@ -49,7 +31,5 @@ public class Student extends UserEntity {
     @OneToMany(mappedBy = "student")
     private List<StudentTask> tasks = new ArrayList<>();
 
-    private String password;
-    @Transient private String confirmPassword;
 
 }

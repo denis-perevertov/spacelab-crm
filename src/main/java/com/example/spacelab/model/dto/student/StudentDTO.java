@@ -1,6 +1,7 @@
 package com.example.spacelab.model.dto;
 
 import com.example.spacelab.model.dto.CourseDTO.CourseListDTO;
+import com.example.spacelab.model.dto.CourseDTO;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;

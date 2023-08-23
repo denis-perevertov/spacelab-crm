@@ -8,7 +8,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
-public interface TaskService extends EntityService<Task>{
+public interface TaskService extends EntityFilterService<Task>{
 
     List<Task> getTasks();
     Page<Task> getTasks(Pageable pageable);

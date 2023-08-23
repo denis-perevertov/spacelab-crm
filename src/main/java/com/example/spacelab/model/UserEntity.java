@@ -1,6 +1,6 @@
 package com.example.spacelab.model;
 
-import com.example.spacelab.model.dto.UserRoleDTO;
+import com.example.spacelab.model.role.UserRole;
 import jakarta.persistence.*;
 import lombok.Data;
 

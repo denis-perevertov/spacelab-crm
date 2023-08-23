@@ -1,7 +1,9 @@
 package com.example.spacelab.mapper;
 
 import com.example.spacelab.exception.MappingException;
-import com.example.spacelab.model.UserRole;
+import com.example.spacelab.model.role.PermissionSet;
+import com.example.spacelab.model.role.PermissionType;
+import com.example.spacelab.model.role.UserRole;
 import com.example.spacelab.model.dto.UserRoleDTO;
 import com.example.spacelab.repository.UserRoleRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,7 @@ public class RoleMapper {
         UserRoleDTO dto = new UserRoleDTO();
 
         try {
+            dto.setId(role.getId());
             dto.setName(role.getName());
             dto.setPermissions(role.getPermissions());
 
@@ -40,7 +43,48 @@ public class RoleMapper {
         try {
 
             role.setName(dto.getName());
-            role.setPermissions(dto.getPermissions());
+            PermissionSet permissions = dto.getPermissions();
+
+            /*
+            permissions.setReadStatistics((permissions.getReadStatistics() != null) ? permissions.getReadStatistics() : PermissionType.UNDEFINED);
+
+            permissions.setReadStatistics((permissions.getReadStatistics() != null) ? permissions.getReadStatistics() : PermissionType.UNDEFINED);
+            permissions.setReadStatistics((permissions.getReadStatistics() != null) ? permissions.getReadStatistics() : PermissionType.UNDEFINED);
+            permissions.setReadStatistics((permissions.getReadStatistics() != null) ? permissions.getReadStatistics() : PermissionType.UNDEFINED);
+            permissions.setReadStatistics((permissions.getReadStatistics() != null) ? permissions.getReadStatistics() : PermissionType.UNDEFINED);
+
+            permissions.setReadStatistics((permissions.getReadStatistics() != null) ? permissions.getReadStatistics() : PermissionType.UNDEFINED);
+            permissions.setReadStatistics((permissions.getReadStatistics() != null) ? permissions.getReadStatistics() : PermissionType.UNDEFINED);
+            permissions.setReadStatistics((permissions.getReadStatistics() != null) ? permissions.getReadStatistics() : PermissionType.UNDEFINED);
+            permissions.setReadStatistics((permissions.getReadStatistics() != null) ? permissions.getReadStatistics() : PermissionType.UNDEFINED);
+            permissions.setReadStatistics((permissions.getReadStatistics() != null) ? permissions.getReadStatistics() : PermissionType.UNDEFINED);
+
+            permissions.setReadStatistics((permissions.getReadStatistics() != null) ? permissions.getReadStatistics() : PermissionType.UNDEFINED);
+            permissions.setReadStatistics((permissions.getReadStatistics() != null) ? permissions.getReadStatistics() : PermissionType.UNDEFINED);
+            permissions.setReadStatistics((permissions.getReadStatistics() != null) ? permissions.getReadStatistics() : PermissionType.UNDEFINED);
+            permissions.setReadStatistics((permissions.getReadStatistics() != null) ? permissions.getReadStatistics() : PermissionType.UNDEFINED);
+
+            permissions.setReadStatistics((permissions.getReadStatistics() != null) ? permissions.getReadStatistics() : PermissionType.UNDEFINED);
+            permissions.setReadStatistics((permissions.getReadStatistics() != null) ? permissions.getReadStatistics() : PermissionType.UNDEFINED);
+            permissions.setReadStatistics((permissions.getReadStatistics() != null) ? permissions.getReadStatistics() : PermissionType.UNDEFINED);
+            permissions.setReadStatistics((permissions.getReadStatistics() != null) ? permissions.getReadStatistics() : PermissionType.UNDEFINED);
+
+            permissions.setReadStatistics((permissions.getReadStatistics() != null) ? permissions.getReadStatistics() : PermissionType.UNDEFINED);
+            permissions.setReadStatistics((permissions.getReadStatistics() != null) ? permissions.getReadStatistics() : PermissionType.UNDEFINED);
+            permissions.setReadStatistics((permissions.getReadStatistics() != null) ? permissions.getReadStatistics() : PermissionType.UNDEFINED);
+            permissions.setReadStatistics((permissions.getReadStatistics() != null) ? permissions.getReadStatistics() : PermissionType.UNDEFINED);
+            permissions.setReadStatistics((permissions.getReadStatistics() != null) ? permissions.getReadStatistics() : PermissionType.UNDEFINED);
+
+            permissions.setReadStatistics((permissions.getReadStatistics() != null) ? permissions.getReadStatistics() : PermissionType.UNDEFINED);
+            permissions.setReadStatistics((permissions.getReadStatistics() != null) ? permissions.getReadStatistics() : PermissionType.UNDEFINED);
+            permissions.setReadStatistics((permissions.getReadStatistics() != null) ? permissions.getReadStatistics() : PermissionType.UNDEFINED);
+            permissions.setReadStatistics((permissions.getReadStatistics() != null) ? permissions.getReadStatistics() : PermissionType.UNDEFINED);
+
+            permissions.setReadStatistics((permissions.getReadStatistics() != null) ? permissions.getReadStatistics() : PermissionType.UNDEFINED);
+            permissions.setReadStatistics((permissions.getReadStatistics() != null) ? permissions.getReadStatistics() : PermissionType.UNDEFINED);
+            */
+
+            role.setPermissions(permissions);
 
         } catch (Exception e) {
             log.severe("Mapping error: " + e.getMessage());

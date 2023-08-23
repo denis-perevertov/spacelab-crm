@@ -2,9 +2,7 @@ package com.example.spacelab.service.specification;
 
 import com.example.spacelab.model.Admin;
 import com.example.spacelab.model.Course;
-import com.example.spacelab.model.Student;
-import com.example.spacelab.model.UserRole;
-import com.example.spacelab.util.StudentAccountStatus;
+import com.example.spacelab.model.role.UserRole;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDate;

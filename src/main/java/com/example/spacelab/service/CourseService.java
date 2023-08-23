@@ -8,7 +8,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
-public interface CourseService extends EntityService<Course> {
+public interface CourseService extends EntityFilterService<Course> {
 
     List<Course> getCourses();
     Page<Course> getCourses(Pageable pageable);
