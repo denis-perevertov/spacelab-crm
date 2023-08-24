@@ -1,7 +1,6 @@
 package com.example.spacelab.controller;
 
-import com.example.spacelab.model.Course;
-import com.example.spacelab.model.dto.CourseDTO;
+import com.example.spacelab.dto.CourseDTO;
 import com.example.spacelab.service.CourseService;
 import com.example.spacelab.util.FilterForm;
 import jakarta.validation.Valid;
@@ -12,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController

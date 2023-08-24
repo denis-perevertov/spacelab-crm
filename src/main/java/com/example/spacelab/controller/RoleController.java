@@ -1,13 +1,12 @@
 package com.example.spacelab.controller;
 
 import com.example.spacelab.mapper.RoleMapper;
-import com.example.spacelab.model.dto.role.UserRoleDTO;
-import com.example.spacelab.model.dto.role.UserRoleEditDTO;
+import com.example.spacelab.dto.role.UserRoleDTO;
+import com.example.spacelab.dto.role.UserRoleEditDTO;
 import com.example.spacelab.model.role.UserRole;
 import com.example.spacelab.service.UserRoleService;
 import com.example.spacelab.validator.RoleValidator;
 import com.example.spacelab.validator.ValidationErrorMessage;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.http.HttpStatus;

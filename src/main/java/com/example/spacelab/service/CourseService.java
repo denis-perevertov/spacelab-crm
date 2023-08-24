@@ -1,10 +1,9 @@
 package com.example.spacelab.service;
 
-import com.example.spacelab.model.Course;
-import com.example.spacelab.model.dto.CourseDTO;
+import com.example.spacelab.model.course.Course;
+import com.example.spacelab.dto.CourseDTO;
 import com.example.spacelab.util.FilterForm;
 import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
 

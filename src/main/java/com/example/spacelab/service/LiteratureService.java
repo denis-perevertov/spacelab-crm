@@ -1,10 +1,9 @@
 package com.example.spacelab.service;
 
-import com.example.spacelab.model.Literature;
-import com.example.spacelab.model.dto.LiteratureDTO;
+import com.example.spacelab.model.literature.Literature;
+import com.example.spacelab.dto.LiteratureDTO;
 import com.example.spacelab.util.FilterForm;
 import org.springframework.data.domain.Pageable;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 

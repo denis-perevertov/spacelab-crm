@@ -2,8 +2,8 @@ package com.example.spacelab.service.impl;
 
 import com.example.spacelab.exception.ResourceNotFoundException;
 import com.example.spacelab.mapper.TaskMapper;
-import com.example.spacelab.model.Task;
-import com.example.spacelab.model.dto.TaskDTO;
+import com.example.spacelab.model.task.Task;
+import com.example.spacelab.dto.TaskDTO;
 import com.example.spacelab.repository.TaskRepository;
 import com.example.spacelab.service.TaskService;
 import com.example.spacelab.util.FilterForm;

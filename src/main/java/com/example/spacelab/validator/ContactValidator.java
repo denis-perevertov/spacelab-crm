@@ -1,8 +1,7 @@
 package com.example.spacelab.validator;
 
-import com.example.spacelab.model.ContactInfo;
-import com.example.spacelab.model.dto.contact.ContactInfoDTO;
-import com.example.spacelab.model.dto.contact.ContactInfoEditDTO;
+import com.example.spacelab.model.contact.ContactInfo;
+import com.example.spacelab.dto.contact.ContactInfoEditDTO;
 import com.example.spacelab.repository.AdminRepository;
 import com.example.spacelab.repository.ContactInfoRepository;
 import lombok.RequiredArgsConstructor;

@@ -1,12 +1,9 @@
 package com.example.spacelab.service.impl;
 
 import com.example.spacelab.exception.ResourceNotFoundException;
-import com.example.spacelab.mapper.AdminMapper;
-import com.example.spacelab.model.Admin;
-import com.example.spacelab.model.Course;
-import com.example.spacelab.model.dto.admin.AdminEditDTO;
+import com.example.spacelab.model.admin.Admin;
+import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.role.UserRole;
-import com.example.spacelab.model.dto.admin.AdminDTO;
 import com.example.spacelab.repository.AdminRepository;
 import com.example.spacelab.repository.CourseRepository;
 import com.example.spacelab.repository.UserRoleRepository;
@@ -16,10 +13,8 @@ import com.example.spacelab.util.FilterForm;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
