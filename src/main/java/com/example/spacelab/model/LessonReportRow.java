@@ -23,11 +23,13 @@ public class LessonReportRow {
     private Boolean wasPresent;
 
     private Integer rating;
-/*
-    TODO исправить
+
     @ManyToMany
+    @JoinTable(
+        name = "lesson_report_row_tasks",
+        joinColumns = @JoinColumn(name = "lesson_report_row_id"),
+        inverseJoinColumns = @JoinColumn(name = "task_id"))
     private List<Task> currentTasks;
-*/
 
     private Double hours;
     private String hoursNote;

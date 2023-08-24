@@ -47,7 +47,11 @@ public class Task {
     @ManyToMany
     private List<Student> activeStudents;
 
+    @ManyToMany
+    private List<LessonReportRow> lessonReportRows;
+
     @Enumerated(value = EnumType.STRING)
     private TaskStatus status;
 
+    private Long percentOfCompletion;
 }
