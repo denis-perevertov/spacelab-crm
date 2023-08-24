@@ -1,10 +1,10 @@
 package com.example.spacelab.mapper;
 
 import com.example.spacelab.model.*;
-import com.example.spacelab.model.dto.CourseDTO.CourseCardDTO;
-import com.example.spacelab.model.dto.CourseDTO.CourseInfoDTO;
-import com.example.spacelab.model.dto.CourseDTO.CourseListDTO;
-import com.example.spacelab.model.dto.CourseDTO.CourseSaveDTO;
+import com.example.spacelab.model.dto.course.CourseCardDTO;
+import com.example.spacelab.model.dto.course.CourseInfoDTO;
+import com.example.spacelab.model.dto.course.CourseListDTO;
+import com.example.spacelab.model.dto.course.CourseSaveDTO;
 import com.example.spacelab.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -101,7 +101,7 @@ public class CourseMapper {
         Map<Long, String> students = new HashMap<>();
         if (course.getStudents() != null && !course.getStudents().isEmpty()) {
             for (Student student : course.getStudents()) {
-                students.put(student.getId(), student.getFirstName()+" "+student.getLastName());
+                students.put(student.getId(), student.getDetails().getFirstName()+" "+student.getDetails().getLastName());
             }
         }
         dto.setStudents(students);

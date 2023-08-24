@@ -1,15 +1,13 @@
-package com.example.spacelab.model.dto.CourseDTO;
+package com.example.spacelab.model.dto.course;
 
 import com.example.spacelab.util.CourseStatus;
 import lombok.Data;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 
 @Data
-public class CourseCardDTO {
+public class CourseSaveDTO {
 
     private Long id;
 
@@ -20,14 +18,12 @@ public class CourseCardDTO {
     private LocalDate endDate;
 
     private Long mentorId;
-    private String mentorName;
 
     private Long managerId;
-    private String managerName;
 
-    private Map<Long, String> students;
+    private List<Long> students;
 
-    private Map<Long, String> tasks;
+    private List<Long> tasks;
 
     private CourseStatus status;
 
@@ -41,8 +37,5 @@ public class CourseCardDTO {
 
     private Integer hoursNorm;
 
-    private Map<Long, String> manegers;
-
-    private Map<Long, String> mentors;
 
 }

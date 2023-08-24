@@ -3,9 +3,9 @@ package com.example.spacelab.controller;
 
 import com.example.spacelab.mapper.TaskMapper;
 import com.example.spacelab.model.Task;
-import com.example.spacelab.model.dto.TaskDTO.TaskInfoDTO;
-import com.example.spacelab.model.dto.TaskDTO.TaskSaveDTO;
-import com.example.spacelab.model.dto.TaskDTO.TaskListDTO;
+import com.example.spacelab.model.dto.task.TaskInfoDTO;
+import com.example.spacelab.model.dto.task.TaskSaveDTO;
+import com.example.spacelab.model.dto.task.TaskListDTO;
 import com.example.spacelab.service.TaskService;
 import com.example.spacelab.util.FilterForm;
 import jakarta.validation.Valid;
@@ -16,8 +16,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @Log

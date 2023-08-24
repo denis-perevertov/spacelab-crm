@@ -2,9 +2,9 @@ package com.example.spacelab.controller;
 
 import com.example.spacelab.mapper.CourseMapper;
 import com.example.spacelab.model.Course;
-import com.example.spacelab.model.dto.CourseDTO.CourseInfoDTO;
-import com.example.spacelab.model.dto.CourseDTO.CourseListDTO;
-import com.example.spacelab.model.dto.CourseDTO.CourseSaveDTO;
+import com.example.spacelab.model.dto.course.CourseInfoDTO;
+import com.example.spacelab.model.dto.course.CourseListDTO;
+import com.example.spacelab.model.dto.course.CourseSaveDTO;
 import com.example.spacelab.service.CourseService;
 import com.example.spacelab.util.FilterForm;
 import jakarta.validation.Valid;
@@ -14,10 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @Log

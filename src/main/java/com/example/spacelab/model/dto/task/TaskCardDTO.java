@@ -1,6 +1,5 @@
-package com.example.spacelab.model.dto.TaskDTO;
+package com.example.spacelab.model.dto.task;
 
-import com.example.spacelab.model.Student;
 import com.example.spacelab.util.TaskLevel;
 import com.example.spacelab.util.TaskStatus;
 import lombok.Data;

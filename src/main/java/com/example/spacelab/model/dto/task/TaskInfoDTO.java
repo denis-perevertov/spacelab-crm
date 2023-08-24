@@ -1,21 +1,19 @@
-package com.example.spacelab.model.dto.TaskDTO;
+package com.example.spacelab.model.dto.task;
 
 import com.example.spacelab.util.TaskLevel;
-import com.example.spacelab.util.TaskStatus;
 import lombok.Data;
 
-import java.util.List;
+import java.util.Map;
 
 @Data
-public class TaskSaveDTO {
+public class TaskInfoDTO {
 
     private Long id;
 
     private String name;
 
     private Long parentTaskId;
-
-    private Long courseId;
+    private String parentTaskName;
 
     private TaskLevel level;
 
@@ -25,11 +23,9 @@ public class TaskSaveDTO {
 
     private String taskDescription;
 
-    private List<Long> subtasksIds;
+    private Map<Long, String> subtasks;
 
-    private List<Long> recommendedLiteratureIds;
-
-    private TaskStatus status;
+    private Map<Long, String> recommendedLiterature;
 
 
 }

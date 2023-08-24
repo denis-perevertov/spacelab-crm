@@ -32,4 +32,12 @@ public class Lesson {
 
     @OneToOne
     private LessonReport lessonReport;
+
+    @ManyToOne
+    @JoinColumn(name = "mentor_id")
+    private Admin mentor;
+
+    @ManyToOne
+    @JoinColumn(name = "admin_id")
+    private Admin manager;
 }

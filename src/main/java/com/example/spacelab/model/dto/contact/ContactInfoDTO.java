@@ -1,6 +1,6 @@
 package com.example.spacelab.model.dto.contact;
 
-import com.example.spacelab.model.dto.admin.AdminDTO;
+
 import com.example.spacelab.model.dto.admin.AdminContactDTO;
 import lombok.Data;
 

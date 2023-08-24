@@ -4,7 +4,6 @@ import com.example.spacelab.exception.ResourceNotFoundException;
 import com.example.spacelab.mapper.LiteratureMapper;
 import com.example.spacelab.model.Course;
 import com.example.spacelab.model.Literature;
-import com.example.spacelab.model.dto.LiteratureDTO.LiteratureListDTO;
 import com.example.spacelab.repository.CourseRepository;
 import com.example.spacelab.repository.LiteratureRepository;
 import com.example.spacelab.service.LiteratureService;
@@ -13,6 +12,7 @@ import com.example.spacelab.util.FilterForm;
 import com.example.spacelab.util.LiteratureType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -30,28 +30,19 @@ public class LiteratureServiceImpl implements LiteratureService{
     private final LiteratureMapper literatureMapper;
 
     @Override
-    public List<LiteratureListDTO> getLiterature() {
-        return literatureRepository.findAll()
-                .stream()
-                .map(literatureMapper::fromLiteratureToDTO)
-                .toList();
+    public List<Literature> getLiterature() {
+        return literatureRepository.findAll();
     }
 
     @Override
-    public List<LiteratureListDTO> getLiterature(Pageable pageable) {
-        return literatureRepository.findAll(pageable)
-                .stream()
-                .map(literatureMapper::fromLiteratureToDTO)
-                .toList();
+    public Page<Literature> getLiterature(Pageable pageable) {
+        return literatureRepository.findAll(pageable);
     }
 
     @Override
-    public List<LiteratureListDTO> getLiterature(FilterForm filters, Pageable pageable) {
+    public Page<Literature> getLiterature(FilterForm filters, Pageable pageable) {
         Specification<Literature> spec = buildSpecificationFromFilters(filters);
-        return literatureRepository.findAll(spec, pageable)
-                .stream()
-                .map(literatureMapper::fromLiteratureToDTO)
-                .toList();
+        return literatureRepository.findAll(spec, pageable);
     }
 
     @Override
@@ -62,25 +53,20 @@ public class LiteratureServiceImpl implements LiteratureService{
     }
 
     @Override
-    public LiteratureListDTO getLiteratureById(Long id) {
+    public Literature getLiteratureById(Long id) {
         Literature literature = literatureRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Literature not found"));
-        return literatureMapper.fromLiteratureToDTO(literature);
+        return literature;
     }
 
     @Override
-    public LiteratureListDTO createNewLiterature(LiteratureListDTO dto) {
-        Literature literature = literatureMapper.fromDTOToLiterature(dto);
-        if(literature.getIs_verified() == null || !literature.getIs_verified()) literature.setIs_verified(false);
-        literature = literatureRepository.save(literature);
-        return literatureMapper.fromLiteratureToDTO(literature);
+    public Literature createNewLiterature(Literature literature) {
+        return literatureRepository.save(literature);
     }
 
 
     @Override
-    public LiteratureListDTO editLiterature(LiteratureListDTO dto) {
-        Literature literature = literatureMapper.fromDTOToLiterature(dto);
-        literature = literatureRepository.save(literature);
-        return literatureMapper.fromLiteratureToDTO(literature);
+    public Literature editLiterature(Literature literature) {
+        return literatureRepository.save(literature);
     }
 
     @Override

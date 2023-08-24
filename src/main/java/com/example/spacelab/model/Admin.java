@@ -2,7 +2,6 @@ package com.example.spacelab.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.List;
 
@@ -20,6 +19,15 @@ public class Admin extends UserEntity {
     private String password;
     @Transient private String confirmPassword;
 
-    @ManyToMany
-    private List<Course> courses;
+    @OneToMany(mappedBy = "mentor")
+    private List<Course> coursesAsMentor;
+
+    @OneToMany(mappedBy = "manager")
+    private List<Course> coursesAsManager;
+
+    @OneToMany(mappedBy = "mentor")
+    private List<Lesson> lessonsAsMentor;
+
+    @OneToMany(mappedBy = "manager")
+    private List<Lesson> lessonsaAsManager;
 }

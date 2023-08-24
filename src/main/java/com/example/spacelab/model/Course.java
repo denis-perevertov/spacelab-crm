@@ -25,11 +25,11 @@ public class Course {
     @DateTimeFormat(pattern = "MM/dd/yyyy")
     private LocalDate endDate;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "mentor_id")
     private Admin mentor;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "manager_id")
     private Admin manager;
 

@@ -1,19 +1,19 @@
 package com.example.spacelab.service;
 
 import com.example.spacelab.model.Literature;
-import com.example.spacelab.model.dto.LiteratureDTO.LiteratureListDTO;
 import com.example.spacelab.util.FilterForm;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
-public interface LiteratureService extends EntityService<Literature>{
-    List<LiteratureListDTO> getLiterature();
-    List<LiteratureListDTO> getLiterature(Pageable pageable);
-    List<LiteratureListDTO> getLiterature(FilterForm filters, Pageable pageable);
-    LiteratureListDTO getLiteratureById(Long id);
-    LiteratureListDTO createNewLiterature(LiteratureListDTO literature);
-    LiteratureListDTO editLiterature(LiteratureListDTO literature);
+public interface LiteratureService extends EntityFilterService<Literature>{
+    List<Literature> getLiterature();
+    Page<Literature> getLiterature(Pageable pageable);
+    Page<Literature> getLiterature(FilterForm filters, Pageable pageable);
+    Literature getLiteratureById(Long id);
+    Literature createNewLiterature(Literature literature);
+    Literature editLiterature(Literature literature);
 
     void verifyLiterature(Long id);
 

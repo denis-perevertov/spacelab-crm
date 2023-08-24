@@ -4,8 +4,9 @@ import com.example.spacelab.mapper.StudentMapper;
 import com.example.spacelab.mapper.TaskMapper;
 import com.example.spacelab.model.*;
 import com.example.spacelab.model.dto.student.StudentCardDTO;
-import com.example.spacelab.model.dto.student.StudentDTO;
+
 import com.example.spacelab.model.dto.StudentTaskDTO;
+import com.example.spacelab.model.dto.student.StudentDTO;
 import com.example.spacelab.model.dto.student.StudentRegisterDTO;
 import com.example.spacelab.model.role.PermissionType;
 import com.example.spacelab.service.StudentService;
@@ -22,7 +23,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -183,7 +183,7 @@ public class StudentController {
 
         if(permissionType == PermissionType.NO_ACCESS) throw new AccessDeniedException("No access to this operation!");
         else if(permissionType == PermissionType.PARTIAL) {
-            if(!admin.getCourses().stream().map(Course::getId).toList().contains(courseID))
+            if(!admin.getCoursesAsMentor().stream().map(Course::getId).toList().contains(courseID))
                 throw new AccessDeniedException("No access to creating new students for course "+courseName+"!");
         }
     }

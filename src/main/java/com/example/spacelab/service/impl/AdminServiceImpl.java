@@ -6,7 +6,7 @@ import com.example.spacelab.model.Admin;
 import com.example.spacelab.model.Course;
 import com.example.spacelab.model.dto.admin.AdminEditDTO;
 import com.example.spacelab.model.role.UserRole;
-import com.example.spacelab.model.dto.admin.AdminDTO;
+
 import com.example.spacelab.repository.AdminRepository;
 import com.example.spacelab.repository.CourseRepository;
 import com.example.spacelab.repository.UserRoleRepository;

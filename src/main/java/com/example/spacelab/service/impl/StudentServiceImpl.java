@@ -8,7 +8,7 @@ import com.example.spacelab.model.InviteStudentRequest;
 import com.example.spacelab.model.Student;
 import com.example.spacelab.model.StudentTask;
 import com.example.spacelab.model.dto.student.StudentCardDTO;
-import com.example.spacelab.model.dto.student.StudentDTO;
+
 import com.example.spacelab.model.dto.StudentTaskDTO;
 import com.example.spacelab.model.dto.student.StudentRegisterDTO;
 import com.example.spacelab.repository.*;

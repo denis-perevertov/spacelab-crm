@@ -4,7 +4,6 @@ import com.example.spacelab.exception.ResourceNotFoundException;
 import com.example.spacelab.mapper.CourseMapper;
 import com.example.spacelab.model.Admin;
 import com.example.spacelab.model.Course;
-import com.example.spacelab.model.dto.CourseDTO.CourseListDTO;
 import com.example.spacelab.repository.AdminRepository;
 import com.example.spacelab.repository.CourseRepository;
 import com.example.spacelab.service.CourseService;

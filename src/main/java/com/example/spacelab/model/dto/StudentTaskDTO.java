@@ -1,6 +1,6 @@
 package com.example.spacelab.model.dto;
 
-import com.example.spacelab.model.dto.TaskDTO.TaskListDTO;
+import com.example.spacelab.model.dto.task.TaskListDTO;
 import lombok.Data;
 
 import java.time.LocalDate;

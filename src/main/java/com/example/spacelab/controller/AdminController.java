@@ -2,7 +2,7 @@ package com.example.spacelab.controller;
 
 import com.example.spacelab.mapper.AdminMapper;
 import com.example.spacelab.model.Admin;
-import com.example.spacelab.model.dto.admin.AdminDTO;
+import com.example.spacelab.model.dto.AdminDTO;
 import com.example.spacelab.model.dto.admin.AdminEditDTO;
 import com.example.spacelab.service.AdminService;
 import com.example.spacelab.util.FilterForm;
