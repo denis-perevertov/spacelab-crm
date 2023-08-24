@@ -13,26 +13,11 @@ import java.util.List;
 public class AdminDTO {
 
     private Long id;
-
-    private String full_name;
-
-    @NotBlank
+    private String fullName;
     private String firstName, lastName;
-
-    @Pattern(regexp = "\\d{10,}")
-    @NotBlank
     private String phone;
-
-    @Email
-    @NotBlank
     private String email;
-
-    private String password, confirmPassword;
-
-    @NotBlank
     private String role;
-
-    @NotBlank
     private List<CourseDTO> courses = new ArrayList<>();
 
 }
