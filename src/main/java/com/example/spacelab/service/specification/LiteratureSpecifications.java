@@ -1,8 +1,8 @@
 package com.example.spacelab.service.specification;
 
-import com.example.spacelab.model.Course;
-import com.example.spacelab.model.Literature;
-import com.example.spacelab.util.LiteratureType;
+import com.example.spacelab.model.course.Course;
+import com.example.spacelab.model.literature.Literature;
+import com.example.spacelab.model.literature.LiteratureType;
 import org.springframework.data.jpa.domain.Specification;
 
 public class LiteratureSpecifications {

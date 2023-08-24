@@ -1,9 +1,8 @@
 package com.example.spacelab.service.specification;
 
-import com.example.spacelab.model.Course;
-import com.example.spacelab.model.Student;
-import com.example.spacelab.util.StudentAccountStatus;
-import jakarta.persistence.criteria.Join;
+import com.example.spacelab.model.course.Course;
+import com.example.spacelab.model.student.Student;
+import com.example.spacelab.model.student.StudentAccountStatus;
 import org.springframework.data.jpa.domain.Specification;
 
 public class StudentSpecifications {

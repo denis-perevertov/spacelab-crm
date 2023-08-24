@@ -1,8 +1,7 @@
 package com.example.spacelab.repository;
 
-import com.example.spacelab.model.Student;
-import com.example.spacelab.model.StudentTask;
-import com.example.spacelab.util.StudentTaskStatus;
+import com.example.spacelab.model.student.StudentTask;
+import com.example.spacelab.model.student.StudentTaskStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

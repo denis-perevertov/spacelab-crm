@@ -1,9 +1,9 @@
 package com.example.spacelab.service.specification;
 
-import com.example.spacelab.model.Course;
-import com.example.spacelab.model.Task;
-import com.example.spacelab.util.TaskLevel;
-import com.example.spacelab.util.TaskStatus;
+import com.example.spacelab.model.course.Course;
+import com.example.spacelab.model.task.Task;
+import com.example.spacelab.model.task.TaskLevel;
+import com.example.spacelab.model.task.TaskStatus;
 import org.springframework.data.jpa.domain.Specification;
 
 public class TaskSpecifications {

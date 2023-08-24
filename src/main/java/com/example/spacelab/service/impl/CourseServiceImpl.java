@@ -2,13 +2,12 @@ package com.example.spacelab.service.impl;
 
 import com.example.spacelab.exception.ResourceNotFoundException;
 import com.example.spacelab.mapper.CourseMapper;
-import com.example.spacelab.model.Admin;
-import com.example.spacelab.model.Course;
-import com.example.spacelab.model.dto.CourseDTO;
+import com.example.spacelab.model.admin.Admin;
+import com.example.spacelab.model.course.Course;
+import com.example.spacelab.dto.CourseDTO;
 import com.example.spacelab.repository.AdminRepository;
 import com.example.spacelab.repository.CourseRepository;
 import com.example.spacelab.service.CourseService;
-import com.example.spacelab.service.specification.AdminSpecifications;
 import com.example.spacelab.service.specification.CourseSpecifications;
 import com.example.spacelab.util.FilterForm;
 import lombok.RequiredArgsConstructor;

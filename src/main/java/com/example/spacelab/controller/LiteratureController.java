@@ -1,7 +1,6 @@
 package com.example.spacelab.controller;
 
-import com.example.spacelab.model.Literature;
-import com.example.spacelab.model.dto.LiteratureDTO;
+import com.example.spacelab.dto.LiteratureDTO;
 import com.example.spacelab.service.LiteratureService;
 import com.example.spacelab.util.FilterForm;
 import jakarta.validation.Valid;

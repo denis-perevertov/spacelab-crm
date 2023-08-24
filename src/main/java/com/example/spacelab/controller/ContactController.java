@@ -1,13 +1,12 @@
 package com.example.spacelab.controller;
 
 import com.example.spacelab.mapper.ContactInfoMapper;
-import com.example.spacelab.model.ContactInfo;
-import com.example.spacelab.model.dto.contact.ContactInfoDTO;
-import com.example.spacelab.model.dto.contact.ContactInfoEditDTO;
+import com.example.spacelab.model.contact.ContactInfo;
+import com.example.spacelab.dto.contact.ContactInfoDTO;
+import com.example.spacelab.dto.contact.ContactInfoEditDTO;
 import com.example.spacelab.service.ContactInfoService;
 import com.example.spacelab.validator.ContactValidator;
 import com.example.spacelab.validator.ValidationErrorMessage;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.data.domain.Page;

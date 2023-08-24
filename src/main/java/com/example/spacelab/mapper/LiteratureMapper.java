@@ -1,8 +1,7 @@
 package com.example.spacelab.mapper;
 
-import com.example.spacelab.model.Literature;
-import com.example.spacelab.model.dto.LiteratureDTO;
-import lombok.Data;
+import com.example.spacelab.model.literature.Literature;
+import com.example.spacelab.dto.LiteratureDTO;
 import org.springframework.stereotype.Component;
 
 @Component

@@ -2,11 +2,11 @@ package com.example.spacelab.mapper;
 
 import com.example.spacelab.exception.MappingException;
 import com.example.spacelab.exception.ResourceNotFoundException;
-import com.example.spacelab.model.Admin;
-import com.example.spacelab.model.dto.admin.AdminDTO;
-import com.example.spacelab.model.dto.CourseDTO;
-import com.example.spacelab.model.dto.admin.AdminContactDTO;
-import com.example.spacelab.model.dto.admin.AdminEditDTO;
+import com.example.spacelab.model.admin.Admin;
+import com.example.spacelab.dto.admin.AdminDTO;
+import com.example.spacelab.dto.CourseDTO;
+import com.example.spacelab.dto.admin.AdminContactDTO;
+import com.example.spacelab.dto.admin.AdminEditDTO;
 import com.example.spacelab.repository.AdminRepository;
 import com.example.spacelab.repository.CourseRepository;
 import com.example.spacelab.repository.UserRoleRepository;

@@ -1,7 +1,7 @@
 package com.example.spacelab.validator;
 
-import com.example.spacelab.model.Admin;
-import com.example.spacelab.model.dto.admin.AdminEditDTO;
+import com.example.spacelab.model.admin.Admin;
+import com.example.spacelab.dto.admin.AdminEditDTO;
 import com.example.spacelab.repository.AdminRepository;
 import com.example.spacelab.repository.CourseRepository;
 import com.example.spacelab.repository.UserRoleRepository;

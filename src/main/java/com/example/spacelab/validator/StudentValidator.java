@@ -1,7 +1,7 @@
 package com.example.spacelab.validator;
 
-import com.example.spacelab.model.Student;
-import com.example.spacelab.model.dto.student.StudentEditDTO;
+import com.example.spacelab.model.student.Student;
+import com.example.spacelab.dto.student.StudentEditDTO;
 import com.example.spacelab.repository.StudentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

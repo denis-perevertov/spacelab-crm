@@ -1,9 +1,8 @@
 package com.example.spacelab.service;
 
-import com.example.spacelab.model.Task;
-import com.example.spacelab.model.dto.TaskDTO;
+import com.example.spacelab.model.task.Task;
+import com.example.spacelab.dto.TaskDTO;
 import com.example.spacelab.util.FilterForm;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;

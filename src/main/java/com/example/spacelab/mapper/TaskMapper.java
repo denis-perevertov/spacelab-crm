@@ -1,14 +1,12 @@
 package com.example.spacelab.mapper;
 
 import com.example.spacelab.exception.MappingException;
-import com.example.spacelab.model.Course;
-import com.example.spacelab.model.StudentTask;
-import com.example.spacelab.model.Task;
-import com.example.spacelab.model.dto.CourseDTO;
-import com.example.spacelab.model.dto.StudentTaskDTO;
-import com.example.spacelab.model.dto.TaskDTO;
+import com.example.spacelab.model.student.StudentTask;
+import com.example.spacelab.model.task.Task;
+import com.example.spacelab.dto.CourseDTO;
+import com.example.spacelab.dto.student.StudentTaskDTO;
+import com.example.spacelab.dto.TaskDTO;
 import com.example.spacelab.repository.CourseRepository;
-import com.example.spacelab.repository.StudentTaskRepository;
 import com.example.spacelab.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
@@ -48,7 +46,7 @@ public class TaskMapper {
 
         try {
             dto.setId(studentTask.getId());
-            dto.setTask(fromTaskToDTO(studentTask.getTask()));
+            dto.setTaskID(studentTask.getId());
             dto.setBeginDate(studentTask.getBeginDate());
             dto.setEndDate(studentTask.getEndDate());
             dto.setStatus(studentTask.getStatus().toString());

@@ -1,8 +1,7 @@
 package com.example.spacelab.service;
 
-import com.example.spacelab.model.StudentTask;
-import com.example.spacelab.model.dto.StudentTaskDTO;
-import com.example.spacelab.util.StudentTaskStatus;
+import com.example.spacelab.model.student.StudentTask;
+import com.example.spacelab.model.student.StudentTaskStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

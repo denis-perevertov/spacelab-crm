@@ -1,7 +1,7 @@
 package com.example.spacelab.mapper;
 
-import com.example.spacelab.model.Course;
-import com.example.spacelab.model.dto.CourseDTO;
+import com.example.spacelab.model.course.Course;
+import com.example.spacelab.dto.CourseDTO;
 import org.springframework.stereotype.Component;
 
 @Component

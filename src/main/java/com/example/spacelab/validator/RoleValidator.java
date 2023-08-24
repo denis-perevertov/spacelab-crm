@@ -1,6 +1,6 @@
 package com.example.spacelab.validator;
 
-import com.example.spacelab.model.dto.role.UserRoleEditDTO;
+import com.example.spacelab.dto.role.UserRoleEditDTO;
 import com.example.spacelab.model.role.UserRole;
 import com.example.spacelab.repository.UserRoleRepository;
 import lombok.RequiredArgsConstructor;

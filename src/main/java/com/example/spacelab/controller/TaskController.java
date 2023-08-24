@@ -1,7 +1,7 @@
 package com.example.spacelab.controller;
 
 
-import com.example.spacelab.model.dto.TaskDTO;
+import com.example.spacelab.dto.TaskDTO;
 import com.example.spacelab.service.TaskService;
 import com.example.spacelab.util.FilterForm;
 import jakarta.validation.Valid;
@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

@@ -1,6 +1,6 @@
 package com.example.spacelab.repository;
 
-import com.example.spacelab.model.ContactInfo;
+import com.example.spacelab.model.contact.ContactInfo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

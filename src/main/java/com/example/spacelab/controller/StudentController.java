@@ -2,20 +2,22 @@ package com.example.spacelab.controller;
 
 import com.example.spacelab.mapper.StudentMapper;
 import com.example.spacelab.mapper.TaskMapper;
-import com.example.spacelab.model.*;
-import com.example.spacelab.model.dto.student.StudentCardDTO;
-import com.example.spacelab.model.dto.student.StudentDTO;
-import com.example.spacelab.model.dto.StudentTaskDTO;
-import com.example.spacelab.model.dto.student.StudentEditDTO;
-import com.example.spacelab.model.dto.student.StudentRegisterDTO;
+import com.example.spacelab.model.admin.Admin;
+import com.example.spacelab.model.course.Course;
+import com.example.spacelab.dto.student.StudentCardDTO;
+import com.example.spacelab.dto.student.StudentDTO;
+import com.example.spacelab.dto.student.StudentTaskDTO;
+import com.example.spacelab.dto.student.StudentEditDTO;
+import com.example.spacelab.dto.student.StudentRegisterDTO;
 import com.example.spacelab.model.role.PermissionType;
+import com.example.spacelab.model.student.StudentInviteRequest;
+import com.example.spacelab.model.student.Student;
 import com.example.spacelab.service.StudentService;
 import com.example.spacelab.util.FilterForm;
-import com.example.spacelab.util.StudentTaskStatus;
+import com.example.spacelab.model.student.StudentTaskStatus;
 import com.example.spacelab.validator.StudentValidator;
 import com.example.spacelab.validator.ValidationErrorMessage;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.data.domain.Page;
@@ -25,7 +27,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -130,7 +131,7 @@ public class StudentController {
     // Формирование ссылки на приглашение студента
     @PostMapping("/invite")
     public ResponseEntity<String> createStudentInviteLink(@AuthenticationPrincipal Admin admin,
-                                                          @RequestBody InviteStudentRequest inviteRequest,
+                                                          @RequestBody StudentInviteRequest inviteRequest,
                                                           HttpServletRequest servletRequest) {
 
         String token = studentService.createInviteStudentToken(inviteRequest);
