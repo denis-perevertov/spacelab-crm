@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -44,6 +45,7 @@ public class RoleController {
             @ApiResponse(responseCode = "200", description = "Successful operation"),
             @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
+    @PreAuthorize("!hasAuthority('roles.read.NO_ACCESS')")
     @GetMapping
     public ResponseEntity<List<UserRoleDTO>> getRoles() {
         List<UserRoleDTO> list = userRoleService.getRoles().stream().map(roleMapper::fromRoleToDTO).toList();
@@ -56,6 +58,7 @@ public class RoleController {
             @ApiResponse(responseCode = "404", description = "Role not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
             @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
+    @PreAuthorize("!hasAuthority('roles.read.NO_ACCESS')")
     @GetMapping("/{id}")
     public ResponseEntity<UserRoleDTO> getRoleById(@PathVariable Long id) {
         UserRoleDTO role = roleMapper.fromRoleToDTO(userRoleService.getRoleById(id));
@@ -68,6 +71,7 @@ public class RoleController {
             @ApiResponse(responseCode = "400", description = "Validation error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
             @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
+    @PreAuthorize("!hasAuthority('roles.write.NO_ACCESS')")
     @PostMapping
     public ResponseEntity<UserRoleDTO> createNewRole(@RequestBody UserRoleEditDTO dto,
                                            BindingResult bindingResult) {
@@ -90,6 +94,7 @@ public class RoleController {
             @ApiResponse(responseCode = "400", description = "Validation error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
             @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
+    @PreAuthorize("!hasAuthority('roles.edit.NO_ACCESS')")
     @PutMapping("/{id}")
     public ResponseEntity<UserRoleDTO> updateRole(@PathVariable Long id,
                                         @RequestBody UserRoleEditDTO dto,
@@ -112,6 +117,7 @@ public class RoleController {
             @ApiResponse(responseCode = "404", description = "Role not found in DB", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
             @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
+    @PreAuthorize("!hasAuthority('roles.delete.NO_ACCESS')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteRole(@PathVariable Long id ){
         userRoleService.deleteRoleById(id);

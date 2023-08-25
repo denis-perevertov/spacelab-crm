@@ -36,6 +36,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -63,6 +64,7 @@ public class StudentController {
             @ApiResponse(responseCode = "200", description = "Successful operation"),
             @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
+    @PreAuthorize("!hasAuthority('students.read.NO_ACCESS')")
     @GetMapping
     public ResponseEntity<?> getStudents(FilterForm filters,
                                          @RequestParam(required = false) Integer page,
@@ -78,13 +80,14 @@ public class StudentController {
         return new ResponseEntity<>(students, HttpStatus.OK);
     }
 
+    // Получение одного студента
     @Operation(description = "Get student DTO by its ID", summary = "Get Student", tags = {"Student"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation", content = @Content(mediaType = "application/json", schema = @Schema(implementation = StudentDTO.class))),
             @ApiResponse(responseCode = "404", description = "Student not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
             @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
-    // Получение одного студента
+    @PreAuthorize("!hasAuthority('students.read.NO_ACCESS')")
     @GetMapping("/{studentID}")
     public ResponseEntity<StudentDTO> getStudent(@PathVariable Long studentID) {
         Student student = studentService.getStudentById(studentID);
@@ -98,6 +101,7 @@ public class StudentController {
             @ApiResponse(responseCode = "404", description = "Student not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
             @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
+    @PreAuthorize("!hasAuthority('students.read.NO_ACCESS')")
     @GetMapping("/{studentID}/tasks")
     public ResponseEntity<List<StudentTaskDTO>> getStudentTasks(@PathVariable Long studentID,
                                                                 @RequestParam(required = false) StudentTaskStatus status) {
@@ -116,6 +120,7 @@ public class StudentController {
             @ApiResponse(responseCode = "404", description = "Student/task not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
             @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
+    @PreAuthorize("!hasAuthority('students.read.NO_ACCESS')")
     @GetMapping("/{studentID}/tasks/{taskID}")
     public ResponseEntity<StudentTaskDTO> getStudentTask(@PathVariable Long studentID,
                                                          @PathVariable Long taskID) {
@@ -130,6 +135,7 @@ public class StudentController {
             @ApiResponse(responseCode = "404", description = "Student not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
             @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
+    @PreAuthorize("!hasAuthority('students.read.NO_ACCESS')")
     @GetMapping("/{studentID}/card")
     public ResponseEntity<StudentCardDTO> getStudentCard(@PathVariable Long studentID) {
         StudentCardDTO card = studentService.getCard(studentID);
@@ -157,6 +163,7 @@ public class StudentController {
             @ApiResponse(responseCode = "400", description = "Validation error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
             @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
+    @PreAuthorize("!hasAuthority('students.write.NO_ACCESS')")
     @PostMapping
     public ResponseEntity<StudentDTO> createNewStudent(@RequestBody StudentEditDTO dto,
                                                     BindingResult bindingResult) {
@@ -180,6 +187,7 @@ public class StudentController {
             @ApiResponse(responseCode = "201", description = "Successfully created", content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
+    @PreAuthorize("!hasAuthority('students.invite.NO_ACCESS')")
     @PostMapping("/invite")
     public ResponseEntity<String> createStudentInviteLink(@AuthenticationPrincipal Admin admin,
                                                           @RequestBody StudentInviteRequest inviteRequest,
@@ -191,7 +199,7 @@ public class StudentController {
 
     }
 
-    // Регистрация студента
+    // Регистрация студента ; для захода сюда защита не нужна
     @Operation(description = "Register new student (register by using the created link)", summary = "Register New Student", tags = {"Student"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Successfully created", content = @Content(mediaType = "application/json", schema = @Schema(implementation = StudentDTO.class))),
@@ -221,6 +229,7 @@ public class StudentController {
             @ApiResponse(responseCode = "400", description = "Validation error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
             @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
+    @PreAuthorize("!hasAuthority('students.edit.NO_ACCESS')")
     @PutMapping("/{id}")
     public ResponseEntity<StudentDTO> editStudent(@PathVariable Long id,
                                           @RequestBody StudentEditDTO dto,
@@ -246,6 +255,7 @@ public class StudentController {
             @ApiResponse(responseCode = "404", description = "Student not found in DB", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
             @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
+    @PreAuthorize("!hasAuthority('students.delete.NO_ACCESS')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteStudent(@PathVariable Long id) {
         studentService.deleteStudentById(id);

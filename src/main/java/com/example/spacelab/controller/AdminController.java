@@ -26,6 +26,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -53,6 +54,7 @@ public class AdminController {
             @ApiResponse(responseCode = "200", description = "Successful operation"),
             @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
+    @PreAuthorize("!hasAuthority('settings.read.NO_ACCESS')")
     @GetMapping
     public ResponseEntity<Page<AdminDTO>> getAdmins(FilterForm filters,
                                                     @RequestParam(required = false) Integer page,
@@ -70,6 +72,7 @@ public class AdminController {
             @ApiResponse(responseCode = "404", description = "Admin not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
             @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
+    @PreAuthorize("!hasAuthority('settings.read.NO_ACCESS')")
     @GetMapping("/{id}")
     public ResponseEntity<AdminDTO> getAdmin(@PathVariable @Parameter(description = "Admin ID", example = "1") Long id) {
         Admin admin = adminService.getAdminById(id);
@@ -83,6 +86,7 @@ public class AdminController {
             @ApiResponse(responseCode = "400", description = "Validation error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
             @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
+    @PreAuthorize("!hasAuthority('settings.write.NO_ACCESS')")
     @PostMapping
     public ResponseEntity<?> createNewAdmin(@RequestBody AdminEditDTO admin,
                                             BindingResult bindingResult) {
@@ -109,6 +113,7 @@ public class AdminController {
             @ApiResponse(responseCode = "400", description = "Validation error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
             @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
+    @PreAuthorize("!hasAuthority('settings.edit.NO_ACCESS')")
     @PutMapping("/{id}")
     public ResponseEntity<AdminDTO> updateAdmin(@PathVariable Long id,
                                         @RequestBody AdminEditDTO admin,
@@ -137,6 +142,7 @@ public class AdminController {
             @ApiResponse(responseCode = "404", description = "Admin not found in DB", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
             @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
+    @PreAuthorize("!hasAuthority('settings.delete.NO_ACCESS')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteAdmin(@PathVariable Long id) {
         adminService.deleteAdminById(id);

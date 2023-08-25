@@ -23,6 +23,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -47,6 +48,7 @@ public class ContactController {
             @ApiResponse(responseCode = "200", description = "Successful operation"),
             @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
+    @PreAuthorize("!hasAuthority('contacts.read.NO_ACCESS')")
     @GetMapping
     public ResponseEntity<Page<ContactInfoDTO>> getContacts(@RequestParam(required = false) Integer page,
                                                             @RequestParam(required = false) Integer size) {
@@ -64,6 +66,7 @@ public class ContactController {
             @ApiResponse(responseCode = "404", description = "Contact not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
             @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
+    @PreAuthorize("!hasAuthority('contacts.read.NO_ACCESS')")
     @GetMapping("/{id}")
     public ResponseEntity<ContactInfoDTO> getContact(@PathVariable Long id) {
         ContactInfoDTO info = contactMapper.fromContactToContactDTO(contactService.getContact(id));
@@ -77,6 +80,7 @@ public class ContactController {
             @ApiResponse(responseCode = "400", description = "Validation error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
             @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
+    @PreAuthorize("!hasAuthority('contacts.write.NO_ACCESS')")
     @PostMapping
     public ResponseEntity<?> createNewContact(@RequestBody ContactInfoEditDTO contactInfoDTO,
                                                            BindingResult bindingResult) {
@@ -100,6 +104,7 @@ public class ContactController {
             @ApiResponse(responseCode = "400", description = "Validation error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
             @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
+    @PreAuthorize("!hasAuthority('contacts.edit.NO_ACCESS')")
     @PutMapping("/{id}")
     public ResponseEntity<?> editContact(@PathVariable Long id,
                                           @RequestBody ContactInfoEditDTO contactInfoDTO,
@@ -125,6 +130,7 @@ public class ContactController {
             @ApiResponse(responseCode = "404", description = "Contact not found in DB", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
             @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
+    @PreAuthorize("!hasAuthority('contacts.delete.NO_ACCESS')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteContact(@PathVariable Long id) {
         contactService.deleteContact(id);

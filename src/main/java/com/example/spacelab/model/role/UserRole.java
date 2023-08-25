@@ -31,4 +31,8 @@ public class UserRole {
     @JsonIgnore
     @Embedded
     private PermissionSet permissions;
+
+    public List<String> getAuthorities() {
+        return this.permissions.getAuthorities();
+    }
 }
