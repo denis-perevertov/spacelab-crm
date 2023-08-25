@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 @Tag(name="Role", description = "Role controller")
-@Controller
+@RestController
 @Log
 @RequiredArgsConstructor
 @RequestMapping("/api/roles")

@@ -26,6 +26,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -34,7 +35,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Tag(name="Admin", description = "Admin controller")
-@Controller
+@RestController
 @Log
 @RequiredArgsConstructor
 @RequestMapping("/api/admins")
@@ -43,6 +44,8 @@ public class AdminController {
     private final AdminService adminService;
     private final AdminMapper adminMapper;
     private final AdminValidator adminValidator;
+
+    private final PasswordEncoder passwordEncoder;
 
     // Получение админов (с фильтрами и страницами)
     @Operation(description = "Get admins list", summary = "Get admins list", tags = {"Admin"})
@@ -93,6 +96,8 @@ public class AdminController {
             throw new ObjectValidationException(errors);
         }
 
+        admin.setPassword(passwordEncoder.encode(admin.getPassword()));
+
         Admin savedAdmin = adminService.createAdmin(adminMapper.fromEditDTOToAdmin(admin));
         return new ResponseEntity<>(adminMapper.fromAdminToDTO(savedAdmin), HttpStatus.CREATED);
     }
@@ -118,6 +123,8 @@ public class AdminController {
             bindingResult.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
             throw new ObjectValidationException(errors);
         }
+
+        if(admin.getPassword() != null && !admin.getPassword().isEmpty()) admin.setPassword(passwordEncoder.encode(admin.getPassword()));
 
         Admin savedAdmin = adminService.updateAdmin(adminMapper.fromEditDTOToAdmin(admin));
         return new ResponseEntity<>(adminMapper.fromAdminToDTO(savedAdmin), HttpStatus.OK);

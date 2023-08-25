@@ -31,7 +31,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Tag(name="Contact", description = "Contact info controller")
-@Controller
+@RestController
 @Log
 @RequiredArgsConstructor
 @RequestMapping("/api/contacts")
