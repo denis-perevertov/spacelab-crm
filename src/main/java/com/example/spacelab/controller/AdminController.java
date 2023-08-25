@@ -1,5 +1,8 @@
 package com.example.spacelab.controller;
 
+import com.example.spacelab.exception.ErrorMessage;
+import com.example.spacelab.exception.ObjectValidationException;
+import com.example.spacelab.exception.ResourceNotFoundException;
 import com.example.spacelab.mapper.AdminMapper;
 import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.dto.admin.AdminDTO;
@@ -7,9 +10,12 @@ import com.example.spacelab.dto.admin.AdminEditDTO;
 import com.example.spacelab.service.AdminService;
 import com.example.spacelab.util.FilterForm;
 import com.example.spacelab.validator.AdminValidator;
-import com.example.spacelab.validator.ValidationErrorMessage;
+import com.example.spacelab.exception.ValidationErrorMessage;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,11 +33,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 
-@Tag(name="Admin", description = "admin controller")
+@Tag(name="Admin", description = "Admin controller")
 @Controller
 @Log
 @RequiredArgsConstructor
-@RequestMapping("/admins")
+@RequestMapping("/api/admins")
 public class AdminController {
 
     private final AdminService adminService;
@@ -42,7 +48,7 @@ public class AdminController {
     @Operation(description = "Get admins list", summary = "Get admins list", tags = {"Admin"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation"),
-            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content)
+            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
     @GetMapping
     public ResponseEntity<Page<AdminDTO>> getAdmins(FilterForm filters,
@@ -55,23 +61,36 @@ public class AdminController {
     }
 
     // Получение одного админа
+    @Operation(description = "Get admin info DTO by his ID", summary = "Get Admin DTO By ID", tags = {"Admin"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation", content = @Content(mediaType = "application/json", schema = @Schema(implementation = AdminDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Admin not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
+            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+    })
     @GetMapping("/{id}")
-    public ResponseEntity<AdminDTO> getAdmin(@PathVariable Long id) {
+    public ResponseEntity<AdminDTO> getAdmin(@PathVariable @Parameter(description = "Admin ID", example = "1") Long id) {
         Admin admin = adminService.getAdminById(id);
         return new ResponseEntity<>(adminMapper.fromAdminToDTO(admin), HttpStatus.OK);
     }
 
     // Создание нового админа
+    @Operation(description = "Create new admin in the application", summary = "Create New Admin", tags = {"Admin"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Successfully created", content = @Content(mediaType = "application/json", schema = @Schema(implementation = AdminDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Validation error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
+            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+    })
     @PostMapping
     public ResponseEntity<?> createNewAdmin(@RequestBody AdminEditDTO admin,
-                                           BindingResult bindingResult) {
+                                            BindingResult bindingResult) {
 
+        admin.setId(null);
         adminValidator.validate(admin, bindingResult);
 
         if(bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
             bindingResult.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
-            return new ResponseEntity<>(new ValidationErrorMessage(HttpStatus.BAD_REQUEST.value(), errors), HttpStatus.BAD_REQUEST);
+            throw new ObjectValidationException(errors);
         }
 
         Admin savedAdmin = adminService.createAdmin(adminMapper.fromEditDTOToAdmin(admin));
@@ -79,8 +98,14 @@ public class AdminController {
     }
 
     // Редактирование админа
+    @Operation(description = "Update existing admin in the application", summary = "Update Admin", tags = {"Admin"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully updated", content = @Content(mediaType = "application/json", schema = @Schema(implementation = AdminDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Validation error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
+            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+    })
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateAdmin(@PathVariable Long id,
+    public ResponseEntity<AdminDTO> updateAdmin(@PathVariable Long id,
                                         @RequestBody AdminEditDTO admin,
                                         BindingResult bindingResult) {
 
@@ -91,7 +116,7 @@ public class AdminController {
         if(bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
             bindingResult.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
-            return new ResponseEntity<>(new ValidationErrorMessage(HttpStatus.BAD_REQUEST.value(), errors), HttpStatus.BAD_REQUEST);
+            throw new ObjectValidationException(errors);
         }
 
         Admin savedAdmin = adminService.updateAdmin(adminMapper.fromEditDTOToAdmin(admin));
@@ -99,6 +124,12 @@ public class AdminController {
     }
 
     // Удаление админа
+    @Operation(description = "Delete admin by his ID", summary = "Delete Admin By ID", tags = {"Admin"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully deleted", content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "404", description = "Admin not found in DB", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
+            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+    })
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteAdmin(@PathVariable Long id) {
         adminService.deleteAdminById(id);

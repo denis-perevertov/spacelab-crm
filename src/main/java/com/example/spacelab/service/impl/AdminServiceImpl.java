@@ -52,7 +52,7 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public Admin getAdminById(Long id) {
         log.info("Getting admin with ID: " + id);
-        Admin admin = adminRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Admin not found!"));
+        Admin admin = adminRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Admin not found!", Admin.class));
         return admin;
     }
 
@@ -84,7 +84,7 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public void deleteAdminById(Long id) {
-        Admin admin = adminRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Admin not found!"));
+        Admin admin = adminRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Admin not found!", Admin.class));
         log.info("Deleting admin with ID: " + id);
         adminRepository.delete(admin);
     }

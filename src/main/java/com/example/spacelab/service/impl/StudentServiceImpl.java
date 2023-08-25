@@ -61,7 +61,7 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public Student getStudentById(Long id) {
         log.info("Getting student with ID: " + id);
-        Student student = studentRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+        Student student = studentRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Student not found", Student.class));
         return student;
     }
 
@@ -99,13 +99,13 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public StudentCardDTO getCard(Long id) {
-        Student student = studentRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+        Student student = studentRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Student not found", Student.class));
         return studentMapper.fromStudentToCardDTO(student);
     }
 
     @Override
     public void deleteStudentById(Long id) {
-        Student student = studentRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+        Student student = studentRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Student not found", Student.class));
         log.info("Deleting student with ID: " + id);
         studentRepository.delete(student);
     }
@@ -139,7 +139,7 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public StudentTask getStudentTask(Long taskID) {
         log.info("Getting student task with taskID: " + taskID);
-        StudentTask task = studentTaskRepository.findById(taskID).orElseThrow(() -> new ResourceNotFoundException("Student task not found"));
+        StudentTask task = studentTaskRepository.findById(taskID).orElseThrow(() -> new ResourceNotFoundException("Student task not found", StudentTask.class));
         return task;
     }
 

@@ -1,5 +1,8 @@
 package com.example.spacelab.controller;
 
+import com.example.spacelab.dto.role.UserRoleDTO;
+import com.example.spacelab.exception.ErrorMessage;
+import com.example.spacelab.exception.ObjectValidationException;
 import com.example.spacelab.mapper.StudentMapper;
 import com.example.spacelab.mapper.TaskMapper;
 import com.example.spacelab.model.admin.Admin;
@@ -16,7 +19,14 @@ import com.example.spacelab.service.StudentService;
 import com.example.spacelab.util.FilterForm;
 import com.example.spacelab.model.student.StudentTaskStatus;
 import com.example.spacelab.validator.StudentValidator;
-import com.example.spacelab.validator.ValidationErrorMessage;
+import com.example.spacelab.exception.ValidationErrorMessage;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.tags.Tags;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
@@ -35,10 +45,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 @Controller
 @Log
 @RequiredArgsConstructor
-@RequestMapping("/students")
+@RequestMapping("/api/students")
 public class StudentController {
 
     private final StudentService studentService;
@@ -47,6 +58,11 @@ public class StudentController {
     private final TaskMapper taskMapper;
 
     // Получение студентов (с фильтрами/страницами)
+    @Operation(description = "Get students page", summary = "Get Students", tags = {"Student"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation"),
+            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+    })
     @GetMapping
     public ResponseEntity<?> getStudents(FilterForm filters,
                                          @RequestParam(required = false) Integer page,
@@ -62,6 +78,12 @@ public class StudentController {
         return new ResponseEntity<>(students, HttpStatus.OK);
     }
 
+    @Operation(description = "Get student DTO by its ID", summary = "Get Student", tags = {"Student"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation", content = @Content(mediaType = "application/json", schema = @Schema(implementation = StudentDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Student not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
+            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+    })
     // Получение одного студента
     @GetMapping("/{studentID}")
     public ResponseEntity<StudentDTO> getStudent(@PathVariable Long studentID) {
@@ -70,6 +92,12 @@ public class StudentController {
     }
 
     // Получение заданий одного студента
+    @Operation(description = "Get student tasks DTO list by student's ID", summary = "Get Student Tasks List", tags = {"Student Task"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation"),
+            @ApiResponse(responseCode = "404", description = "Student not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
+            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+    })
     @GetMapping("/{studentID}/tasks")
     public ResponseEntity<List<StudentTaskDTO>> getStudentTasks(@PathVariable Long studentID,
                                                                 @RequestParam(required = false) StudentTaskStatus status) {
@@ -82,6 +110,12 @@ public class StudentController {
 
 
     // Получение одного задания одного студента
+    @Operation(description = "Get single student task DTO by student's ID", summary = "Get Student Task", tags = {"Student Task"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation", content = @Content(mediaType = "application/json", schema = @Schema(implementation = StudentTaskDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Student/task not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
+            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+    })
     @GetMapping("/{studentID}/tasks/{taskID}")
     public ResponseEntity<StudentTaskDTO> getStudentTask(@PathVariable Long studentID,
                                                          @PathVariable Long taskID) {
@@ -90,6 +124,12 @@ public class StudentController {
     }
 
     // Получение карточки информации о студенте
+    @Operation(description = "Get student card DTO by his ID", summary = "Get Student Info Card", tags = {"Student"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation", content = @Content(mediaType = "application/json", schema = @Schema(implementation = StudentCardDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Student not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
+            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+    })
     @GetMapping("/{studentID}/card")
     public ResponseEntity<StudentCardDTO> getStudentCard(@PathVariable Long studentID) {
         StudentCardDTO card = studentService.getCard(studentID);
@@ -111,16 +151,22 @@ public class StudentController {
 
 
     // Создание нового студента (не регистрация)
+    @Operation(description = "Create new student (create manually, not register)", summary = "Create New Student", tags = {"Student"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Successfully created", content = @Content(mediaType = "application/json", schema = @Schema(implementation = StudentDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Validation error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
+            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+    })
     @PostMapping
-    public ResponseEntity<?> createNewStudent(@RequestBody StudentEditDTO dto,
-                                               BindingResult bindingResult) {
+    public ResponseEntity<StudentDTO> createNewStudent(@RequestBody StudentEditDTO dto,
+                                                    BindingResult bindingResult) {
 
         studentValidator.validate(dto, bindingResult);
 
         if(bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
             bindingResult.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
-            return new ResponseEntity<>(new ValidationErrorMessage(HttpStatus.BAD_REQUEST.value(), errors), HttpStatus.BAD_REQUEST);
+            throw new ObjectValidationException(errors);
         }
 
         Student student = studentService.createNewStudent(studentMapper.fromEditDTOToStudent(dto));
@@ -129,6 +175,11 @@ public class StudentController {
     }
 
     // Формирование ссылки на приглашение студента
+    @Operation(description = "Create new link that students can use to register in the application", summary = "Create New Register Link For Students", tags = {"Student"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Successfully created", content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+    })
     @PostMapping("/invite")
     public ResponseEntity<String> createStudentInviteLink(@AuthenticationPrincipal Admin admin,
                                                           @RequestBody StudentInviteRequest inviteRequest,
@@ -141,8 +192,14 @@ public class StudentController {
     }
 
     // Регистрация студента
+    @Operation(description = "Register new student (register by using the created link)", summary = "Register New Student", tags = {"Student"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Successfully created", content = @Content(mediaType = "application/json", schema = @Schema(implementation = StudentDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Validation error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
+            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+    })
     @PostMapping("/register")
-    public ResponseEntity<?> registerStudent(@RequestBody StudentRegisterDTO dto,
+    public ResponseEntity<StudentDTO> registerStudent(@RequestBody StudentRegisterDTO dto,
                                                       BindingResult bindingResult) {
 
         studentValidator.validate(dto, bindingResult);
@@ -150,7 +207,7 @@ public class StudentController {
         if(bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
             bindingResult.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
-            return new ResponseEntity<>(new ValidationErrorMessage(HttpStatus.BAD_REQUEST.value(), errors), HttpStatus.BAD_REQUEST);
+            throw new ObjectValidationException(errors);
         }
 
         Student student = studentService.registerStudent(studentMapper.fromRegisterDTOToStudent(dto));
@@ -158,8 +215,14 @@ public class StudentController {
     }
 
     // Редактирование студента
+    @Operation(description = "Update existing student in the application", summary = "Update Role", tags = {"Student"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully updated", content = @Content(mediaType = "application/json", schema = @Schema(implementation = StudentDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Validation error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
+            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+    })
     @PutMapping("/{id}")
-    public ResponseEntity<?> editStudent(@PathVariable Long id,
+    public ResponseEntity<StudentDTO> editStudent(@PathVariable Long id,
                                           @RequestBody StudentEditDTO dto,
                                           BindingResult bindingResult) {
         StudentEditDTO dtoWithID = new StudentEditDTO(id, dto);
@@ -169,7 +232,7 @@ public class StudentController {
         if(bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
             bindingResult.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
-            return new ResponseEntity<>(new ValidationErrorMessage(HttpStatus.BAD_REQUEST.value(), errors), HttpStatus.BAD_REQUEST);
+            throw new ObjectValidationException(errors);
         }
 
         Student student = studentService.editStudent(studentMapper.fromEditDTOToStudent(dtoWithID));
@@ -177,6 +240,12 @@ public class StudentController {
     }
 
     // Удаление студента
+    @Operation(description = "Delete student by his ID", summary = "Delete Student", tags = {"Student"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully deleted", content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "404", description = "Student not found in DB", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
+            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+    })
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteStudent(@PathVariable Long id) {
         studentService.deleteStudentById(id);

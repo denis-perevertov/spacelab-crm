@@ -1,4 +1,4 @@
-package com.example.spacelab.validator;
+package com.example.spacelab.exception;
 
 import java.time.Instant;
 import java.util.Map;

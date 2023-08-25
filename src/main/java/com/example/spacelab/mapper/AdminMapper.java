@@ -98,7 +98,7 @@ public class AdminMapper {
     }
 
     public Admin fromEditDTOToAdmin(AdminEditDTO dto) {
-        Admin admin = (dto.getId() != null) ?
+        Admin admin = (dto.getId() != null && dto.getId() != 0) ?
                 adminRepository.getReferenceById(dto.getId()) :
                 new Admin();
 
