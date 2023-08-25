@@ -54,7 +54,7 @@ public class AdminValidator implements Validator {
         else if(adminRepository.existsByEmail(dto.getEmail())) {
             if(dto.getId() == null || dto.getId() == 0)
                 e.rejectValue("email", "email.exists", "Admin with this email already exists!");
-            else if(dto.getId().equals(adminRepository.findByEmail(dto.getEmail()).getId()))
+            else if(dto.getId().equals(adminRepository.findByEmail(dto.getEmail()).orElseThrow().getId()))
                 e.rejectValue("email", "email.exists", "Admin with this email already exists!");
         }
 

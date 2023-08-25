@@ -5,14 +5,17 @@ import com.example.spacelab.model.UserEntity;
 import jakarta.persistence.*;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import lombok.Data;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Data
 @Entity
 @Table(name="admins")
-public class Admin extends UserEntity {
+public class Admin extends UserEntity implements UserDetails {
 
     private String firstName;
     private String lastName;
@@ -24,4 +27,35 @@ public class Admin extends UserEntity {
 
     @ManyToMany
     private List<Course> courses = new ArrayList<>();
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        // тут нужен список разрешений от роли
+        return new ArrayList<>();
+    }
+
+    @Override
+    public String getUsername() {
+        return this.email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 }
