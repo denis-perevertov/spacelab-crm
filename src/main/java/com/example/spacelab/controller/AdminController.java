@@ -8,6 +8,11 @@ import com.example.spacelab.service.AdminService;
 import com.example.spacelab.util.FilterForm;
 import com.example.spacelab.validator.AdminValidator;
 import com.example.spacelab.validator.ValidationErrorMessage;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.data.domain.Page;
@@ -22,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 
+@Tag(name="Admin", description = "admin controller")
 @Controller
 @Log
 @RequiredArgsConstructor
@@ -33,6 +39,11 @@ public class AdminController {
     private final AdminValidator adminValidator;
 
     // Получение админов (с фильтрами и страницами)
+    @Operation(description = "Get admins list", summary = "Get admins list", tags = {"Admin"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation"),
+            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content)
+    })
     @GetMapping
     public ResponseEntity<Page<AdminDTO>> getAdmins(FilterForm filters,
                                                     @RequestParam(required = false) Integer page,

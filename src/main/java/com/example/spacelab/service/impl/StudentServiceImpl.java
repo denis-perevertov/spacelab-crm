@@ -125,7 +125,7 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public List<StudentTask> getStudentTasks(Long studentID, StudentTaskStatus status) {
         log.info("Getting tasks(STATUS:"+status.toString()+") of student w/ ID: " + studentID);
-        return studentTaskRepository.findStudentTasks(studentID, status);
+        return studentTaskRepository.findStudentTasksWithStatus(studentID, status);
     }
 
     @Override
@@ -133,7 +133,7 @@ public class StudentServiceImpl implements StudentService {
         log.info("Getting "+pageable.getPageSize()+" tasks(STATUS:"+status.toString()+")" +
                 " of student w/ ID: " + studentID +
                 " || page " + pageable.getPageNumber());
-        return studentTaskRepository.findStudentTasks(studentID, status, pageable);
+        return studentTaskRepository.findStudentTasksWithStatusAndPage(studentID, status, pageable);
     }
 
     @Override
