@@ -18,10 +18,10 @@ public interface StudentRepository extends JpaRepository<Student, Long>, JpaSpec
 //            "FROM Student st")
 //    boolean existsByEmail(String email);
 
-    @Query("SELECT s FROM Student s WHERE s.course_id IN :ids")
+    @Query("SELECT s FROM Student s WHERE s.course.id IN :ids")
     List<Student> findAllByAllowedCourse(@Param("ids") Long... ids);
 
-    @Query("SELECT s FROM Student s WHERE s.course_id IN :ids")
+    @Query("SELECT s FROM Student s WHERE s.course.id IN :ids")
     Page<Student> findAllByAllowedCourse(Pageable pageable, @Param("ids") Long... ids);
 
     boolean existsByDetailsEmail(String email);

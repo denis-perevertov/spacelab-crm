@@ -8,6 +8,7 @@ import lombok.Data;
 import java.util.List;
 
 @Embeddable
+@Data
 public class CourseInfo {
 
     private String main_description;

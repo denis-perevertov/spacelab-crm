@@ -13,51 +13,51 @@ public class PermissionSet {
     @Transient List<String> authorities;
 
     // статистика
-    PermissionType readStatistics;
+    PermissionType readStatistics = PermissionType.UNDEFINED;
 
     // задания
-    PermissionType readTasks;
-    PermissionType writeTasks;
-    PermissionType editTasks;
-    PermissionType deleteTasks;
+    PermissionType readTasks = PermissionType.UNDEFINED;
+    PermissionType writeTasks = PermissionType.UNDEFINED;
+    PermissionType editTasks = PermissionType.UNDEFINED;
+    PermissionType deleteTasks = PermissionType.UNDEFINED;
 
     // студенты
-    PermissionType readStudents;
-    PermissionType writeStudents;
-    PermissionType inviteStudents;
-    PermissionType editStudents;
-    PermissionType deleteStudents;
+    PermissionType readStudents = PermissionType.UNDEFINED;
+    PermissionType writeStudents = PermissionType.UNDEFINED;
+    PermissionType inviteStudents = PermissionType.UNDEFINED;
+    PermissionType editStudents = PermissionType.UNDEFINED;
+    PermissionType deleteStudents = PermissionType.UNDEFINED;
 
     // курсы
-    PermissionType readCourses;
-    PermissionType writeCourses;
-    PermissionType editCourses;
-    PermissionType deleteCourses;
+    PermissionType readCourses = PermissionType.UNDEFINED;
+    PermissionType writeCourses = PermissionType.UNDEFINED;
+    PermissionType editCourses = PermissionType.UNDEFINED;
+    PermissionType deleteCourses = PermissionType.UNDEFINED;
 
     // занятия
-    PermissionType readLessons;
-    PermissionType writeLessons;
-    PermissionType editLessons;
-    PermissionType deleteLessons;
+    PermissionType readLessons = PermissionType.UNDEFINED;
+    PermissionType writeLessons = PermissionType.UNDEFINED;
+    PermissionType editLessons = PermissionType.UNDEFINED;
+    PermissionType deleteLessons = PermissionType.UNDEFINED;
 
     // литература
-    PermissionType readLiteratures;
-    PermissionType writeLiteratures;
-    PermissionType editLiteratures;
-    PermissionType verifyLiteratures;
-    PermissionType deleteLiteratures;
+    PermissionType readLiteratures = PermissionType.UNDEFINED;
+    PermissionType writeLiteratures = PermissionType.UNDEFINED;
+    PermissionType editLiteratures = PermissionType.UNDEFINED;
+    PermissionType verifyLiteratures = PermissionType.UNDEFINED;
+    PermissionType deleteLiteratures = PermissionType.UNDEFINED;
 
     // роли
-    PermissionType readRoles;
-    PermissionType writeRoles;
-    PermissionType editRoles;
-    PermissionType deleteRoles;
+    PermissionType readRoles = PermissionType.UNDEFINED;
+    PermissionType writeRoles = PermissionType.UNDEFINED;
+    PermissionType editRoles = PermissionType.UNDEFINED;
+    PermissionType deleteRoles = PermissionType.UNDEFINED;
 
     // настройки системы
-    PermissionType readSettings;
-    PermissionType writeSettings;
-    PermissionType editSettings;
-    PermissionType deleteSettings;
+    PermissionType readSettings = PermissionType.UNDEFINED;
+    PermissionType writeSettings = PermissionType.UNDEFINED;
+    PermissionType editSettings = PermissionType.UNDEFINED;
+    PermissionType deleteSettings = PermissionType.UNDEFINED;
 
     public PermissionType getPermission(String permissionName) {
         return switch(permissionName) {
