@@ -68,7 +68,7 @@ public class StudentServiceImpl implements StudentService {
     public Page<Student> getStudentsByAllowedCourses(Pageable pageable, Long... ids) {
         log.info("Getting all students' info with page " + pageable.getPageNumber() +
                 " / size " + pageable.getPageSize() + " | for courses with IDs: " + Arrays.toString(ids));
-        return studentRepository.findAllByAllowedCourse(pageable, ids);
+        return studentRepository.findAllByAllowedCoursePage(pageable, ids);
     }
 
     public Page<Student> getStudentsByAllowedCourses(FilterForm filters, Pageable pageable, Long... ids) {

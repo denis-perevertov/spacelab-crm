@@ -128,7 +128,6 @@ public class PermissionSet {
                 "settings.edit." + this.editSettings.name(),
                 "settings.delete." + this.deleteSettings.name()
         );
-        System.out.println(authorities);
         return authorities;
     }
 }

@@ -22,7 +22,7 @@ public interface StudentRepository extends JpaRepository<Student, Long>, JpaSpec
     List<Student> findAllByAllowedCourse(@Param("ids") Long... ids);
 
     @Query("SELECT s FROM Student s WHERE s.course.id IN :ids")
-    Page<Student> findAllByAllowedCourse(Pageable pageable, @Param("ids") Long... ids);
+    Page<Student> findAllByAllowedCoursePage(Pageable pageable, @Param("ids") Long... ids);
 
     boolean existsByDetailsEmail(String email);
 }

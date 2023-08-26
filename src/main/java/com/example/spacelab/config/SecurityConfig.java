@@ -46,6 +46,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(customizer -> customizer
                                                     .requestMatchers("/api/auth/register", "/api/auth/login", "/api/auth/logout").permitAll()
                                                     .requestMatchers("/api/students/register").permitAll()
+                                                    .requestMatchers("/swagger-ui/**", "/api-docs").permitAll()
                                                     .anyRequest().authenticated())
                 .sessionManagement(customizer -> customizer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
