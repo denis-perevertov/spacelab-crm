@@ -35,4 +35,6 @@ public class UserRole {
     public List<String> getAuthorities() {
         return this.permissions.getAuthorities();
     }
+
+    public PermissionType getPermission(String permissionName) {return this.permissions.getPermission(permissionName);}
 }

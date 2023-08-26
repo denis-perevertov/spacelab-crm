@@ -59,6 +59,41 @@ public class PermissionSet {
     PermissionType editSettings;
     PermissionType deleteSettings;
 
+    public PermissionType getPermission(String permissionName) {
+        return switch(permissionName) {
+            case "statistics.read" -> this.readStatistics;
+            case "tasks.read" -> this.readTasks;
+            case "tasks.write" -> this.writeTasks;
+            case "tasks.edit" -> this.editTasks;
+            case "tasks.delete" -> this.deleteTasks;
+            case "students.read" -> this.readStudents;
+            case "students.write" -> this.writeStudents;
+            case "students.edit" -> this.editStudents;
+            case "students.delete" -> this.deleteStudents;
+            case "courses.read" -> this.readCourses;
+            case "courses.write" -> this.writeCourses;
+            case "courses.edit" -> this.editCourses;
+            case "courses.delete" -> this.deleteCourses;
+            case "lessons.read" -> this.readLessons;
+            case "lessons.write" -> this.writeLessons;
+            case "lessons.edit" -> this.editLessons;
+            case "lessons.delete" -> this.deleteLessons;
+            case "literatures.read" -> this.readLiteratures;
+            case "literatures.write" -> this.writeLiteratures;
+            case "literatures.edit" -> this.editLiteratures;
+            case "literatures.delete" -> this.deleteLiteratures;
+            case "roles.read" -> this.readRoles;
+            case "roles.write" -> this.writeRoles;
+            case "roles.edit" -> this.editRoles;
+            case "roles.delete" -> this.deleteRoles;
+            case "settings.read" -> this.readSettings;
+            case "settings.write" -> this.writeSettings;
+            case "settings.edit" -> this.editSettings;
+            case "settings.delete" -> this.deleteSettings;
+            default -> null;
+        };
+    }
+
     public List<String> getAuthorities() {
         List<String> authorities = List.of(
                 "statistics.read." + this.readStatistics.name(),

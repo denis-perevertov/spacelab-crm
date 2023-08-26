@@ -45,6 +45,7 @@ public class SecurityConfig {
                 .httpBasic(hb -> {})
                 .authorizeHttpRequests(customizer -> customizer
                                                     .requestMatchers("/api/auth/register", "/api/auth/login", "/api/auth/logout").permitAll()
+                                                    .requestMatchers("/api/students/register").permitAll()
                                                     .anyRequest().authenticated())
                 .sessionManagement(customizer -> customizer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())

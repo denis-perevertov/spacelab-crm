@@ -1,32 +1,26 @@
 package com.example.spacelab.controller;
 
-import com.example.spacelab.dto.role.UserRoleDTO;
+import com.example.spacelab.dto.student.*;
 import com.example.spacelab.exception.ErrorMessage;
 import com.example.spacelab.exception.ObjectValidationException;
 import com.example.spacelab.mapper.StudentMapper;
 import com.example.spacelab.mapper.TaskMapper;
 import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.model.course.Course;
-import com.example.spacelab.dto.student.StudentCardDTO;
-import com.example.spacelab.dto.student.StudentDTO;
-import com.example.spacelab.dto.student.StudentTaskDTO;
-import com.example.spacelab.dto.student.StudentEditDTO;
-import com.example.spacelab.dto.student.StudentRegisterDTO;
+import com.example.spacelab.model.lesson.LessonReportRow;
 import com.example.spacelab.model.role.PermissionType;
-import com.example.spacelab.model.student.StudentInviteRequest;
 import com.example.spacelab.model.student.Student;
-import com.example.spacelab.service.StudentService;
-import com.example.spacelab.util.FilterForm;
+import com.example.spacelab.model.student.StudentInviteRequest;
 import com.example.spacelab.model.student.StudentTaskStatus;
+import com.example.spacelab.service.StudentService;
+import com.example.spacelab.util.AuthUtil;
+import com.example.spacelab.util.FilterForm;
 import com.example.spacelab.validator.StudentValidator;
-import com.example.spacelab.exception.ValidationErrorMessage;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.annotations.tags.Tags;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
@@ -38,10 +32,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,23 +53,35 @@ public class StudentController {
     private final TaskMapper taskMapper;
 
     // Получение студентов (с фильтрами/страницами)
-    @Operation(description = "Get students page", summary = "Get Students", tags = {"Student"})
+    @Operation(description = "Get students page, output depends on permission type(full/partial)", summary = "Get Students", tags = {"Student"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation"),
             @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
     @PreAuthorize("!hasAuthority('students.read.NO_ACCESS')")
     @GetMapping
-    public ResponseEntity<?> getStudents(FilterForm filters,
+    public ResponseEntity<Page<StudentDTO>> getStudents(FilterForm filters,
                                          @RequestParam(required = false) Integer page,
                                          @RequestParam(required = false) Integer size) {
 
-        Page<StudentDTO> students;
+        Page<StudentDTO> students = new PageImpl<>(new ArrayList<>());
 
-        if(page == null && size == null) students = new PageImpl<>(studentService.getStudents().stream().map(studentMapper::fromStudentToDTO).toList());
-        else if(page != null && size == null) students = new PageImpl<>(studentService.getStudents(filters, PageRequest.of(page, 10)).stream().map(studentMapper::fromStudentToDTO).toList());
-        else if(page == null) return ResponseEntity.badRequest().body("Size parameter present without page");
-        else students = new PageImpl<>(studentService.getStudents(filters, PageRequest.of(page, size)).stream().map(studentMapper::fromStudentToDTO).toList());
+        Admin loggedInAdmin = AuthUtil.getLoggedInAdmin();
+        PermissionType permissionForLoggedInAdmin = loggedInAdmin.getRole().getPermissions().getReadStudents();
+
+        if(permissionForLoggedInAdmin == PermissionType.FULL) {
+            if(page == null && size == null) students = new PageImpl<>(studentService.getStudents().stream().map(studentMapper::fromStudentToDTO).toList());
+            else if(page != null && size == null) students = new PageImpl<>(studentService.getStudents(filters, PageRequest.of(page, 10)).stream().map(studentMapper::fromStudentToDTO).toList());
+            else students = new PageImpl<>(studentService.getStudents(filters, PageRequest.of(page, size)).stream().map(studentMapper::fromStudentToDTO).toList());
+        }
+        else if(permissionForLoggedInAdmin == PermissionType.PARTIAL) {
+
+            Long[] allowedCoursesIDs = (Long[]) loggedInAdmin.getCourses().stream().map(Course::getId).toArray();
+
+            if(page == null && size == null) students = new PageImpl<>(studentService.getStudentsByAllowedCourses(allowedCoursesIDs).stream().map(studentMapper::fromStudentToDTO).toList());
+            else if(page != null && size == null) students = new PageImpl<>(studentService.getStudentsByAllowedCourses(filters, PageRequest.of(page, 10),allowedCoursesIDs).stream().map(studentMapper::fromStudentToDTO).toList());
+            else students = new PageImpl<>(studentService.getStudentsByAllowedCourses(filters, PageRequest.of(page, size), allowedCoursesIDs).stream().map(studentMapper::fromStudentToDTO).toList());
+        }
 
         return new ResponseEntity<>(students, HttpStatus.OK);
     }
@@ -90,6 +96,9 @@ public class StudentController {
     @PreAuthorize("!hasAuthority('students.read.NO_ACCESS')")
     @GetMapping("/{studentID}")
     public ResponseEntity<StudentDTO> getStudent(@PathVariable Long studentID) {
+
+        AuthUtil.checkAccessToCourse(studentService.getStudentCourseID(studentID), "students.read");
+
         Student student = studentService.getStudentById(studentID);
         return new ResponseEntity<>(studentMapper.fromStudentToDTO(student), HttpStatus.OK);
     }
@@ -105,6 +114,9 @@ public class StudentController {
     @GetMapping("/{studentID}/tasks")
     public ResponseEntity<List<StudentTaskDTO>> getStudentTasks(@PathVariable Long studentID,
                                                                 @RequestParam(required = false) StudentTaskStatus status) {
+
+        AuthUtil.checkAccessToCourse(studentService.getStudentCourseID(studentID), "students.read");
+
         List<StudentTaskDTO> taskList;
         if(status == null) taskList = studentService.getStudentTasks(studentID).stream().map(taskMapper::fromStudentTaskToDTO).toList();
         else taskList = studentService.getStudentTasks(studentID, status).stream().map(taskMapper::fromStudentTaskToDTO).toList();
@@ -124,7 +136,11 @@ public class StudentController {
     @GetMapping("/{studentID}/tasks/{taskID}")
     public ResponseEntity<StudentTaskDTO> getStudentTask(@PathVariable Long studentID,
                                                          @PathVariable Long taskID) {
+
+        AuthUtil.checkAccessToCourse(studentService.getStudentCourseID(studentID), "students.read");
+
         StudentTaskDTO task = taskMapper.fromStudentTaskToDTO(studentService.getStudentTask(taskID));
+
         return new ResponseEntity<>(task, HttpStatus.OK);
     }
 
@@ -138,23 +154,26 @@ public class StudentController {
     @PreAuthorize("!hasAuthority('students.read.NO_ACCESS')")
     @GetMapping("/{studentID}/card")
     public ResponseEntity<StudentCardDTO> getStudentCard(@PathVariable Long studentID) {
+
+        AuthUtil.checkAccessToCourse(studentService.getStudentCourseID(studentID), "students.read");
+
         StudentCardDTO card = studentService.getCard(studentID);
         return new ResponseEntity<>(card, HttpStatus.OK);
     }
 
-    /*
-
-        TODO
-        занятия
-
+    // Получение списка занятий студента
+    @Operation(description = "Get all lesson data associated with a student, by his ID", summary = "Get Student Lesson Data", tags = {"Student Lesson"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation", content = @Content(mediaType = "application/json", schema = @Schema(implementation = LessonReportRow.class))),
+            @ApiResponse(responseCode = "404", description = "Student not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
+            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+    })
+    @PreAuthorize("!hasAuthority('students.read.NO_ACCESS')")
     @GetMapping("/{studentID}/lessons")
-    public ResponseEntity<LessonReportRow> getStudentLessons(@PathVariable Long studentID) {
-
-        return new ResponseEntity<>();
+    public ResponseEntity<List<LessonReportRow>> getStudentLessons(@PathVariable Long studentID) {
+        List<LessonReportRow> studentLessonData = studentService.getStudentLessonData(studentID);
+        return new ResponseEntity<>(studentLessonData, HttpStatus.OK);
     }
-
-    */
-
 
     // Создание нового студента (не регистрация)
     @Operation(description = "Create new student (create manually, not register)", summary = "Create New Student", tags = {"Student"})
@@ -168,6 +187,7 @@ public class StudentController {
     public ResponseEntity<StudentDTO> createNewStudent(@RequestBody StudentEditDTO dto,
                                                     BindingResult bindingResult) {
 
+        AuthUtil.checkAccessToCourse(dto.courseID(), "students.write");
         studentValidator.validate(dto, bindingResult);
 
         if(bindingResult.hasErrors()) {
@@ -192,6 +212,8 @@ public class StudentController {
     public ResponseEntity<String> createStudentInviteLink(@AuthenticationPrincipal Admin admin,
                                                           @RequestBody StudentInviteRequest inviteRequest,
                                                           HttpServletRequest servletRequest) {
+
+        AuthUtil.checkAccessToCourse(inviteRequest.getCourse().getId(), "students.invite");
 
         String token = studentService.createInviteStudentToken(inviteRequest);
         String url = "http://" + servletRequest.getServerName() + ":" + servletRequest.getServerPort() + "/register/" + token;
@@ -234,6 +256,9 @@ public class StudentController {
     public ResponseEntity<StudentDTO> editStudent(@PathVariable Long id,
                                           @RequestBody StudentEditDTO dto,
                                           BindingResult bindingResult) {
+
+        AuthUtil.checkAccessToCourse(dto.courseID(), "students.edit");
+
         StudentEditDTO dtoWithID = new StudentEditDTO(id, dto);
 
         studentValidator.validate(dtoWithID, bindingResult);
@@ -243,6 +268,7 @@ public class StudentController {
             bindingResult.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
             throw new ObjectValidationException(errors);
         }
+
 
         Student student = studentService.editStudent(studentMapper.fromEditDTOToStudent(dtoWithID));
         return new ResponseEntity<>(studentMapper.fromStudentToDTO(student), HttpStatus.OK);
@@ -258,18 +284,12 @@ public class StudentController {
     @PreAuthorize("!hasAuthority('students.delete.NO_ACCESS')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteStudent(@PathVariable Long id) {
+
+        AuthUtil.checkAccessToCourse(studentService.getStudentCourseID(id), "students.delete");
+
         studentService.deleteStudentById(id);
         return new ResponseEntity<>("Student with ID:"+id+" deleted", HttpStatus.OK);
     }
 
-    // Проверка доступа
-    private void checkAccess(Long courseID, String courseName, Admin admin, PermissionType permissionType) {
-
-        if(permissionType == PermissionType.NO_ACCESS) throw new AccessDeniedException("No access to this operation!");
-        else if(permissionType == PermissionType.PARTIAL) {
-            if(!admin.getCourses().stream().map(Course::getId).toList().contains(courseID))
-                throw new AccessDeniedException("No access to creating new students for course "+courseName+"!");
-        }
-    }
 
 }

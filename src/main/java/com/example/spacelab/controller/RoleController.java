@@ -83,7 +83,6 @@ public class RoleController {
             bindingResult.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
             throw new ObjectValidationException(errors);
         }
-
         UserRole role = userRoleService.createNewRole(roleMapper.fromEditDTOToRole(dto));
         return new ResponseEntity<>(roleMapper.fromRoleToDTO(role), HttpStatus.CREATED);
     }
@@ -106,7 +105,6 @@ public class RoleController {
             bindingResult.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
             throw new ObjectValidationException(errors);
         }
-
         UserRole role = userRoleService.updateRole(roleMapper.fromEditDTOToRole(dto));
         return new ResponseEntity<>(roleMapper.fromRoleToDTO(role), HttpStatus.OK);
     }
