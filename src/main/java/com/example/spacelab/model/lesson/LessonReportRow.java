@@ -1,8 +1,11 @@
 package com.example.spacelab.model.lesson;
 
 import com.example.spacelab.model.student.Student;
+import com.example.spacelab.model.student.StudentTask;
 import jakarta.persistence.*;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 @Entity
@@ -27,6 +30,9 @@ public class LessonReportRow {
     @ManyToMany
     private List<Task> currentTasks;
 */
+
+    @ManyToMany
+    private List<StudentTask> currentTasks;
 
     private Double hours;
     private String hoursNote;

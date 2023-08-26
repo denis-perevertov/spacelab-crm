@@ -15,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+
 @Component
 @Log
 @RequiredArgsConstructor
@@ -44,11 +46,10 @@ public class StudentMapper {
 
             dto.setRating(student.getRating());
 
-//            if(student.getAccountStatus() != null)
-//                dto.setStatus(student.getAccountStatus().toString());
+            dto.setAvatar(student.getAvatar());
 
             if(student.getCourse() != null) {
-                dto.setCourse(courseMapper.fromCourseToDTO(student.getCourse()));
+                dto.setCourse(Map.of("id", student.getCourse().getId(), "name", student.getCourse().getName()));
             }
         } catch (Exception e) {
             log.severe("Mapping error: " + e.getMessage());
@@ -98,9 +99,10 @@ public class StudentMapper {
             studentDetails.setTelegram(studentDTO.getTelegram());
 
             student.setRating(studentDTO.getRating());
+            student.setAvatar(studentDTO.getAvatar());
 
             if(studentDTO.getCourse() != null) {
-                student.setCourse(courseRepository.getReferenceById(studentDTO.getCourse().getId()));
+                student.setCourse(courseRepository.getReferenceById((Long) studentDTO.getCourse().get("id")));
             }
         } catch (EntityNotFoundException e) {
             log.severe("Error: " + e.getMessage());

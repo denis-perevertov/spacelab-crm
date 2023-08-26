@@ -8,6 +8,7 @@ import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -27,23 +28,23 @@ public class Course {
     @DateTimeFormat(pattern = "MM/dd/yyyy")
     private LocalDate endDate;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "mentor_id")
     private Admin mentor;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "manager_id")
     private Admin manager;
 
     @OneToMany
-    private List<Student> students;
+    private List<Student> students = new ArrayList<>();
 
     @OneToMany
-    private List<Task> tasks;
+    private List<Task> tasks = new ArrayList<>();
 
     @Embedded
-    private CourseInfo courseInfo;
+    private CourseInfo courseInfo = new CourseInfo();
 
-    private Boolean isActive;
+    private Boolean isActive = false;
 
 }

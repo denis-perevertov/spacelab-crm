@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
@@ -30,8 +31,7 @@ public class Admin extends UserEntity implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // тут нужен список разрешений от роли
-        return new ArrayList<>();
+        return this.getRole().getAuthorities().stream().map(SimpleGrantedAuthority::new).toList();
     }
 
     @Override

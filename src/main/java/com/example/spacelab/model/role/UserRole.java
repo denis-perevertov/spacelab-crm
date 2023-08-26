@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.ToString;
 
 import java.security.Permission;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -25,10 +26,16 @@ public class UserRole {
     @ToString.Exclude
     @JsonIgnore
     @OneToMany
-    private List<UserEntity> userList;
+    private List<UserEntity> userList = new ArrayList<>();
 
     @ToString.Exclude
     @JsonIgnore
     @Embedded
-    private PermissionSet permissions;
+    private PermissionSet permissions = new PermissionSet();
+
+    public List<String> getAuthorities() {
+        return this.permissions.getAuthorities();
+    }
+
+    public PermissionType getPermission(String permissionName) {return this.permissions.getPermission(permissionName);}
 }

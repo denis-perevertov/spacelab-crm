@@ -4,6 +4,7 @@ import com.example.spacelab.exception.ResourceNotFoundException;
 import com.example.spacelab.mapper.StudentMapper;
 import com.example.spacelab.mapper.TaskMapper;
 import com.example.spacelab.model.course.Course;
+import com.example.spacelab.model.lesson.LessonReportRow;
 import com.example.spacelab.model.student.StudentInviteRequest;
 import com.example.spacelab.model.student.Student;
 import com.example.spacelab.model.student.StudentTask;
@@ -21,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -55,6 +57,24 @@ public class StudentServiceImpl implements StudentService {
         log.info("Getting all students' info with page " + pageable.getPageNumber() +
                 " / size " + pageable.getPageSize() + " and filters: " + filters);
         Specification<Student> spec = buildSpecificationFromFilters(filters);
+        return studentRepository.findAll(spec, pageable);
+    }
+
+    public List<Student> getStudentsByAllowedCourses(Long... ids) {
+        log.info("Getting all students' info without filters or pages | for courses with IDs: " + Arrays.toString(ids));
+        return studentRepository.findAllByAllowedCourse(ids);
+    }
+
+    public Page<Student> getStudentsByAllowedCourses(Pageable pageable, Long... ids) {
+        log.info("Getting all students' info with page " + pageable.getPageNumber() +
+                " / size " + pageable.getPageSize() + " | for courses with IDs: " + Arrays.toString(ids));
+        return studentRepository.findAllByAllowedCoursePage(pageable, ids);
+    }
+
+    public Page<Student> getStudentsByAllowedCourses(FilterForm filters, Pageable pageable, Long... ids) {
+        log.info("Getting all students' info with page " + pageable.getPageNumber() +
+                " / size " + pageable.getPageSize() + " and filters: " + filters + " | for courses with IDs: " + Arrays.toString(ids));
+        Specification<Student> spec = buildSpecificationFromFilters(filters).and(StudentSpecifications.hasCourseIDs(ids));
         return studentRepository.findAll(spec, pageable);
     }
 
@@ -151,6 +171,16 @@ public class StudentServiceImpl implements StudentService {
         log.info("Created token: " + id + ", saving token with set parameters in DB");
         request = inviteRepository.save(request);
         return request.getId();
+    }
+
+    @Override
+    public List<LessonReportRow> getStudentLessonData(Long studentID) {
+        return getStudentById(studentID).getLessonData();
+    }
+
+    @Override
+    public Long getStudentCourseID(Long studentID) {
+        return getStudentById(studentID).getCourse().getId();
     }
 
     @Override
