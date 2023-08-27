@@ -1,7 +1,7 @@
 package com.example.spacelab.mapper;
 
 import com.example.spacelab.exception.MappingException;
-import com.example.spacelab.dto.StudentTaskDTO;
+import com.example.spacelab.dto.student.StudentTaskDTO;
 import com.example.spacelab.dto.task.TaskCardDTO;
 import com.example.spacelab.dto.task.TaskInfoDTO;
 import com.example.spacelab.dto.task.TaskSaveDTO;

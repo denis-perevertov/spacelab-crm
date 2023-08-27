@@ -1,4 +1,4 @@
-package com.example.spacelab.dto;
+package com.example.spacelab.dto.student;
 
 
 import com.example.spacelab.dto.task.TaskListDTO;

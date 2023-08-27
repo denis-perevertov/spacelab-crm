@@ -1,6 +1,6 @@
 package com.example.spacelab.controller;
 
-import com.example.spacelab.dto.StudentTaskDTO;
+import com.example.spacelab.dto.student.StudentTaskDTO;
 import com.example.spacelab.dto.student.*;
 import com.example.spacelab.exception.ErrorMessage;
 import com.example.spacelab.exception.ObjectValidationException;
@@ -30,7 +30,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
