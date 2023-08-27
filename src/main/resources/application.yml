@@ -23,6 +23,19 @@ spring:
     ansi:
       enabled: ALWAYS
 
+springdoc:
+  packages-to-scan: com.example.spacelab.controller, com.example.spacelab.model
+  packages-to-exclude: com.example.spacelab.repository
+  paths-to-match: /api/**
+  api-docs:
+    enabled: true
+    path: /api-docs
+  swagger-ui:
+    tryItOutEnabled: true
+    operationsSorter: alpha
+    tagsSorter: alpha
+    filter: true
+
 server:
   port: 1488
   error:

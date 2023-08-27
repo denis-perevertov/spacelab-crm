@@ -1,9 +1,5 @@
 package com.example.spacelab.model.student;
 
-import com.example.spacelab.model.student.StudentAccountStatus;
-import com.example.spacelab.model.student.StudentEducationLevel;
-import com.example.spacelab.model.student.StudentEnglishLevel;
-import com.example.spacelab.model.student.StudentWorkStatus;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;

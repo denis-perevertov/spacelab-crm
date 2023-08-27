@@ -4,7 +4,6 @@ import com.example.spacelab.exception.ResourceNotFoundException;
 import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.role.UserRole;
-
 import com.example.spacelab.repository.AdminRepository;
 import com.example.spacelab.repository.CourseRepository;
 import com.example.spacelab.repository.UserRoleRepository;
@@ -16,9 +15,13 @@ import lombok.extern.java.Log;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Log
@@ -53,7 +56,7 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public Admin getAdminById(Long id) {
         log.info("Getting admin with ID: " + id);
-        Admin admin = adminRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Admin not found!"));
+        Admin admin = adminRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Admin not found!", Admin.class));
         return admin;
     }
 
@@ -85,7 +88,7 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public void deleteAdminById(Long id) {
-        Admin admin = adminRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Admin not found!"));
+        Admin admin = adminRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Admin not found!", Admin.class));
         log.info("Deleting admin with ID: " + id);
         adminRepository.delete(admin);
     }
@@ -119,5 +122,10 @@ public class AdminServiceImpl implements AdminService {
         );
 
         return spec;
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return adminRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException("User not found by login: " + username));
     }
 }

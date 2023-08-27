@@ -26,7 +26,7 @@ public class UserRoleServiceImpl implements UserRoleService {
     @Override
     public UserRole getRoleById(Long id) {
         log.info("Getting role with ID: " + id);
-        UserRole role = userRoleRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Role not found"));
+        UserRole role = userRoleRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Role not found", UserRole.class));
         return role;
     }
 
@@ -46,7 +46,7 @@ public class UserRoleServiceImpl implements UserRoleService {
 
     @Override
     public void deleteRoleById(Long id) {
-        UserRole role = userRoleRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Role not found"));
+        UserRole role = userRoleRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Role not found", UserRole.class));
         log.info("Deleting user role with ID: " + id);
         userRoleRepository.delete(role);
     }

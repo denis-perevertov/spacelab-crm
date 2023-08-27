@@ -4,11 +4,11 @@ import com.example.spacelab.exception.ResourceNotFoundException;
 import com.example.spacelab.mapper.StudentMapper;
 import com.example.spacelab.mapper.TaskMapper;
 import com.example.spacelab.model.course.Course;
+import com.example.spacelab.model.lesson.LessonReportRow;
 import com.example.spacelab.model.student.StudentInviteRequest;
 import com.example.spacelab.model.student.Student;
 import com.example.spacelab.model.student.StudentTask;
 import com.example.spacelab.dto.student.StudentCardDTO;
-
 import com.example.spacelab.repository.*;
 import com.example.spacelab.service.StudentService;
 import com.example.spacelab.service.specification.StudentSpecifications;
@@ -22,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -59,10 +60,28 @@ public class StudentServiceImpl implements StudentService {
         return studentRepository.findAll(spec, pageable);
     }
 
+    public List<Student> getStudentsByAllowedCourses(Long... ids) {
+        log.info("Getting all students' info without filters or pages | for courses with IDs: " + Arrays.toString(ids));
+        return studentRepository.findAllByAllowedCourse(ids);
+    }
+
+    public Page<Student> getStudentsByAllowedCourses(Pageable pageable, Long... ids) {
+        log.info("Getting all students' info with page " + pageable.getPageNumber() +
+                " / size " + pageable.getPageSize() + " | for courses with IDs: " + Arrays.toString(ids));
+        return studentRepository.findAllByAllowedCoursePage(pageable, ids);
+    }
+
+    public Page<Student> getStudentsByAllowedCourses(FilterForm filters, Pageable pageable, Long... ids) {
+        log.info("Getting all students' info with page " + pageable.getPageNumber() +
+                " / size " + pageable.getPageSize() + " and filters: " + filters + " | for courses with IDs: " + Arrays.toString(ids));
+        Specification<Student> spec = buildSpecificationFromFilters(filters).and(StudentSpecifications.hasCourseIDs(ids));
+        return studentRepository.findAll(spec, pageable);
+    }
+
     @Override
     public Student getStudentById(Long id) {
         log.info("Getting student with ID: " + id);
-        Student student = studentRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+        Student student = studentRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Student not found", Student.class));
         return student;
     }
 
@@ -92,6 +111,7 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public Student editStudent(Student student) {
+
         student = studentRepository.save(student);
         log.info("Edited student: " + student);
         return student;
@@ -99,13 +119,13 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public StudentCardDTO getCard(Long id) {
-        Student student = studentRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+        Student student = studentRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Student not found", Student.class));
         return studentMapper.fromStudentToCardDTO(student);
     }
 
     @Override
     public void deleteStudentById(Long id) {
-        Student student = studentRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+        Student student = studentRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Student not found", Student.class));
         log.info("Deleting student with ID: " + id);
         studentRepository.delete(student);
     }
@@ -125,7 +145,7 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public List<StudentTask> getStudentTasks(Long studentID, StudentTaskStatus status) {
         log.info("Getting tasks(STATUS:"+status.toString()+") of student w/ ID: " + studentID);
-        return studentTaskRepository.findStudentTasks(studentID, status);
+        return studentTaskRepository.findStudentTasksWithStatus(studentID, status);
     }
 
     @Override
@@ -133,13 +153,13 @@ public class StudentServiceImpl implements StudentService {
         log.info("Getting "+pageable.getPageSize()+" tasks(STATUS:"+status.toString()+")" +
                 " of student w/ ID: " + studentID +
                 " || page " + pageable.getPageNumber());
-        return studentTaskRepository.findStudentTasks(studentID, status, pageable);
+        return studentTaskRepository.findStudentTasksWithStatusAndPage(studentID, status, pageable);
     }
 
     @Override
     public StudentTask getStudentTask(Long taskID) {
         log.info("Getting student task with taskID: " + taskID);
-        StudentTask task = studentTaskRepository.findById(taskID).orElseThrow(() -> new ResourceNotFoundException("Student task not found"));
+        StudentTask task = studentTaskRepository.findById(taskID).orElseThrow(() -> new ResourceNotFoundException("Student task not found", StudentTask.class));
         return task;
     }
 
@@ -151,6 +171,16 @@ public class StudentServiceImpl implements StudentService {
         log.info("Created token: " + id + ", saving token with set parameters in DB");
         request = inviteRepository.save(request);
         return request.getId();
+    }
+
+    @Override
+    public List<LessonReportRow> getStudentLessonData(Long studentID) {
+        return getStudentById(studentID).getLessonData();
+    }
+
+    @Override
+    public Long getStudentCourseID(Long studentID) {
+        return getStudentById(studentID).getCourse().getId();
     }
 
     @Override

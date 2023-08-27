@@ -37,7 +37,7 @@ public class ContactInfoServiceImpl implements ContactInfoService {
     @Override
     public ContactInfo getContact(Long id) {
         log.info("Getting contact with ID: " + id);
-        ContactInfo info = contactRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Contact not found"));
+        ContactInfo info = contactRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Contact not found", ContactInfo.class));
         return info;
     }
 
@@ -57,7 +57,7 @@ public class ContactInfoServiceImpl implements ContactInfoService {
 
     @Override
     public void deleteContact(Long id) {
-        ContactInfo info = contactRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Contact not found"));
+        ContactInfo info = contactRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Contact not found", ContactInfo.class));
         log.info("Deleting contact with ID: " + id);
         contactRepository.delete(info);
     }

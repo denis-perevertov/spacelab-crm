@@ -1,18 +1,22 @@
 package com.example.spacelab.mapper;
 
+import com.example.spacelab.dto.student.StudentCardDTO;
+import com.example.spacelab.dto.student.StudentDTO;
+import com.example.spacelab.dto.student.StudentEditDTO;
+import com.example.spacelab.dto.student.StudentRegisterDTO;
 import com.example.spacelab.exception.MappingException;
+
+import com.example.spacelab.exception.ResourceNotFoundException;
 import com.example.spacelab.model.student.Student;
 import com.example.spacelab.model.student.StudentDetails;
-
-import com.example.spacelab.dto.student.StudentCardDTO;
-
-import com.example.spacelab.dto.student.StudentDTO;
-import com.example.spacelab.dto.student.StudentRegisterDTO;
 import com.example.spacelab.repository.CourseRepository;
 import com.example.spacelab.repository.StudentRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
 
 @Component
 @Log
@@ -43,11 +47,11 @@ public class StudentMapper {
 
             dto.setRating(student.getRating());
 
-//            if(student.getAccountStatus() != null)
-//                dto.setStatus(student.getAccountStatus().toString());
+            dto.setAvatar(student.getAvatar());
 
             if(student.getCourse() != null) {
-                dto.setCourse(courseMapper.fromCourseToListDTO(student.getCourse()));
+                dto.setCourse(Map.of("id", student.getCourse().getId(), "name", student.getCourse().getName()));
+//                dto.setCourse(courseMapper.fromCourseToListDTO(student.getCourse()));
             }
         } catch (Exception e) {
             log.severe("Mapping error: " + e.getMessage());
@@ -97,10 +101,45 @@ public class StudentMapper {
             studentDetails.setTelegram(studentDTO.getTelegram());
 
             student.setRating(studentDTO.getRating());
+            student.setAvatar(studentDTO.getAvatar());
 
             if(studentDTO.getCourse() != null) {
-                student.setCourse(courseRepository.getReferenceById(studentDTO.getCourse().getId()));
+                student.setCourse(courseRepository.getReferenceById((Long) studentDTO.getCourse().get("id")));
+//                student.setCourse(courseRepository.getReferenceById(studentDTO.getCourse().getId()));
             }
+        } catch (EntityNotFoundException e) {
+            log.severe("Error: " + e.getMessage());
+            throw new ResourceNotFoundException(e.getMessage());
+        } catch (Exception e) {
+            log.severe("Mapping error: " + e.getMessage());
+            log.warning("Entity: " + student);
+            throw new MappingException(e.getMessage());
+
+        }
+
+        return student;
+    }
+
+    public Student fromEditDTOToStudent(StudentEditDTO dto) {
+        Student student = (dto.id() != null) ?
+                studentRepository.getReferenceById(dto.id()) :
+                new Student();
+
+        try {
+            StudentDetails studentDetails = student.getDetails();
+            studentDetails.setFirstName(dto.firstName());
+            studentDetails.setFathersName(dto.fathersName());
+            studentDetails.setLastName(dto.lastName());
+            studentDetails.setEmail(dto.email());
+            studentDetails.setPhone(dto.phone());
+            studentDetails.setTelegram(dto.telegram());
+
+            if(dto.courseID() != null && dto.courseID() != 0)
+                student.setCourse(courseRepository.getReferenceById(dto.courseID()));
+
+        } catch (EntityNotFoundException e) {
+            log.severe("Error: " + e.getMessage());
+            throw new ResourceNotFoundException(e.getMessage());
         } catch (Exception e) {
             log.severe("Mapping error: " + e.getMessage());
             log.warning("Entity: " + student);

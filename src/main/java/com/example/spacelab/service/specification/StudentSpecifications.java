@@ -3,6 +3,7 @@ package com.example.spacelab.service.specification;
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.student.Student;
 import com.example.spacelab.model.student.StudentAccountStatus;
+import jakarta.persistence.criteria.Join;
 import org.springframework.data.jpa.domain.Specification;
 
 public class StudentSpecifications {
@@ -22,6 +23,14 @@ public class StudentSpecifications {
     public static Specification<Student> hasCourse(Course course) {
         if(course == null) return (root, query, cb) -> null;
         return (root, query, cb) -> cb.equal(root.get("course"), course);
+    }
+
+    public static Specification<Student> hasCourseIDs(Long... ids) {
+        if(ids == null) return (root, query, cb) -> null;
+        return (root, query, cb) -> {
+            Join<Course, Student> csj = root.join("course");
+            return csj.in("id", ids);
+        };
     }
 
     public static Specification<Student> hasPhoneLike(String phone) {

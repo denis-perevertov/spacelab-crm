@@ -41,7 +41,7 @@ public class Task {
     private String taskDescription;
 
     @OneToMany
-    private List<Student> subtasks;
+    private List<Task> subtasks;
 
     @ManyToMany
     private List<Literature> recommendedLiterature;

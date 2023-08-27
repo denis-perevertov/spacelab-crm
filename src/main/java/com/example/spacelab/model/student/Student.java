@@ -2,6 +2,7 @@ package com.example.spacelab.model.student;
 
 import com.example.spacelab.model.UserEntity;
 import com.example.spacelab.model.course.Course;
+import com.example.spacelab.model.lesson.LessonReportRow;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -26,6 +27,9 @@ public class Student extends UserEntity {
 
     @OneToMany(mappedBy = "student")
     private List<StudentTask> tasks = new ArrayList<>();
+
+    @OneToMany(mappedBy = "student")
+    private List<LessonReportRow> lessonData = new ArrayList<>();
 
 
 }

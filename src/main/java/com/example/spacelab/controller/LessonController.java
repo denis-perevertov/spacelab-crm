@@ -19,7 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-@Controller
+@RestController
 @Log
 @RequiredArgsConstructor
 @RequestMapping("/lessons")
@@ -62,7 +62,7 @@ public class LessonController {
         return new ResponseEntity<>("Deleted", HttpStatus.OK);
     }
 
-    @PostMapping
+    @PostMapping("/update")
     public ResponseEntity<String> saveLessonReportRowAfterStart(@Valid @RequestBody LessonReportRowSaveDTO lessonReportRowSTO) {
        lessonReportRowService.updateLessonReportRowAndCompletedTask(lessonReportRowSTO);
         return new ResponseEntity<>("Successful update", HttpStatus.OK);

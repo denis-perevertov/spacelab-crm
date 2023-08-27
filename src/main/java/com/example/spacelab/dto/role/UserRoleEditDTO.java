@@ -1,10 +1,10 @@
-package com.example.spacelab.dto;
+package com.example.spacelab.dto.role;
 
 import com.example.spacelab.model.role.PermissionSet;
 import lombok.Data;
 
 @Data
-public class UserRoleDTO {
+public class UserRoleEditDTO {
 
     private Long id;
     private String name;
