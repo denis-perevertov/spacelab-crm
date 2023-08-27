@@ -1,13 +1,13 @@
 package com.example.spacelab.mapper;
 
-import com.example.spacelab.model.Course;
-import com.example.spacelab.model.Literature;
-import com.example.spacelab.model.dto.literature.LiteratureCardDTO;
-import com.example.spacelab.model.dto.literature.LiteratureInfoDTO;
-import com.example.spacelab.model.dto.literature.LiteratureListDTO;
-import com.example.spacelab.model.dto.literature.LiteratureSaveDTO;
+import com.example.spacelab.model.course.Course;
+import com.example.spacelab.model.literature.Literature;
+import com.example.spacelab.dto.literature.LiteratureCardDTO;
+import com.example.spacelab.dto.literature.LiteratureInfoDTO;
+import com.example.spacelab.dto.literature.LiteratureListDTO;
+import com.example.spacelab.dto.literature.LiteratureSaveDTO;
 import com.example.spacelab.service.CourseService;
-import com.example.spacelab.util.LiteratureType;
+import com.example.spacelab.model.literature.LiteratureType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;

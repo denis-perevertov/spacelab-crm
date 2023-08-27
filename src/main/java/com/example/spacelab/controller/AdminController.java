@@ -1,9 +1,9 @@
 package com.example.spacelab.controller;
 
 import com.example.spacelab.mapper.AdminMapper;
-import com.example.spacelab.model.Admin;
-import com.example.spacelab.model.dto.AdminDTO;
-import com.example.spacelab.model.dto.admin.AdminEditDTO;
+import com.example.spacelab.model.admin.Admin;
+import com.example.spacelab.dto.AdminDTO;
+import com.example.spacelab.dto.admin.AdminEditDTO;
 import com.example.spacelab.service.AdminService;
 import com.example.spacelab.util.FilterForm;
 import jakarta.validation.Valid;
@@ -16,8 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Controller
 @Log

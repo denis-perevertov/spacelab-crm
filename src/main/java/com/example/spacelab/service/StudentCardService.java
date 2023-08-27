@@ -1,6 +1,6 @@
 package com.example.spacelab.service;
 
-import com.example.spacelab.model.dto.student.StudentCardDTO;
+import com.example.spacelab.dto.student.StudentCardDTO;
 
 public interface StudentCardService {
 

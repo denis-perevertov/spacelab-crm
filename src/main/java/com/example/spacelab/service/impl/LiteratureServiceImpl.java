@@ -2,14 +2,14 @@ package com.example.spacelab.service.impl;
 
 import com.example.spacelab.exception.ResourceNotFoundException;
 import com.example.spacelab.mapper.LiteratureMapper;
-import com.example.spacelab.model.Course;
-import com.example.spacelab.model.Literature;
+import com.example.spacelab.model.course.Course;
+import com.example.spacelab.model.literature.Literature;
 import com.example.spacelab.repository.CourseRepository;
 import com.example.spacelab.repository.LiteratureRepository;
 import com.example.spacelab.service.LiteratureService;
 import com.example.spacelab.service.specification.LiteratureSpecifications;
 import com.example.spacelab.util.FilterForm;
-import com.example.spacelab.util.LiteratureType;
+import com.example.spacelab.model.literature.LiteratureType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.data.domain.Page;

@@ -1,18 +1,18 @@
 package com.example.spacelab.mapper;
 
-import com.example.spacelab.model.*;
-import com.example.spacelab.model.dto.lesson.LessonInfoDTO;
-import com.example.spacelab.model.dto.lesson.LessonListDTO;
-import com.example.spacelab.model.dto.lesson.LessonReportRowDTO;
-import com.example.spacelab.model.dto.lesson.LessonSaveBeforeStartDTO;
-import com.example.spacelab.model.dto.literature.LiteratureCardDTO;
-import com.example.spacelab.model.dto.literature.LiteratureInfoDTO;
-import com.example.spacelab.model.dto.literature.LiteratureListDTO;
-import com.example.spacelab.model.dto.literature.LiteratureSaveDTO;
+import com.example.spacelab.dto.lesson.LessonInfoDTO;
+import com.example.spacelab.dto.lesson.LessonListDTO;
+import com.example.spacelab.dto.lesson.LessonReportRowDTO;
+import com.example.spacelab.dto.lesson.LessonSaveBeforeStartDTO;
+import com.example.spacelab.model.admin.Admin;
+import com.example.spacelab.model.course.Course;
+import com.example.spacelab.model.lesson.Lesson;
+import com.example.spacelab.model.lesson.LessonReport;
+import com.example.spacelab.model.lesson.LessonReportRow;
+import com.example.spacelab.model.student.StudentTask;
 import com.example.spacelab.service.AdminService;
 import com.example.spacelab.service.CourseService;
-import com.example.spacelab.util.LessonStatus;
-import com.example.spacelab.util.LiteratureType;
+import com.example.spacelab.model.lesson.LessonStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -20,9 +20,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
@@ -96,8 +94,13 @@ public class LessonMapper {
                 lessonReportRowDTO.setWasPresent(lessonReportRow.getWasPresent());
 
                 List<String> taskNames = new ArrayList<>();
-                for (Task currentTask : lessonReportRow.getCurrentTasks()) {
-                    taskNames.add(currentTask.getName()+ " ("+currentTask.getPercentOfCompletion()+"%)"); }
+                for (StudentTask currentTask : lessonReportRow.getStudent().getTasks()) {
+                    String taskName = currentTask.getTask().getName();
+                    String taskPercent = "";
+                    if (currentTask.getPercentOfCompletion() != null ) {
+                        taskPercent = " ("+currentTask.getPercentOfCompletion()+"%)";
+                    }
+                taskNames.add(taskName + taskPercent); }
                 lessonReportRowDTO.setCurrentTasks(taskNames);
                 
                 lessonReportRowDTO.setHours(lessonReportRow.getHours());

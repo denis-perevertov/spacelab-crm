@@ -2,10 +2,10 @@ package com.example.spacelab.controller;
 
 
 import com.example.spacelab.mapper.TaskMapper;
-import com.example.spacelab.model.Task;
-import com.example.spacelab.model.dto.task.TaskInfoDTO;
-import com.example.spacelab.model.dto.task.TaskSaveDTO;
-import com.example.spacelab.model.dto.task.TaskListDTO;
+import com.example.spacelab.model.task.Task;
+import com.example.spacelab.dto.task.TaskInfoDTO;
+import com.example.spacelab.dto.task.TaskSaveDTO;
+import com.example.spacelab.dto.task.TaskListDTO;
 import com.example.spacelab.service.TaskService;
 import com.example.spacelab.util.FilterForm;
 import jakarta.validation.Valid;

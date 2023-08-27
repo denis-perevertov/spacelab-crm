@@ -1,6 +1,6 @@
 package com.example.spacelab.repository;
 
-import com.example.spacelab.model.Literature;
+import com.example.spacelab.model.literature.Literature;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;

@@ -1,10 +1,14 @@
 package com.example.spacelab.mapper;
 
-import com.example.spacelab.model.*;
-import com.example.spacelab.model.dto.course.CourseCardDTO;
-import com.example.spacelab.model.dto.course.CourseInfoDTO;
-import com.example.spacelab.model.dto.course.CourseListDTO;
-import com.example.spacelab.model.dto.course.CourseSaveDTO;
+import com.example.spacelab.dto.course.CourseCardDTO;
+import com.example.spacelab.dto.course.CourseInfoDTO;
+import com.example.spacelab.dto.course.CourseListDTO;
+import com.example.spacelab.dto.course.CourseSaveDTO;
+import com.example.spacelab.model.admin.Admin;
+import com.example.spacelab.model.course.Course;
+import com.example.spacelab.model.course.CourseInfo;
+import com.example.spacelab.model.student.Student;
+import com.example.spacelab.model.task.Task;
 import com.example.spacelab.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

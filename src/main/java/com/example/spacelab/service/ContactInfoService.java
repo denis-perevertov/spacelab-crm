@@ -1,7 +1,6 @@
 package com.example.spacelab.service;
 
-import com.example.spacelab.model.ContactInfo;
-import com.example.spacelab.model.dto.contact.ContactInfoDTO;
+import com.example.spacelab.model.contact.ContactInfo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

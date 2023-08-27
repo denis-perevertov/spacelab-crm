@@ -1,8 +1,8 @@
 package com.example.spacelab.controller;
 
 import com.example.spacelab.mapper.ContactInfoMapper;
-import com.example.spacelab.model.ContactInfo;
-import com.example.spacelab.model.dto.contact.ContactInfoDTO;
+import com.example.spacelab.model.contact.ContactInfo;
+import com.example.spacelab.dto.contact.ContactInfoDTO;
 import com.example.spacelab.service.ContactInfoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

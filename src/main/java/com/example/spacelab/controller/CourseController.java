@@ -1,10 +1,10 @@
 package com.example.spacelab.controller;
 
 import com.example.spacelab.mapper.CourseMapper;
-import com.example.spacelab.model.Course;
-import com.example.spacelab.model.dto.course.CourseInfoDTO;
-import com.example.spacelab.model.dto.course.CourseListDTO;
-import com.example.spacelab.model.dto.course.CourseSaveDTO;
+import com.example.spacelab.model.course.Course;
+import com.example.spacelab.dto.course.CourseInfoDTO;
+import com.example.spacelab.dto.course.CourseListDTO;
+import com.example.spacelab.dto.course.CourseSaveDTO;
 import com.example.spacelab.service.CourseService;
 import com.example.spacelab.util.FilterForm;
 import jakarta.validation.Valid;

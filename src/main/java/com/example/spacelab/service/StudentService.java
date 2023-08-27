@@ -1,13 +1,9 @@
 package com.example.spacelab.service;
 
-import com.example.spacelab.model.InviteStudentRequest;
-import com.example.spacelab.model.Student;
-import com.example.spacelab.model.dto.student.StudentCardDTO;
+import com.example.spacelab.model.student.StudentInviteRequest;
+import com.example.spacelab.model.student.Student;
 
-import com.example.spacelab.model.dto.StudentTaskDTO;
-import com.example.spacelab.model.dto.student.StudentRegisterDTO;
 import com.example.spacelab.util.FilterForm;
-import com.example.spacelab.util.StudentTaskStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -28,5 +24,5 @@ public interface StudentService extends StudentTaskService,
 
     void deleteStudentById(Long id);
 
-    String createInviteStudentToken(InviteStudentRequest request);
+    String createInviteStudentToken(StudentInviteRequest request);
 }

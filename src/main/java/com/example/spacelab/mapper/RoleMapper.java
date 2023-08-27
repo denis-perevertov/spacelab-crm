@@ -2,9 +2,8 @@ package com.example.spacelab.mapper;
 
 import com.example.spacelab.exception.MappingException;
 import com.example.spacelab.model.role.PermissionSet;
-import com.example.spacelab.model.role.PermissionType;
 import com.example.spacelab.model.role.UserRole;
-import com.example.spacelab.model.dto.UserRoleDTO;
+import com.example.spacelab.dto.UserRoleDTO;
 import com.example.spacelab.repository.UserRoleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;

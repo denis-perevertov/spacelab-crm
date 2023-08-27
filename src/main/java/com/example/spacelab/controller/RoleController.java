@@ -1,7 +1,7 @@
 package com.example.spacelab.controller;
 
 import com.example.spacelab.mapper.RoleMapper;
-import com.example.spacelab.model.dto.UserRoleDTO;
+import com.example.spacelab.dto.UserRoleDTO;
 import com.example.spacelab.model.role.UserRole;
 import com.example.spacelab.service.UserRoleService;
 import jakarta.validation.Valid;

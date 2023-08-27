@@ -1,7 +1,7 @@
 package com.example.spacelab.service.impl;
 
 import com.example.spacelab.exception.ResourceNotFoundException;
-import com.example.spacelab.model.Lesson;
+import com.example.spacelab.model.lesson.Lesson;
 import com.example.spacelab.repository.LessonRepository;
 import com.example.spacelab.service.LessonService;
 import com.example.spacelab.util.FilterForm;

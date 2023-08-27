@@ -2,16 +2,19 @@ package com.example.spacelab.controller;
 
 import com.example.spacelab.mapper.StudentMapper;
 import com.example.spacelab.mapper.TaskMapper;
-import com.example.spacelab.model.*;
-import com.example.spacelab.model.dto.student.StudentCardDTO;
+import com.example.spacelab.dto.student.StudentCardDTO;
 
-import com.example.spacelab.model.dto.StudentTaskDTO;
-import com.example.spacelab.model.dto.student.StudentDTO;
-import com.example.spacelab.model.dto.student.StudentRegisterDTO;
+import com.example.spacelab.dto.StudentTaskDTO;
+import com.example.spacelab.dto.student.StudentDTO;
+import com.example.spacelab.dto.student.StudentRegisterDTO;
+import com.example.spacelab.model.admin.Admin;
+import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.role.PermissionType;
+import com.example.spacelab.model.student.Student;
+import com.example.spacelab.model.student.StudentInviteRequest;
 import com.example.spacelab.service.StudentService;
 import com.example.spacelab.util.FilterForm;
-import com.example.spacelab.util.StudentTaskStatus;
+import com.example.spacelab.model.student.StudentTaskStatus;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -126,7 +129,7 @@ public class StudentController {
     // Формирование ссылки на приглашение студента
     @PostMapping("/invite")
     public ResponseEntity<String> createStudentInviteLink(@AuthenticationPrincipal Admin admin,
-                                                          @RequestBody InviteStudentRequest inviteRequest,
+                                                          @RequestBody StudentInviteRequest inviteRequest,
                                                           HttpServletRequest servletRequest) {
 
         String token = studentService.createInviteStudentToken(inviteRequest);
@@ -183,7 +186,7 @@ public class StudentController {
 
         if(permissionType == PermissionType.NO_ACCESS) throw new AccessDeniedException("No access to this operation!");
         else if(permissionType == PermissionType.PARTIAL) {
-            if(!admin.getCoursesAsMentor().stream().map(Course::getId).toList().contains(courseID))
+            if(!admin.getCourses().stream().map(Course::getId).toList().contains(courseID))
                 throw new AccessDeniedException("No access to creating new students for course "+courseName+"!");
         }
     }

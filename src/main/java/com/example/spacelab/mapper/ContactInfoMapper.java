@@ -1,8 +1,8 @@
 package com.example.spacelab.mapper;
 
 import com.example.spacelab.exception.MappingException;
-import com.example.spacelab.model.ContactInfo;
-import com.example.spacelab.model.dto.contact.ContactInfoDTO;
+import com.example.spacelab.model.contact.ContactInfo;
+import com.example.spacelab.dto.contact.ContactInfoDTO;
 import com.example.spacelab.repository.AdminRepository;
 import com.example.spacelab.repository.ContactInfoRepository;
 import lombok.RequiredArgsConstructor;

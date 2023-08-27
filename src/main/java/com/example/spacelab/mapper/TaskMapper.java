@@ -1,12 +1,16 @@
 package com.example.spacelab.mapper;
 
 import com.example.spacelab.exception.MappingException;
-import com.example.spacelab.model.*;
-import com.example.spacelab.model.dto.StudentTaskDTO;
-import com.example.spacelab.model.dto.task.TaskCardDTO;
-import com.example.spacelab.model.dto.task.TaskInfoDTO;
-import com.example.spacelab.model.dto.task.TaskSaveDTO;
-import com.example.spacelab.model.dto.task.TaskListDTO;
+import com.example.spacelab.dto.StudentTaskDTO;
+import com.example.spacelab.dto.task.TaskCardDTO;
+import com.example.spacelab.dto.task.TaskInfoDTO;
+import com.example.spacelab.dto.task.TaskSaveDTO;
+import com.example.spacelab.dto.task.TaskListDTO;
+import com.example.spacelab.model.course.Course;
+import com.example.spacelab.model.literature.Literature;
+import com.example.spacelab.model.student.Student;
+import com.example.spacelab.model.student.StudentTask;
+import com.example.spacelab.model.task.Task;
 import com.example.spacelab.repository.CourseRepository;
 import com.example.spacelab.repository.LiteratureRepository;
 import com.example.spacelab.repository.TaskRepository;

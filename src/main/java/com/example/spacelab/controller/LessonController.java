@@ -1,14 +1,12 @@
 package com.example.spacelab.controller;
 
 import com.example.spacelab.mapper.LessonMapper;
-import com.example.spacelab.model.Lesson;
-import com.example.spacelab.model.Literature;
-import com.example.spacelab.model.dto.lesson.LessonInfoDTO;
-import com.example.spacelab.model.dto.lesson.LessonListDTO;
-import com.example.spacelab.model.dto.lesson.LessonSaveBeforeStartDTO;
-import com.example.spacelab.model.dto.literature.LiteratureInfoDTO;
-import com.example.spacelab.model.dto.literature.LiteratureListDTO;
-import com.example.spacelab.model.dto.literature.LiteratureSaveDTO;
+import com.example.spacelab.model.lesson.Lesson;
+import com.example.spacelab.dto.lesson.LessonInfoDTO;
+import com.example.spacelab.dto.lesson.LessonListDTO;
+import com.example.spacelab.dto.lesson.LessonReportRowSaveDTO;
+import com.example.spacelab.dto.lesson.LessonSaveBeforeStartDTO;
+import com.example.spacelab.service.LessonReportRowService;
 import com.example.spacelab.service.LessonService;
 import com.example.spacelab.util.FilterForm;
 import jakarta.validation.Valid;
@@ -27,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/lessons")
 public class LessonController {
 
+    private final LessonReportRowService lessonReportRowService;
     private final LessonService lessonService;
     private final LessonMapper mapper;
 
@@ -62,6 +61,13 @@ public class LessonController {
         lessonService.deleteLessonById(id);
         return new ResponseEntity<>("Deleted", HttpStatus.OK);
     }
+
+    @PostMapping
+    public ResponseEntity<String> saveLessonReportRowAfterStart(@Valid @RequestBody LessonReportRowSaveDTO lessonReportRowSTO) {
+       lessonReportRowService.updateLessonReportRowAndCompletedTask(lessonReportRowSTO);
+        return new ResponseEntity<>("Successful update", HttpStatus.OK);
+    }
+
 
 
 }

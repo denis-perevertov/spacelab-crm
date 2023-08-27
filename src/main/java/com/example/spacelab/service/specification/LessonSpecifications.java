@@ -1,10 +1,9 @@
 package com.example.spacelab.service.specification;
 
-import com.example.spacelab.model.Admin;
-import com.example.spacelab.model.Course;
-import com.example.spacelab.model.Lesson;
-import com.example.spacelab.model.Literature;
-import com.example.spacelab.util.LessonStatus;
+import com.example.spacelab.model.admin.Admin;
+import com.example.spacelab.model.course.Course;
+import com.example.spacelab.model.lesson.Lesson;
+import com.example.spacelab.model.lesson.LessonStatus;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDate;

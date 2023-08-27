@@ -3,24 +3,21 @@ package com.example.spacelab.service.impl;
 import com.example.spacelab.exception.ResourceNotFoundException;
 import com.example.spacelab.mapper.StudentMapper;
 import com.example.spacelab.mapper.TaskMapper;
-import com.example.spacelab.model.Course;
-import com.example.spacelab.model.InviteStudentRequest;
-import com.example.spacelab.model.Student;
-import com.example.spacelab.model.StudentTask;
-import com.example.spacelab.model.dto.student.StudentCardDTO;
+import com.example.spacelab.model.course.Course;
+import com.example.spacelab.model.student.StudentInviteRequest;
+import com.example.spacelab.model.student.Student;
+import com.example.spacelab.model.student.StudentTask;
+import com.example.spacelab.dto.student.StudentCardDTO;
 
-import com.example.spacelab.model.dto.StudentTaskDTO;
-import com.example.spacelab.model.dto.student.StudentRegisterDTO;
 import com.example.spacelab.repository.*;
 import com.example.spacelab.service.StudentService;
 import com.example.spacelab.service.specification.StudentSpecifications;
 import com.example.spacelab.util.FilterForm;
-import com.example.spacelab.util.StudentAccountStatus;
-import com.example.spacelab.util.StudentTaskStatus;
+import com.example.spacelab.model.student.StudentAccountStatus;
+import com.example.spacelab.model.student.StudentTaskStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -147,7 +144,7 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public String createInviteStudentToken(InviteStudentRequest request) {
+    public String createInviteStudentToken(StudentInviteRequest request) {
         log.info("Creating token to use in Student invite URL...");
         UUID id = UUID.randomUUID();
         request.setId(id.toString());

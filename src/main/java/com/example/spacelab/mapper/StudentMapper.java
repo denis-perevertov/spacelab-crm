@@ -1,16 +1,15 @@
 package com.example.spacelab.mapper;
 
 import com.example.spacelab.exception.MappingException;
-import com.example.spacelab.model.Student;
-import com.example.spacelab.model.StudentDetails;
+import com.example.spacelab.model.student.Student;
+import com.example.spacelab.model.student.StudentDetails;
 
-import com.example.spacelab.model.dto.student.StudentCardDTO;
+import com.example.spacelab.dto.student.StudentCardDTO;
 
-import com.example.spacelab.model.dto.student.StudentDTO;
-import com.example.spacelab.model.dto.student.StudentRegisterDTO;
+import com.example.spacelab.dto.student.StudentDTO;
+import com.example.spacelab.dto.student.StudentRegisterDTO;
 import com.example.spacelab.repository.CourseRepository;
 import com.example.spacelab.repository.StudentRepository;
-import com.example.spacelab.util.StudentAccountStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.stereotype.Component;

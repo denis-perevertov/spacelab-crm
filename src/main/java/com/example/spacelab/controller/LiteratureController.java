@@ -1,10 +1,10 @@
 package com.example.spacelab.controller;
 
 import com.example.spacelab.mapper.LiteratureMapper;
-import com.example.spacelab.model.Literature;
-import com.example.spacelab.model.dto.literature.LiteratureInfoDTO;
-import com.example.spacelab.model.dto.literature.LiteratureListDTO;
-import com.example.spacelab.model.dto.literature.LiteratureSaveDTO;
+import com.example.spacelab.model.literature.Literature;
+import com.example.spacelab.dto.literature.LiteratureInfoDTO;
+import com.example.spacelab.dto.literature.LiteratureListDTO;
+import com.example.spacelab.dto.literature.LiteratureSaveDTO;
 import com.example.spacelab.service.LiteratureService;
 import com.example.spacelab.util.FilterForm;
 import jakarta.validation.Valid;

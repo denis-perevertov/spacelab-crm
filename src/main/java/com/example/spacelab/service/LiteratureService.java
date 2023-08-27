@@ -1,6 +1,6 @@
 package com.example.spacelab.service;
 
-import com.example.spacelab.model.Literature;
+import com.example.spacelab.model.literature.Literature;
 import com.example.spacelab.util.FilterForm;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

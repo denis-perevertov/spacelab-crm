@@ -1,13 +1,13 @@
 package com.example.spacelab.mapper;
 
 import com.example.spacelab.exception.MappingException;
-import com.example.spacelab.model.Admin;
+import com.example.spacelab.model.admin.Admin;
 
 
-import com.example.spacelab.model.dto.admin.AdminContactDTO;
-import com.example.spacelab.model.dto.admin.AdminEditDTO;
-import com.example.spacelab.model.dto.AdminDTO;
-import com.example.spacelab.model.dto.course.CourseListDTO;
+import com.example.spacelab.dto.admin.AdminContactDTO;
+import com.example.spacelab.dto.admin.AdminEditDTO;
+import com.example.spacelab.dto.AdminDTO;
+import com.example.spacelab.dto.course.CourseListDTO;
 import com.example.spacelab.repository.AdminRepository;
 import com.example.spacelab.repository.CourseRepository;
 import com.example.spacelab.repository.UserRoleRepository;
@@ -40,7 +40,7 @@ public class AdminMapper {
             dto.setRole(admin.getRole().toString());
 
             List<CourseListDTO> courses = dto.getCourses();
-            admin.getCoursesAsMentor().forEach(course -> courses.add(courseMapper.fromCourseToListDTO(course)));
+            admin.getCourses().forEach(course -> courses.add(courseMapper.fromCourseToListDTO(course)));
         } catch (Exception e) {
             log.severe("Mapping error: " + e.getMessage());
             log.warning("DTO: " + dto);
