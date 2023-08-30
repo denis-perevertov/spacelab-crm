@@ -13,11 +13,13 @@ public class TaskSaveDTO {
 
     private String name;
 
-    private Long parentTaskId;
+    private Long parentTaskId; // ?
 
     private Long courseId;
 
     private TaskLevel level;
+
+    private TaskStatus status;
 
     private String completionTime;
 
@@ -29,7 +31,6 @@ public class TaskSaveDTO {
 
     private List<Long> recommendedLiteratureIds;
 
-    private TaskStatus status;
 
 
 }

@@ -11,15 +11,8 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class SpacelabApplication {
 
-//	@Autowired private DefaultInitializer defaultInitializer;
-
 	public static void main(String[] args) {
 		SpringApplication.run(SpacelabApplication.class, args);
 	}
-
-//	@EventListener(ApplicationReadyEvent.class)
-//	public void setDefaultValues() throws InterruptedException {
-//		defaultInitializer.init();
-//	}
 
 }

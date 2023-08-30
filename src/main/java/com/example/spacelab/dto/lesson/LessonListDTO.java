@@ -8,12 +8,13 @@ public class LessonListDTO {
 
     private Long id;
 
-    private LocalDateTime datetime;
+    private LocalDateTime datetime; // or string
 
     private Long courseId;
     private String courseName;
 
-    private String link;
+    private String link; // ?
+
     private String status;
 
     private Long mentorId;

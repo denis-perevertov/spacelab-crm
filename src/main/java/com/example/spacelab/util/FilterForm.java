@@ -18,4 +18,6 @@ public class FilterForm {
     private Long mentor;
     private Long manager;
     private Boolean active;
+
+    public static FilterBuilder with() { return new FilterBuilder(); }
 }

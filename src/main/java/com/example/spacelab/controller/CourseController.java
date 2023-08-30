@@ -26,7 +26,8 @@ public class CourseController {
     private final CourseMapper mapper;
 
 
-  private ResponseEntity<Page<CourseListDTO>> getCourses(FilterForm filters,
+    @GetMapping
+    private ResponseEntity<Page<CourseListDTO>> getCourses(FilterForm filters,
                                                            @RequestParam(required = false) Integer page,
                                                            @RequestParam(required = false) Integer size) {
       Page<Course> courseList = courseService.getCourses(filters, PageRequest.of(page, size));

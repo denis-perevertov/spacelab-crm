@@ -31,5 +31,12 @@ public class Student extends UserEntity {
     @OneToMany(mappedBy = "student")
     private List<LessonReportRow> lessonData = new ArrayList<>();
 
+    public String getFullName() {
+        return String.join(" ",
+                this.details.getFirstName(),
+                this.details.getFathersName(),
+                this.details.getLastName());
+    }
+
 
 }

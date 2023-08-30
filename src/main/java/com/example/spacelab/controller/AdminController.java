@@ -1,5 +1,6 @@
 package com.example.spacelab.controller;
 
+import com.example.spacelab.dto.SelectSearchDTO;
 import com.example.spacelab.exception.ErrorMessage;
 import com.example.spacelab.exception.ObjectValidationException;
 import com.example.spacelab.exception.ResourceNotFoundException;
@@ -27,6 +28,7 @@ import lombok.extern.java.Log;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -36,6 +38,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Tag(name="Admin", description = "Admin controller")
@@ -150,5 +153,40 @@ public class AdminController {
     public ResponseEntity<String> deleteAdmin(@PathVariable Long id) {
         adminService.deleteAdminById(id);
         return new ResponseEntity<>("Admin with ID: " + id + " deleted", HttpStatus.OK);
+    }
+
+    // ==================================
+
+    // Получение списка админов по ролям (для Select2)
+    @GetMapping("/get-admins-by-role/")
+    public Map<String, Object> getAdminsByRole(@RequestParam Long roleID,
+                                                 @RequestParam Integer page) {
+        FilterForm form = FilterForm.with()
+                                    .role(roleID)
+                                    .build();
+        Pageable pageable = PageRequest.of(page, 10);
+
+        Page<Admin> adminPage =  adminService.getAdmins(form, pageable);
+
+        List<SelectSearchDTO> adminList = adminPage.getContent()
+                                                    .stream()
+                                                    .map(admin -> new SelectSearchDTO(admin.getId(),
+                                                            admin.getFirstName() + " " + admin.getLastName()))
+                                                    .toList();
+        Map<String, Object> selectMap = new HashMap<>();
+        selectMap.put("results", adminList);
+        selectMap.put("pagination", Map.of("more", adminPage.getNumber() < adminPage.getTotalPages()));
+
+        return selectMap;
+    }
+
+    // Получение списка незанятых админов (админов без назначенных курсов)
+    @GetMapping("/get-available-admins")
+    public List<AdminDTO> getAdminsWithoutCourses() {
+        return adminService.getAdmins()
+                            .stream()
+                            .filter(admin -> admin.getCourses().size() < 1)
+                            .map(adminMapper::fromAdminToDTO)
+                            .toList();
     }
 }
