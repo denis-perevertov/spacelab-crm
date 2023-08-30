@@ -15,6 +15,8 @@ public interface LiteratureService extends EntityFilterService<Literature>{
     Literature createNewLiterature(Literature literature);
     Literature editLiterature(Literature literature);
 
+    Page<Literature> getLiteratureByName(String name, Pageable pageable);
+
     void verifyLiterature(Long id);
 
     void deleteLiteratureById(Long id);

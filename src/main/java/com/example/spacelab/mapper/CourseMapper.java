@@ -1,12 +1,11 @@
 package com.example.spacelab.mapper;
 
-import com.example.spacelab.dto.course.CourseCardDTO;
-import com.example.spacelab.dto.course.CourseInfoDTO;
-import com.example.spacelab.dto.course.CourseListDTO;
-import com.example.spacelab.dto.course.CourseSaveDTO;
+import com.example.spacelab.dto.course.*;
+import com.example.spacelab.dto.student.StudentAvatarDTO;
 import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.course.CourseInfo;
+import com.example.spacelab.model.literature.Literature;
 import com.example.spacelab.model.student.Student;
 import com.example.spacelab.model.task.Task;
 import com.example.spacelab.repository.*;
@@ -25,10 +24,10 @@ import java.util.Map;
 public class CourseMapper {
 
     private final AdminRepository adminRepository;
-    private final CourseRepository courseRepository;
     private final StudentRepository studentRepository;
     private final TaskRepository taskRepository;
-
+    private final LiteratureRepository literatureRepository;
+    private final StudentMapper studentMapper;
 
 
     public CourseListDTO fromCourseToListDTO(Course course) {
@@ -56,6 +55,23 @@ public class CourseMapper {
         return dto;
     }
 
+    public CourseInformationDTO fromCourseInfoToCourseInformationDTO(CourseInfo courseInfo) {
+        CourseInformationDTO dto = new CourseInformationDTO();
+        dto.setMain_description(courseInfo.getMain_description());
+        dto.setTopics(courseInfo.getTopics());
+        dto.setCompletionTime(courseInfo.getCompletionTime());
+        dto.setGroupSize(courseInfo.getGroupSize());
+        dto.setHoursNorm(courseInfo.getHoursNorm());
+        return dto;
+    }
+
+    public CourseSelectDTO fromCourseToSelectDTO(Course course) {
+        CourseSelectDTO dto = new CourseSelectDTO();
+        dto.setId(course.getId());
+        dto.setName(course.getName());
+        return dto;
+    }
+
     public List <CourseListDTO> fromCourseListToListDTO(List<Course> courses) {
         List <CourseListDTO> dtos = new ArrayList<>();
         for (Course course : courses) {
@@ -67,6 +83,14 @@ public class CourseMapper {
         List<CourseListDTO> dtos = new ArrayList<>();
         for (Course course : coursePage.getContent()) {
             dtos.add(fromCourseToListDTO(course));
+        }
+        return new PageImpl<>(dtos, coursePage.getPageable(), coursePage.getTotalElements());
+    }
+
+    public Page<CourseSelectDTO> fromCoursePageToSelectDTOPage(Page<Course> coursePage) {
+        List<CourseSelectDTO> dtos = new ArrayList<>();
+        for (Course course : coursePage.getContent()) {
+            dtos.add(fromCourseToSelectDTO(course));
         }
         return new PageImpl<>(dtos, coursePage.getPageable(), coursePage.getTotalElements());
     }
@@ -102,10 +126,10 @@ public class CourseMapper {
             dto.setManagerName(manager.getFirstName()+" "+manager.getLastName()); // Assuming Admin has a 'name' property
         }
 
-        Map<Long, String> students = new HashMap<>();
+        List<StudentAvatarDTO> students = new ArrayList<>();
         if (course.getStudents() != null && !course.getStudents().isEmpty()) {
             for (Student student : course.getStudents()) {
-                students.put(student.getId(), student.getDetails().getFirstName()+" "+student.getDetails().getLastName());
+                students.add(studentMapper.fromStudentToAvatarDTO(student));
             }
         }
         dto.setStudents(students);
@@ -113,44 +137,64 @@ public class CourseMapper {
         Map<Long, String> tasks = new HashMap<>();
         if (course.getTasks() != null && !course.getTasks().isEmpty()) {
             for (Task task : course.getTasks()) {
-                students.put(task.getId(), task.getName());
+                tasks.put(task.getId(), task.getName());
             }
         }
         dto.setTasks(tasks);
 
         dto.setStatus(course.getStatus());
+        CourseInformationDTO courseInfo;
+        if (course.getCourseInfo() == null) {
+            courseInfo = new CourseInformationDTO();
 
-        CourseInfo courseInfo = course.getCourseInfo();
-        if (courseInfo != null) {
-            dto.setMain_description(courseInfo.getMain_description());
-            dto.setTopics(courseInfo.getTopics());
-            dto.setCompletionTime(courseInfo.getCompletionTime());
-            dto.setGroupSize(courseInfo.getGroupSize());
-            dto.setHoursNorm(courseInfo.getHoursNorm());
+        } else {
+            courseInfo = fromCourseInfoToCourseInformationDTO(course.getCourseInfo());
         }
+        dto.setCourseInfo(courseInfo);
 
-        Map<Long, String> manegers = new HashMap<>();
-        List<Admin> admins = adminRepository.findAll();
-        if (admins != null && !admins.isEmpty()) {
-            for (Admin admin : admins) {
-                students.put(admin.getId(), admin.getFirstName()+" "+admin.getLastName());
-            }
-        }
-        dto.setManegers(manegers);
-
-        //Если будут фиксированные роли, можно будет получать отдельно менторов и админов.
-        dto.setMentors(manegers);
+//        Map<Long, String> manegers = new HashMap<>();
+//        List<Admin> admins = adminRepository.findAll();
+//        if (admins != null && !admins.isEmpty()) {
+//            for (Admin admin : admins) {
+//                students.put(admin.getId(), admin.getFirstName()+" "+admin.getLastName());
+//            }
+//        }
+//        dto.setManegers(manegers);
+//
+//        //Если будут фиксированные роли, можно будет получать отдельно менторов и админов.
+//        dto.setMentors(manegers);
 
         return dto;
     }
 
-    public Course fromCardDTOtoCourse(CourseSaveDTO courseDTO) {
+    public Course fromSaveCreatedDTOtoCourse(CourseSaveCreatedDTO courseDTO) {
+        Course course = new Course();
+        course.setId(courseDTO.getId());
+        course.setName(courseDTO.getName());
+        course.setBeginningDate(courseDTO.getBeginningDate());
+
+
+        Admin mentor = adminRepository.findById(courseDTO.getMentorId()).orElse(null);
+        if (mentor != null) {
+            course.setMentor(mentor);
+        }
+
+
+        Admin manager = adminRepository.findById(courseDTO.getManagerId()).orElse(null);
+        if (manager != null) {
+            course.setManager(manager);
+        }
+
+        return course;
+    }
+
+    public Course fromSaveUpdatedDTOtoCourse(CourseSaveUpdatedDTO courseDTO) {
         Course course = new Course();
         course.setId(courseDTO.getId());
         course.setName(courseDTO.getName());
         course.setBeginningDate(courseDTO.getBeginningDate());
         course.setEndDate(courseDTO.getEndDate());
-
+        course.setStatus(courseDTO.getStatus());
 
         Admin mentor = adminRepository.findById(courseDTO.getMentorId()).orElse(null);
         if (mentor != null) {
@@ -181,17 +225,33 @@ public class CourseMapper {
         }
         course.setTasks(tasks);
 
+        List <Literature > literature = new ArrayList<>();
+        if (courseDTO.getLiterature() != null && !courseDTO.getLiterature().isEmpty()) {
+            for (Long literatureId : courseDTO.getLiterature()) {
+                literature.add(literatureRepository.findById(literatureId).orElse(null));
+            }
+        }
+        course.setLiterature(literature);
 
-        CourseInfo courseInfo = new CourseInfo();
-        courseInfo.setMain_description(courseDTO.getMain_description());
-        courseInfo.setTopics(courseDTO.getTopics());
-        courseInfo.setCompletionTime(courseDTO.getCompletionTime());
-        courseInfo.setGroupSize(courseDTO.getGroupSize());
-        courseInfo.setHoursNorm(courseDTO.getHoursNorm());
-        course.setCourseInfo(courseInfo);
-        course.setStatus(courseDTO.getStatus());
+        if (courseDTO.getCourseInfo().getMain_description() != null ||
+                courseDTO.getCourseInfo().getTopics() != null ||
+                courseDTO.getCourseInfo().getCompletionTime() != null ||
+                courseDTO.getCourseInfo().getGroupSize() != null) {
 
-        return course;
+            CourseInfo courseInfo;
+            if (course.getCourseInfo() != null) {
+                courseInfo = course.getCourseInfo();
+            } else {
+                courseInfo = new CourseInfo();
+            }
+
+            courseInfo.setMain_description(courseDTO.getCourseInfo().getMain_description());
+            courseInfo.setTopics(courseDTO.getCourseInfo().getTopics());
+            courseInfo.setCompletionTime(courseDTO.getCourseInfo().getCompletionTime());
+            courseInfo.setGroupSize(courseDTO.getCourseInfo().getGroupSize());
+            course.setCourseInfo(courseInfo);
+        }
+    return course;
     }
 
 }

@@ -45,6 +45,14 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    public Page<Course> getCoursesByName(String name, Pageable pageable) {
+        FilterForm filters = new FilterForm();
+        filters.setName(name);
+        Specification<Course> spec = buildSpecificationFromFilters(filters);
+        return courseRepository.findAll(spec, pageable);
+    }
+
+    @Override
     public Specification<Course> buildSpecificationFromFilters(FilterForm filters) {
 
         String name = filters.getName();
@@ -62,7 +70,7 @@ public class CourseServiceImpl implements CourseService {
         */
 
         Specification<Course> spec = Specification.where(
-                CourseSpecifications.hasNameLike(name)
+                        CourseSpecifications.hasNameLike(name)
                         .and(CourseSpecifications.hasMentor(mentor))
                         .and(CourseSpecifications.hasManager(manager))
                         .and(CourseSpecifications.hasActive(active))

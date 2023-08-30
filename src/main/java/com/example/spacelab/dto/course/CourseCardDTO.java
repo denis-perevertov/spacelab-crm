@@ -1,5 +1,6 @@
 package com.example.spacelab.dto.course;
 
+import com.example.spacelab.dto.student.StudentAvatarDTO;
 import com.example.spacelab.model.course.CourseStatus;
 import lombok.Data;
 
@@ -24,24 +25,17 @@ public class CourseCardDTO {
     private Long managerId;
     private String managerName;
 
-    private Map<Long, String> students;
+    private List<StudentAvatarDTO> students;
 
     private Map<Long, String> tasks;
 
     private CourseStatus status;
 
-    private String main_description;
+    private CourseInformationDTO courseInfo;
 
-    private List<String> topics;
 
-    private String completionTime;
-
-    private Integer groupSize;
-
-    private Integer hoursNorm;
-
-    private Map<Long, String> manegers;
-
-    private Map<Long, String> mentors;
+//    private Map<Long, String> manegers;
+//
+//    private Map<Long, String> mentors;
 
 }

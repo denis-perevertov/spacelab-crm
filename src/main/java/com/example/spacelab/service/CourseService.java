@@ -12,6 +12,9 @@ public interface CourseService extends EntityFilterService<Course> {
     List<Course> getCourses();
     Page<Course> getCourses(Pageable pageable);
     Page<Course> getCourses(FilterForm filters, Pageable pageable);
+
+    Page<Course> getCoursesByName(String name, Pageable pageable);
+
     Course getCourseById(Long id);
     Course createNewCourse(Course course);
     Course editCourse(Course course);

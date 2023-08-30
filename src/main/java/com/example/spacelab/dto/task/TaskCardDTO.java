@@ -36,6 +36,5 @@ public class TaskCardDTO {
 
     private TaskStatus status;
 
-    private Map<Long, String> courses;
 
 }

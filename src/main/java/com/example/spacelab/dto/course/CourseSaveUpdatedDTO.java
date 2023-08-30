@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Data
-public class CourseSaveDTO {
+public class CourseSaveUpdatedDTO {
 
     private Long id;
 
@@ -25,17 +25,10 @@ public class CourseSaveDTO {
 
     private List<Long> tasks;
 
+    private List<Long> literature;
+
     private CourseStatus status;
 
-    private String main_description;
-
-    private List<String> topics;
-
-    private String completionTime;
-
-    private Integer groupSize;
-
-    private Integer hoursNorm;
-
+    private CourseInformationDTO courseInfo;
 
 }

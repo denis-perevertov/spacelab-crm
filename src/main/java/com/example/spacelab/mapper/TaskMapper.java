@@ -260,12 +260,6 @@ public class TaskMapper {
 
             dto.setStatus(task.getStatus());
 
-            Map<Long, String> courses = new HashMap<>();
-            for (Course course : courseRepository.findAll()) {
-                literatureMap.put(course.getId(), course.getName());
-            }
-            dto.setCourses(courses);
-
 
         } catch (Exception e) {
             log.severe("Mapping error: " + e.getMessage());

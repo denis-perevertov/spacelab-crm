@@ -20,4 +20,6 @@ public class LiteratureInfoDTO {
     private String description;
 
     private String resource_link;
+
+    private String img;
 }

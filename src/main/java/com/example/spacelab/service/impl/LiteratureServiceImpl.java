@@ -46,6 +46,14 @@ public class LiteratureServiceImpl implements LiteratureService{
     }
 
     @Override
+    public Page<Literature> getLiteratureByName(String name, Pageable pageable) {
+        FilterForm filters = new FilterForm();
+        filters.setName(name);
+        Specification<Literature> spec = buildSpecificationFromFilters(filters);
+        return literatureRepository.findAll(spec, pageable);
+    }
+
+    @Override
     public void verifyLiterature(Long id) {
         Literature lit = literatureRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Literature not found"));
         lit.setIs_verified(true);
