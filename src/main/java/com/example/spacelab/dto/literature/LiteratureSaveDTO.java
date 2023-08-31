@@ -8,7 +8,7 @@ public class LiteratureSaveDTO {
 
     private String name;
 
-    private String courseId;
+    private Long courseId;
 
     private String type;
 

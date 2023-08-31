@@ -22,7 +22,6 @@ public class StudentMapper {
 
     private final StudentRepository studentRepository;
     private final CourseRepository courseRepository;
-    private final CourseMapper courseMapper;
 
     public StudentDTO fromStudentToDTO(Student student) {
         StudentDTO dto = new StudentDTO();
@@ -57,6 +56,20 @@ public class StudentMapper {
 
         }
 
+        return dto;
+    }
+
+    public StudentAvatarDTO fromStudentToAvatarDTO(Student student) {
+        StudentAvatarDTO dto = new StudentAvatarDTO();
+        try {
+            dto.setId(student.getId());
+            dto.setAvatar(student.getAvatar());
+            dto.setName(student.getDetails().getFirstName() + " " + student.getDetails().getLastName());
+        } catch (Exception e) {
+            log.severe("Mapping error: " + e.getMessage());
+            log.warning("DTO: " + dto);
+            throw new MappingException(e.getMessage());
+        }
         return dto;
     }
 

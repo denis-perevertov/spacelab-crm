@@ -23,5 +23,6 @@ public class LiteratureCardDTO {
 
     private String description;
 
-    private Map<Long, String> courses;
+    private String img;
+
 }

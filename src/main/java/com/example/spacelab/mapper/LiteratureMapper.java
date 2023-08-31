@@ -1,11 +1,8 @@
 package com.example.spacelab.mapper;
 
+import com.example.spacelab.dto.literature.*;
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.literature.Literature;
-import com.example.spacelab.dto.literature.LiteratureCardDTO;
-import com.example.spacelab.dto.literature.LiteratureInfoDTO;
-import com.example.spacelab.dto.literature.LiteratureListDTO;
-import com.example.spacelab.dto.literature.LiteratureSaveDTO;
 import com.example.spacelab.service.CourseService;
 import com.example.spacelab.model.literature.LiteratureType;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +19,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class LiteratureMapper {
     private final CourseService courseService;
+
+
     public LiteratureListDTO fromLiteratureToListDTO(Literature literature) {
         LiteratureListDTO dto = new LiteratureListDTO();
         dto.setId(literature.getId());
@@ -40,6 +39,16 @@ public class LiteratureMapper {
 
         return new LiteratureListDTO();
     }
+
+
+    public LiteratureSelectDTO fromLiteratureToSelectDTO(Literature literature) {
+        LiteratureSelectDTO dto = new LiteratureSelectDTO();
+        dto.setId(literature.getId());
+        dto.setName(literature.getName());
+        return dto;
+    }
+
+
     public List<LiteratureListDTO> fromListLiteraturetoListDTOList(List<Literature> literatureList) {
         List<LiteratureListDTO> dtoList = new ArrayList<>();
         for (Literature literature : literatureList) {
@@ -48,8 +57,21 @@ public class LiteratureMapper {
         return dtoList;
     }
 
+    public List<LiteratureSelectDTO> fromListLiteraturetoListSelectList(List<Literature> literatureList) {
+        List<LiteratureSelectDTO> dtoList = new ArrayList<>();
+        for (Literature literature : literatureList) {
+            dtoList.add(fromLiteratureToSelectDTO(literature));
+        }
+        return dtoList;
+    }
+
     public Page<LiteratureListDTO> fromPageLiteraturetoPageDTOList(Page<Literature> literaturePage) {
         List<LiteratureListDTO> dtoList = fromListLiteraturetoListDTOList(literaturePage.getContent());
+        return new PageImpl<>(dtoList, literaturePage.getPageable(), literaturePage.getTotalElements());
+    }
+
+    public Page<LiteratureSelectDTO> fromPageLiteraturetoPageSelectList(Page<Literature> literaturePage) {
+        List<LiteratureSelectDTO> dtoList = fromListLiteraturetoListSelectList(literaturePage.getContent());
         return new PageImpl<>(dtoList, literaturePage.getPageable(), literaturePage.getTotalElements());
     }
 
@@ -80,6 +102,7 @@ public class LiteratureMapper {
         dto.setKeywords(literature.getKeywords());
         dto.setDescription(literature.getDescription());
         dto.setResource_link(literature.getResource_link());
+        dto.setImg(literature.getImg());
         return dto;
     }
 
@@ -94,13 +117,7 @@ public class LiteratureMapper {
         dto.setKeywords(literature.getKeywords());
         dto.setResource_link(literature.getResource_link());
         dto.setDescription(literature.getDescription());
-
-        Map<Long, String> coursesMap = new HashMap<>();
-        for (Course course : courseService.getCourses()){
-            coursesMap.put(course.getId(), course.getName());
-        }
-        dto.setCourses(coursesMap);
-
+        dto.setImg(literature.getImg());
         return dto;
     }
 

@@ -1,5 +1,6 @@
 package com.example.spacelab.model.course;
 
+import com.example.spacelab.model.literature.Literature;
 import com.example.spacelab.model.student.Student;
 import com.example.spacelab.model.task.Task;
 import com.example.spacelab.model.admin.Admin;
@@ -45,5 +46,8 @@ public class Course {
     private CourseInfo courseInfo;
 
     private CourseStatus status;
+
+    @OneToMany
+    private List<Literature> literature;
 
 }

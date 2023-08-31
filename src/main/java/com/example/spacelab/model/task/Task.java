@@ -37,7 +37,11 @@ public class Task {
     private TaskLevel level;
 
     private String completionTime;
+
+    @Column(columnDefinition = "TEXT")
     private String skillsDescription;
+
+    @Column(columnDefinition = "TEXT")
     private String taskDescription;
 
     @OneToMany
