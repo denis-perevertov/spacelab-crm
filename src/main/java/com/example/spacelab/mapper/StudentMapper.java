@@ -192,25 +192,4 @@ public class StudentMapper {
 
         return student;
     }
-
-    public StudentAvatarDTO fromStudentToAvatarDTO(Student student) {
-        StudentAvatarDTO dto = new StudentAvatarDTO();
-
-        try {
-
-            dto.setId(student.getId());
-            dto.setName(student.getDetails().getFirstName() +
-                    student.getDetails().getFathersName() +
-                    student.getDetails().getLastName());
-            dto.setAvatar(student.getAvatar());
-
-        } catch (Exception e) {
-            log.severe("Mapping error: " + e.getMessage());
-            log.warning("DTO: " + dto);
-            throw new MappingException(e.getMessage());
-
-        }
-
-        return dto;
-    }
 }

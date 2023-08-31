@@ -51,11 +51,14 @@ public class TaskController {
             @ApiResponse(responseCode = "200", description = "Successful operation"),
             @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
-    @PreAuthorize("!hasAuthority('task.read.NO_ACCESS')")
+    @PreAuthorize("!hasAuthority('tasks.read.NO_ACCESS')")
     @GetMapping
     private ResponseEntity<Page<TaskListDTO>> getTasks(FilterForm filters,
                                                        @RequestParam Integer page,
                                                        @RequestParam(required = false) Integer size) {
+
+        // todo фильтр частичного доступа
+
         Page<Task> taskList = taskService.getTasks(filters, PageRequest.of(page, (size == null) ? 10 : size));
         Page<TaskListDTO> taskListDTO = mapper.fromTaskPageToDTOPage(taskList);
         return new ResponseEntity<>(taskListDTO, HttpStatus.OK);
@@ -70,9 +73,12 @@ public class TaskController {
             @ApiResponse(responseCode = "404", description = "Task not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
             @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
-    @PreAuthorize("!hasAuthority('task.read.NO_ACCESS')")
+    @PreAuthorize("!hasAuthority('tasks.read.NO_ACCESS')")
     @GetMapping("/{id}")
     private ResponseEntity<TaskInfoDTO> getTaskById(@PathVariable Long id) {
+
+        // todo фильтр частичного доступа
+
         TaskInfoDTO task = mapper.fromTaskToInfoDTO(taskService.getTaskById(id));
         return new ResponseEntity<>(task, HttpStatus.OK);
     }
@@ -86,9 +92,12 @@ public class TaskController {
             @ApiResponse(responseCode = "400", description = "Task not valid", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
             @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
-    @PreAuthorize("!hasAuthority('task.write.NO_ACCESS')")
+    @PreAuthorize("!hasAuthority('tasks.write.NO_ACCESS')")
     @PostMapping
     private ResponseEntity<String> createNewTask(@Valid @RequestBody TaskSaveDTO task, BindingResult bindingResult) {
+
+        // todo фильтр частичного доступа
+
         taskValidator.validate(task, bindingResult);
         if (bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
@@ -108,9 +117,12 @@ public class TaskController {
             @ApiResponse(responseCode = "404", description = "Task not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
             @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
-    @PreAuthorize("!hasAuthority('task.read.NO_ACCESS')")
+    @PreAuthorize("!hasAuthority('tasks.read.NO_ACCESS')")
     @GetMapping("/edit/{id}")
     private ResponseEntity<TaskCardDTO> getTaskByIdForEdit(@PathVariable Long id) {
+
+        // todo фильтр частичного доступа
+
         TaskCardDTO task = mapper.fromTaskToCardDTO(taskService.getTaskById(id));
         return new ResponseEntity<>(task, HttpStatus.OK);
     }
@@ -125,9 +137,12 @@ public class TaskController {
             @ApiResponse(responseCode = "404", description = "Task not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
             @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
-    @PreAuthorize("!hasAuthority('task.edit.NO_ACCESS')")
+    @PreAuthorize("!hasAuthority('tasks.edit.NO_ACCESS')")
     @PutMapping
     private ResponseEntity<String> editTask(@Valid @RequestBody TaskSaveDTO task, BindingResult bindingResult) {
+
+        // todo фильтр частичного доступа
+
         taskValidator.validate(task, bindingResult);
         if (bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
@@ -148,9 +163,12 @@ public class TaskController {
             @ApiResponse(responseCode = "404", description = "Task not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
             @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
-    @PreAuthorize("!hasAuthority('task.delete.NO_ACCESS')")
+    @PreAuthorize("!hasAuthority('tasks.delete.NO_ACCESS')")
     @DeleteMapping("/{id}")
     private ResponseEntity<String> deleteTask(@PathVariable Long id) {
+
+        // todo фильтр частичного доступа
+
         taskService.deleteTaskById(id);
         return ResponseEntity.ok("Task with ID:"+id+" deleted");
     }

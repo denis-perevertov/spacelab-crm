@@ -45,7 +45,6 @@ public class DefaultInitializer implements CommandLineRunner {
     public void run(String... args) throws InterruptedException {
 
 
-
         Thread.sleep(50); checkForRoles();
         Thread.sleep(50); checkForAdmins();
         Thread.sleep(50); checkForCourses();
