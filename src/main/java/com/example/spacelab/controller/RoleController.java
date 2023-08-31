@@ -1,5 +1,6 @@
 package com.example.spacelab.controller;
 
+import com.example.spacelab.dto.SelectSearchDTO;
 import com.example.spacelab.dto.contact.ContactInfoDTO;
 import com.example.spacelab.exception.ErrorMessage;
 import com.example.spacelab.exception.ObjectValidationException;
@@ -120,6 +121,17 @@ public class RoleController {
     public ResponseEntity<String> deleteRole(@PathVariable Long id ){
         userRoleService.deleteRoleById(id);
         return new ResponseEntity<>("Role with ID: " + id + " deleted", HttpStatus.OK);
+    }
+
+    // ==============================
+
+    // Получение списка ролей для Select2
+    @GetMapping("/get-all-roles")
+    public List<SelectSearchDTO> getAllRoles() {
+        return userRoleService.getRoles()
+                .stream()
+                .map(role -> new SelectSearchDTO(role.getId(), role.getName()))
+                .toList();
     }
 
 

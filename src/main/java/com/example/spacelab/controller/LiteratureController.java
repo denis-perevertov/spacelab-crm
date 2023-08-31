@@ -53,11 +53,14 @@ public class LiteratureController {
             @ApiResponse(responseCode = "200", description = "Successful operation", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
-    @PreAuthorize("!hasAuthority('literature.read.NO_ACCESS')")
+    @PreAuthorize("!hasAuthority('literatures.read.NO_ACCESS')")
     @GetMapping
     public ResponseEntity<Page<LiteratureListDTO>> getLiterature(FilterForm filters,
                                                                  @RequestParam(required = false) Integer page,
                                                                  @RequestParam(required = false) Integer size) {
+
+        // todo фильтр литературы для частичного доступа
+
         Page<Literature> litList = literatureService.getLiterature(filters, PageRequest.of(page, size));
         Page<LiteratureListDTO> dtoList = mapper.fromPageLiteraturetoPageDTOList(litList);
         return new ResponseEntity<>(dtoList, HttpStatus.OK);
@@ -72,9 +75,12 @@ public class LiteratureController {
             @ApiResponse(responseCode = "404", description = "Literature not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
             @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
-    @PreAuthorize("!hasAuthority('literature.read.NO_ACCESS')")
+    @PreAuthorize("!hasAuthority('literatures.read.NO_ACCESS')")
     @GetMapping("/{id}")
     public ResponseEntity<LiteratureInfoDTO> getLiteratureById(@PathVariable Long id) {
+
+        // todo фильтр частичного доступа
+
         LiteratureInfoDTO lit = mapper.fromLiteraturetoInfoDTO(literatureService.getLiteratureById(id));
         return new ResponseEntity<>(lit, HttpStatus.OK);
     }
@@ -88,9 +94,12 @@ public class LiteratureController {
             @ApiResponse(responseCode = "404", description = "Literature not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
             @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
-    @PreAuthorize("!hasAuthority('literature.read.NO_ACCESS')")
+    @PreAuthorize("!hasAuthority('literatures.read.NO_ACCESS')")
     @GetMapping("/{id}/verify")
     public ResponseEntity<String> verifyLiterature(@PathVariable Long id) {
+
+        // todo фильтр частичного доступа
+
         literatureService.verifyLiterature(id);
         return new ResponseEntity<>("Verified successfully!", HttpStatus.OK);
     }
@@ -104,9 +113,12 @@ public class LiteratureController {
             @ApiResponse(responseCode = "400", description = "Invalid Literature object", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
             @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
-    @PreAuthorize("!hasAuthority('literature.wrire.NO_ACCESS')")
+    @PreAuthorize("!hasAuthority('literatures.write.NO_ACCESS')")
     @PostMapping
     public ResponseEntity<String> createNewLiterature(@Valid @RequestBody LiteratureSaveDTO literature, BindingResult bindingResult) {
+
+        // todo фильтр частичного доступа
+
         validator.validate(literature, bindingResult);
         if (bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
@@ -127,9 +139,12 @@ public class LiteratureController {
             @ApiResponse(responseCode = "404", description = "Literature not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
             @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
-    @PreAuthorize("!hasAuthority('literature.read.NO_ACCESS')")
+    @PreAuthorize("!hasAuthority('literatures.read.NO_ACCESS')")
     @GetMapping("/update/{id}")
     private ResponseEntity<LiteratureCardDTO> getCourseForUpdate(@PathVariable Long id) {
+
+        // todo фильтр частичного доступа
+
         LiteratureCardDTO literatureCardDTO = mapper.fromLiteratureToCardDTO(literatureService.getLiteratureById(id));
         return new ResponseEntity<>(literatureCardDTO, HttpStatus.OK);
     }
@@ -144,9 +159,12 @@ public class LiteratureController {
             @ApiResponse(responseCode = "404", description = "Literature not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
             @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
-    @PreAuthorize("!hasAuthority('literature.edit.NO_ACCESS')")
+    @PreAuthorize("!hasAuthority('literatures.edit.NO_ACCESS')")
     @PutMapping("/{id}")
     public ResponseEntity<String> editLiterature(@PathVariable Long id, @Valid @RequestBody LiteratureSaveDTO literature, BindingResult bindingResult) {
+
+        // todo фильтр частичного доступа
+
         validator.validate(literature, bindingResult);
         if (bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
@@ -166,9 +184,12 @@ public class LiteratureController {
             @ApiResponse(responseCode = "404", description = "Literature not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
             @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
-    @PreAuthorize("!hasAuthority('literature.delete.NO_ACCESS')")
+    @PreAuthorize("!hasAuthority('literatures.delete.NO_ACCESS')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteLiterature(@PathVariable Long id) {
+
+        // todo фильтр частичного доступа
+
         literatureService.deleteLiteratureById(id);
         return new ResponseEntity<>("Deleted", HttpStatus.OK);
     }
@@ -181,7 +202,7 @@ public class LiteratureController {
             @ApiResponse(responseCode = "200", description = "Successful operation"),
             @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
-    @PreAuthorize("!hasAuthority('literature.read.NO_ACCESS')")
+    @PreAuthorize("!hasAuthority('literatures.read.NO_ACCESS')")
     @GetMapping("/getLiteratures")
     @ResponseBody
     public Page<LiteratureSelectDTO> getOwners(@RequestParam(name = "searchQuery", defaultValue = "") String searchQuery,

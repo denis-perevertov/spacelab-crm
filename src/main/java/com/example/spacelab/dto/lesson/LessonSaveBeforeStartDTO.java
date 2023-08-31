@@ -19,7 +19,7 @@ public class LessonSaveBeforeStartDTO {
 
     private Long managerId;
 
-   private String link;
+    private String link;
 
     private Boolean startsAutomatically;
 }

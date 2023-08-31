@@ -6,6 +6,8 @@ import com.example.spacelab.model.task.TaskStatus;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
+import java.util.Map;
+
 @Data
 public class TaskListDTO {
 
@@ -14,6 +16,10 @@ public class TaskListDTO {
     private String name;
     private TaskLevel level;
     private TaskStatus status;
-    private CourseListDTO course;
+
+    private Long courseID;
     private String courseName;
+//
+//    private CourseListDTO course;
+//    private String courseName;
 }

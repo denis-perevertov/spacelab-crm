@@ -1,5 +1,6 @@
 package com.example.spacelab.dto.literature;
 
+import com.example.spacelab.model.literature.LiteratureType;
 import lombok.Data;
 
 @Data
@@ -11,7 +12,7 @@ public class LiteratureInfoDTO {
     private Long courseId;
     private String courseName;
 
-    private String type;
+    private LiteratureType type;
 
     private String author_name;
 

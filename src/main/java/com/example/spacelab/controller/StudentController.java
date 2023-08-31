@@ -1,5 +1,6 @@
 package com.example.spacelab.controller;
 
+import com.example.spacelab.dto.SelectSearchDTO;
 import com.example.spacelab.dto.student.StudentTaskDTO;
 import com.example.spacelab.dto.student.*;
 import com.example.spacelab.exception.ErrorMessage;
@@ -28,6 +29,7 @@ import lombok.extern.java.Log;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -46,6 +48,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @RequestMapping("/api/students")
 public class StudentController {
+
 
     private final StudentService studentService;
     private final StudentMapper studentMapper;
@@ -289,6 +292,28 @@ public class StudentController {
 
         studentService.deleteStudentById(id);
         return new ResponseEntity<>("Student with ID:"+id+" deleted", HttpStatus.OK);
+    }
+
+    // =========================================
+
+    // Получение списка аватарок студентов
+    @GetMapping("/get-student-avatars")
+    public Page<StudentAvatarDTO> getStudentAvatars(@RequestParam(required = false) Integer page,
+                                                    @RequestParam(required = false) Integer size) {
+
+        Page<Student> studentPage;
+        if(page == null) studentPage = new PageImpl<>(studentService.getStudents());
+        else if(size == null) studentPage = studentService.getStudents(PageRequest.of(page, 10));
+        else studentPage = studentService.getStudents(PageRequest.of(page, size));
+
+        return new PageImpl<>(studentPage.getContent().stream().map(studentMapper::fromStudentToAvatarDTO).toList());
+    }
+
+    // Получение списка незанятых студентов (студентов без курса)
+    @GetMapping("/get-available-students")
+    public List<SelectSearchDTO> getStudentsWithoutCourse() {
+        return studentService.getStudents().stream().filter(student -> student.getCourse() == null)
+                .map(student -> new SelectSearchDTO(student.getId(), student.getFullName())).toList();
     }
 
 
