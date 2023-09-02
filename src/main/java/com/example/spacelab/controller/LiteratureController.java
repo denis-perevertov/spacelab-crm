@@ -7,9 +7,12 @@ import com.example.spacelab.dto.student.StudentDTO;
 import com.example.spacelab.exception.ErrorMessage;
 import com.example.spacelab.exception.ObjectValidationException;
 import com.example.spacelab.mapper.LiteratureMapper;
+import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.literature.Literature;
+import com.example.spacelab.model.role.PermissionType;
 import com.example.spacelab.service.LiteratureService;
+import com.example.spacelab.util.AuthUtil;
 import com.example.spacelab.util.FilterForm;
 import com.example.spacelab.validator.LiteratureValidator;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,6 +25,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -31,6 +35,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -59,10 +64,25 @@ public class LiteratureController {
                                                                  @RequestParam(required = false) Integer page,
                                                                  @RequestParam(required = false) Integer size) {
 
-        // todo фильтр литературы для частичного доступа
+        Page<LiteratureListDTO> dtoList = new PageImpl<>(new ArrayList<>());
 
-        Page<Literature> litList = literatureService.getLiterature(filters, PageRequest.of(page, size));
-        Page<LiteratureListDTO> dtoList = mapper.fromPageLiteraturetoPageDTOList(litList);
+        Admin loggedInAdmin = AuthUtil.getLoggedInAdmin();
+        PermissionType permissionForLoggedInAdmin = loggedInAdmin.getRole().getPermissions().getReadStudents();
+
+        if(permissionForLoggedInAdmin == PermissionType.FULL) {
+            if(page == null && size == null) dtoList = new PageImpl<>(literatureService.getLiterature().stream().map(mapper::fromLiteratureToListDTO).toList());
+            else if(page != null && size == null) dtoList = new PageImpl<>(literatureService.getLiterature(filters, PageRequest.of(page, 10)).stream().map(mapper::fromLiteratureToListDTO).toList());
+            else dtoList = new PageImpl<>(literatureService.getLiterature(filters, PageRequest.of(page, size)).stream().map(mapper::fromLiteratureToListDTO).toList());
+        }
+        else if(permissionForLoggedInAdmin == PermissionType.PARTIAL) {
+
+            Long[] allowedCoursesIDs = (Long[]) loggedInAdmin.getCourses().stream().map(Course::getId).toArray();
+
+            if(page == null && size == null) dtoList = new PageImpl<>(literatureService.getLiteratureByAllowedCourses(allowedCoursesIDs).stream().map(mapper::fromLiteratureToListDTO).toList());
+            else if(page != null && size == null) dtoList = new PageImpl<>(literatureService.getLiteratureByAllowedCourses(filters, PageRequest.of(page, 10),allowedCoursesIDs).stream().map(mapper::fromLiteratureToListDTO).toList());
+            else dtoList = new PageImpl<>(literatureService.getLiteratureByAllowedCourses(filters, PageRequest.of(page, size), allowedCoursesIDs).stream().map(mapper::fromLiteratureToListDTO).toList());
+        }
+
         return new ResponseEntity<>(dtoList, HttpStatus.OK);
     }
 
@@ -79,7 +99,7 @@ public class LiteratureController {
     @GetMapping("/{id}")
     public ResponseEntity<LiteratureInfoDTO> getLiteratureById(@PathVariable Long id) {
 
-        // todo фильтр частичного доступа
+        AuthUtil.checkAccessToCourse(literatureService.getLiteratureById(id).getCourse().getId(), "literatures.read");
 
         LiteratureInfoDTO lit = mapper.fromLiteraturetoInfoDTO(literatureService.getLiteratureById(id));
         return new ResponseEntity<>(lit, HttpStatus.OK);
@@ -98,7 +118,7 @@ public class LiteratureController {
     @GetMapping("/{id}/verify")
     public ResponseEntity<String> verifyLiterature(@PathVariable Long id) {
 
-        // todo фильтр частичного доступа
+        AuthUtil.checkAccessToCourse(literatureService.getLiteratureById(id).getCourse().getId(), "literatures.verify");
 
         literatureService.verifyLiterature(id);
         return new ResponseEntity<>("Verified successfully!", HttpStatus.OK);
@@ -115,9 +135,10 @@ public class LiteratureController {
     })
     @PreAuthorize("!hasAuthority('literatures.write.NO_ACCESS')")
     @PostMapping
-    public ResponseEntity<String> createNewLiterature(@Valid @RequestBody LiteratureSaveDTO literature, BindingResult bindingResult) {
+    public ResponseEntity<String> createNewLiterature( @RequestBody LiteratureSaveDTO literature, BindingResult bindingResult) {
 
-        // todo фильтр частичного доступа
+        AuthUtil.checkAccessToCourse(literature.getCourseId(), "literatures.write");
+
 
         validator.validate(literature, bindingResult);
         if (bindingResult.hasErrors()) {
@@ -143,7 +164,7 @@ public class LiteratureController {
     @GetMapping("/update/{id}")
     private ResponseEntity<LiteratureCardDTO> getCourseForUpdate(@PathVariable Long id) {
 
-        // todo фильтр частичного доступа
+        AuthUtil.checkAccessToCourse(literatureService.getLiteratureById(id).getCourse().getId(), "literatures.read");
 
         LiteratureCardDTO literatureCardDTO = mapper.fromLiteratureToCardDTO(literatureService.getLiteratureById(id));
         return new ResponseEntity<>(literatureCardDTO, HttpStatus.OK);
@@ -161,9 +182,13 @@ public class LiteratureController {
     })
     @PreAuthorize("!hasAuthority('literatures.edit.NO_ACCESS')")
     @PutMapping("/{id}")
-    public ResponseEntity<String> editLiterature(@PathVariable Long id, @Valid @RequestBody LiteratureSaveDTO literature, BindingResult bindingResult) {
+    public ResponseEntity<String> editLiterature(@PathVariable Long id,  @RequestBody LiteratureSaveDTO literature, BindingResult bindingResult) {
 
-        // todo фильтр частичного доступа
+        // проверка и для того курса , куда пихаешь источник , и для того курса , который у источника был раньше
+
+        AuthUtil.checkAccessToCourse(literatureService.getLiteratureById(id).getCourse().getId(), "literatures.edit");
+        AuthUtil.checkAccessToCourse(literature.getCourseId(), "literatures.edit");
+
 
         validator.validate(literature, bindingResult);
         if (bindingResult.hasErrors()) {
@@ -188,7 +213,7 @@ public class LiteratureController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteLiterature(@PathVariable Long id) {
 
-        // todo фильтр частичного доступа
+        AuthUtil.checkAccessToCourse(literatureService.getLiteratureById(id).getCourse().getId(), "literatures.delete");
 
         literatureService.deleteLiteratureById(id);
         return new ResponseEntity<>("Deleted", HttpStatus.OK);

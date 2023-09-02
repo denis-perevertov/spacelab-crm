@@ -4,6 +4,8 @@ import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.lesson.Lesson;
 import com.example.spacelab.model.lesson.LessonStatus;
+import com.example.spacelab.model.task.Task;
+import jakarta.persistence.criteria.Join;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDate;
@@ -18,6 +20,14 @@ public class LessonSpecifications {
     public static Specification<Lesson> hasCourse(Course course) {
         if(course == null) return (root, query, cb) -> null;
         return (root, query, cb) -> cb.equal(root.get("course"), course);
+    }
+
+    public static Specification<Lesson> hasCourseIDs(Long... ids) {
+        if(ids == null) return (root, query, cb) -> null;
+        return (root, query, cb) -> {
+            Join<Course, Lesson> clj = root.join("course");
+            return clj.in("id", ids);
+        };
     }
 
     public static Specification<Lesson> hasMentor(Admin admin) {

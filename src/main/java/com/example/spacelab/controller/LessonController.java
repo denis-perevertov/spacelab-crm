@@ -7,7 +7,10 @@ import com.example.spacelab.dto.lesson.LessonSaveBeforeStartDTO;
 import com.example.spacelab.exception.ErrorMessage;
 import com.example.spacelab.exception.ObjectValidationException;
 import com.example.spacelab.mapper.LessonMapper;
+import com.example.spacelab.model.admin.Admin;
+import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.lesson.Lesson;
+import com.example.spacelab.model.role.PermissionType;
 import com.example.spacelab.service.LessonReportRowService;
 import com.example.spacelab.service.LessonService;
 import com.example.spacelab.util.AuthUtil;
@@ -23,6 +26,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +34,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -58,10 +63,26 @@ public class LessonController {
                                                                  @RequestParam(required = false) Integer page,
                                                                  @RequestParam(required = false) Integer size) {
 
-        // todo фильтр занятий для частичного доступа
+        Page<LessonListDTO> dtoList = new PageImpl<>(new ArrayList<>());
 
-        Page<Lesson> litList = lessonService.getLesson(filters, PageRequest.of(page, size));
-        Page<LessonListDTO> dtoList = mapper.pageLessonToPageLessonListDTO(litList);
+        Admin loggedInAdmin = AuthUtil.getLoggedInAdmin();
+        PermissionType permissionForLoggedInAdmin = loggedInAdmin.getRole().getPermissions().getReadCourses();
+
+        if(permissionForLoggedInAdmin == PermissionType.FULL) {
+            if(page == null && size == null) dtoList = new PageImpl<>(lessonService.getLesson().stream().map(mapper::fromLessonToLessonListDTO).toList());
+            else if(page != null && size == null) dtoList = new PageImpl<>(lessonService.getLesson(PageRequest.of(page, 10)).stream().map(mapper::fromLessonToLessonListDTO).toList());
+            else dtoList = new PageImpl<>(lessonService.getLesson(filters, PageRequest.of(page, size)).stream().map(mapper::fromLessonToLessonListDTO).toList());
+        }
+        else if(permissionForLoggedInAdmin == PermissionType.PARTIAL) {
+
+            Long[] allowedCoursesIDs = (Long[]) loggedInAdmin.getCourses().stream().map(Course::getId).toArray();
+
+            if(page == null && size == null) dtoList = new PageImpl<>(lessonService.getLessonsByAllowedCourses(allowedCoursesIDs).stream().map(mapper::fromLessonToLessonListDTO).toList());
+            else if(page != null && size == null) dtoList = new PageImpl<>(lessonService.getLessonsByAllowedCourses(PageRequest.of(page, 10), allowedCoursesIDs).stream().map(mapper::fromLessonToLessonListDTO).toList());
+            else dtoList = new PageImpl<>(lessonService.getLessonsByAllowedCourses(filters, PageRequest.of(page, size), allowedCoursesIDs).stream().map(mapper::fromLessonToLessonListDTO).toList());
+
+        }
+
         return new ResponseEntity<>(dtoList, HttpStatus.OK);
     }
 
@@ -78,9 +99,7 @@ public class LessonController {
     @GetMapping("/{id}")
     public ResponseEntity<LessonInfoDTO> getLessonById(@PathVariable Long id) {
 
-        // todo проверка разрешений на частичный доступ
-
-//        AuthUtil.checkAccessToCourse(id, "courses.edit");
+        AuthUtil.checkAccessToCourse(lessonService.getLessonById(id).getCourse().getId(), "lessons.read");
 
         LessonInfoDTO less = mapper.fromLessonToLessonInfoDTO(lessonService.getLessonById(id));
         return new ResponseEntity<>(less, HttpStatus.OK);
@@ -97,9 +116,9 @@ public class LessonController {
     })
     @PreAuthorize("!hasAuthority('lessons.write.NO_ACCESS')")
     @PostMapping
-    public ResponseEntity<String> createNewLessonBeforeStart(@Valid @RequestBody LessonSaveBeforeStartDTO lesson, BindingResult bindingResult) {
+    public ResponseEntity<String> createNewLessonBeforeStart(@RequestBody LessonSaveBeforeStartDTO lesson, BindingResult bindingResult) {
 
-        // todo проверка разрешений на частичный доступ
+        AuthUtil.checkAccessToCourse(lesson.getCourseId(), "lessons.write");
 
         lessonBeforeStartValidator.validate(lesson, bindingResult);
         if (bindingResult.hasErrors()) {
@@ -123,9 +142,10 @@ public class LessonController {
     })
     @PreAuthorize("!hasAuthority('lessons.edit.NO_ACCESS')")
     @PutMapping("/{id}")
-    public ResponseEntity<String> editLessonBeforeStart(@PathVariable Long id, @Valid @RequestBody LessonSaveBeforeStartDTO lesson, BindingResult bindingResult) {
+    public ResponseEntity<String> editLessonBeforeStart(@PathVariable Long id, @RequestBody LessonSaveBeforeStartDTO lesson, BindingResult bindingResult) {
 
-        // todo проверка разрешений на частичный доступ
+        AuthUtil.checkAccessToCourse(lessonService.getLessonById(id).getCourse().getId(), "lessons.edit");
+        AuthUtil.checkAccessToCourse(lesson.getCourseId(), "lessons.edit");
 
         lessonBeforeStartValidator.validate(lesson, bindingResult);
         if (bindingResult.hasErrors()) {
@@ -150,7 +170,7 @@ public class LessonController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteLesson(@PathVariable Long id) {
 
-        // todo проверка разрешений на частичный доступ
+        AuthUtil.checkAccessToCourse(lessonService.getLessonById(id).getCourse().getId(), "lessons.delete");
 
         lessonService.deleteLessonById(id);
         return new ResponseEntity<>("Deleted", HttpStatus.OK);
@@ -167,9 +187,7 @@ public class LessonController {
     })
     @PreAuthorize("!hasAuthority('lessons.edit.NO_ACCESS')")
     @PostMapping("/update")
-    public ResponseEntity<String> saveLessonReportRowAfterStart(@Valid @RequestBody LessonReportRowSaveDTO lessonReportRowSTO) {
-
-        // todo проверка разрешений на частичный доступ
+    public ResponseEntity<String> saveLessonReportRowAfterStart(@RequestBody LessonReportRowSaveDTO lessonReportRowSTO) {
 
         lessonReportRowService.updateLessonReportRowAndCompletedTask(lessonReportRowSTO);
         return new ResponseEntity<>("Successful update", HttpStatus.OK);

@@ -46,6 +46,22 @@ public class LiteratureServiceImpl implements LiteratureService{
     }
 
     @Override
+    public List<Literature> getLiteratureByAllowedCourses(Long... ids) {
+        return literatureRepository.findAllByAllowedCourse(ids);
+    }
+
+    @Override
+    public Page<Literature> getLiteratureByAllowedCourses(Pageable pageable, Long... ids) {
+        return literatureRepository.findAllByAllowedCoursePage(pageable, ids);
+    }
+
+    @Override
+    public Page<Literature> getLiteratureByAllowedCourses(FilterForm filters, Pageable pageable, Long... ids) {
+        Specification<Literature> spec = buildSpecificationFromFilters(filters).and(LiteratureSpecifications.hasCourseIDs(ids));
+        return literatureRepository.findAll(spec, pageable);
+    }
+
+    @Override
     public Page<Literature> getLiteratureByName(String name, Pageable pageable) {
         FilterForm filters = new FilterForm();
         filters.setName(name);
