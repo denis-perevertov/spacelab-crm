@@ -5,6 +5,7 @@ import com.example.spacelab.mapper.TaskMapper;
 import com.example.spacelab.model.task.Task;
 import com.example.spacelab.repository.TaskRepository;
 import com.example.spacelab.service.TaskService;
+import com.example.spacelab.service.specification.TaskSpecifications;
 import com.example.spacelab.util.FilterForm;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
@@ -36,6 +37,22 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public Page<Task> getTasks(FilterForm filters, Pageable pageable) {
         Specification<Task> spec = buildSpecificationFromFilters(filters);
+        return taskRepository.findAll(spec, pageable);
+    }
+
+    @Override
+    public List<Task> getTasksByAllowedCourses(Long... ids) {
+        return taskRepository.findAllByAllowedCourse(ids);
+    }
+
+    @Override
+    public Page<Task> getTasksByAllowedCourses(Pageable pageable, Long... ids) {
+        return taskRepository.findAllByAllowedCoursePage(pageable, ids);
+    }
+
+    @Override
+    public Page<Task> getTasksByAllowedCourses(FilterForm filters, Pageable pageable, Long... ids) {
+        Specification<Task> spec = buildSpecificationFromFilters(filters).and(TaskSpecifications.hasCourseIDs(ids));
         return taskRepository.findAll(spec, pageable);
     }
 

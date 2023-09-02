@@ -5,11 +5,15 @@ import com.example.spacelab.dto.task.TaskCardDTO;
 import com.example.spacelab.exception.ErrorMessage;
 import com.example.spacelab.exception.ObjectValidationException;
 import com.example.spacelab.mapper.TaskMapper;
+import com.example.spacelab.model.admin.Admin;
+import com.example.spacelab.model.course.Course;
+import com.example.spacelab.model.role.PermissionType;
 import com.example.spacelab.model.task.Task;
 import com.example.spacelab.dto.task.TaskInfoDTO;
 import com.example.spacelab.dto.task.TaskSaveDTO;
 import com.example.spacelab.dto.task.TaskListDTO;
 import com.example.spacelab.service.TaskService;
+import com.example.spacelab.util.AuthUtil;
 import com.example.spacelab.util.FilterForm;
 import com.example.spacelab.validator.TaskValidator;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,6 +26,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +34,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,7 +50,6 @@ public class TaskController {
     private final TaskValidator taskValidator;
 
 
-
     // Получение списка задач (с фильтрами/страницами)
     @Operation(description = "Get tasks list", summary = "Get tasks list", tags = {"Task"})
     @ApiResponses(value = {
@@ -54,16 +59,31 @@ public class TaskController {
     @PreAuthorize("!hasAuthority('tasks.read.NO_ACCESS')")
     @GetMapping
     private ResponseEntity<Page<TaskListDTO>> getTasks(FilterForm filters,
-                                                       @RequestParam Integer page,
+                                                       @RequestParam(required = false) Integer page,
                                                        @RequestParam(required = false) Integer size) {
 
-        // todo фильтр частичного доступа
+        Page<TaskListDTO> taskListDTO = new PageImpl<>(new ArrayList<>());
 
-        Page<Task> taskList = taskService.getTasks(filters, PageRequest.of(page, (size == null) ? 10 : size));
-        Page<TaskListDTO> taskListDTO = mapper.fromTaskPageToDTOPage(taskList);
+        Admin loggedInAdmin = AuthUtil.getLoggedInAdmin();
+        PermissionType permissionForLoggedInAdmin = loggedInAdmin.getRole().getPermissions().getReadTasks();
+
+        if(permissionForLoggedInAdmin == PermissionType.FULL) {
+            if(page == null && size == null) taskListDTO = new PageImpl<>(taskService.getTasks().stream().map(mapper::fromTaskToListDTO).toList());
+            else if(page != null && size == null) taskListDTO = new PageImpl<>(taskService.getTasks(PageRequest.of(page, 10)).stream().map(mapper::fromTaskToListDTO).toList());
+            else taskListDTO = new PageImpl<>(taskService.getTasks(PageRequest.of(page, size)).stream().map(mapper::fromTaskToListDTO).toList());
+        }
+        else if(permissionForLoggedInAdmin == PermissionType.PARTIAL) {
+
+            Long[] allowedCoursesIDs = (Long[]) loggedInAdmin.getCourses().stream().map(Course::getId).toArray();
+
+            if(page == null && size == null) taskListDTO = new PageImpl<>(taskService.getTasksByAllowedCourses(allowedCoursesIDs).stream().map(mapper::fromTaskToListDTO).toList());
+            else if(page != null && size == null) taskListDTO = new PageImpl<>(taskService.getTasksByAllowedCourses(PageRequest.of(page, 10), allowedCoursesIDs).stream().map(mapper::fromTaskToListDTO).toList());
+            else taskListDTO = new PageImpl<>(taskService.getTasksByAllowedCourses(filters, PageRequest.of(page, size), allowedCoursesIDs).stream().map(mapper::fromTaskToListDTO).toList());
+
+        }
+
         return new ResponseEntity<>(taskListDTO, HttpStatus.OK);
     }
-
 
 
     // Получение задачи по id
@@ -77,7 +97,7 @@ public class TaskController {
     @GetMapping("/{id}")
     private ResponseEntity<TaskInfoDTO> getTaskById(@PathVariable Long id) {
 
-        // todo фильтр частичного доступа
+        AuthUtil.checkAccessToCourse(taskService.getTaskById(id).getCourse().getId(), "tasks.read");
 
         TaskInfoDTO task = mapper.fromTaskToInfoDTO(taskService.getTaskById(id));
         return new ResponseEntity<>(task, HttpStatus.OK);
@@ -94,9 +114,9 @@ public class TaskController {
     })
     @PreAuthorize("!hasAuthority('tasks.write.NO_ACCESS')")
     @PostMapping
-    private ResponseEntity<String> createNewTask(@Valid @RequestBody TaskSaveDTO task, BindingResult bindingResult) {
+    private ResponseEntity<String> createNewTask( @RequestBody TaskSaveDTO task, BindingResult bindingResult) {
 
-        // todo фильтр частичного доступа
+        AuthUtil.checkAccessToCourse(task.getCourseId(), "tasks.write");
 
         taskValidator.validate(task, bindingResult);
         if (bindingResult.hasErrors()) {
@@ -121,7 +141,7 @@ public class TaskController {
     @GetMapping("/edit/{id}")
     private ResponseEntity<TaskCardDTO> getTaskByIdForEdit(@PathVariable Long id) {
 
-        // todo фильтр частичного доступа
+        AuthUtil.checkAccessToCourse(taskService.getTaskById(id).getCourse().getId(), "tasks.read");
 
         TaskCardDTO task = mapper.fromTaskToCardDTO(taskService.getTaskById(id));
         return new ResponseEntity<>(task, HttpStatus.OK);
@@ -138,10 +158,11 @@ public class TaskController {
             @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
     })
     @PreAuthorize("!hasAuthority('tasks.edit.NO_ACCESS')")
-    @PutMapping
-    private ResponseEntity<String> editTask(@Valid @RequestBody TaskSaveDTO task, BindingResult bindingResult) {
+    @PutMapping("/{id}")
+    private ResponseEntity<String> editTask(@PathVariable Long id,  @RequestBody TaskSaveDTO task, BindingResult bindingResult) {
 
-        // todo фильтр частичного доступа
+        AuthUtil.checkAccessToCourse(taskService.getTaskById(id).getCourse().getId(), "tasks.edit");
+        AuthUtil.checkAccessToCourse(task.getCourseId(), "tasks.edit");
 
         taskValidator.validate(task, bindingResult);
         if (bindingResult.hasErrors()) {
@@ -167,7 +188,7 @@ public class TaskController {
     @DeleteMapping("/{id}")
     private ResponseEntity<String> deleteTask(@PathVariable Long id) {
 
-        // todo фильтр частичного доступа
+        AuthUtil.checkAccessToCourse(taskService.getTaskById(id).getCourse().getId(), "tasks.delete");
 
         taskService.deleteTaskById(id);
         return ResponseEntity.ok("Task with ID:"+id+" deleted");

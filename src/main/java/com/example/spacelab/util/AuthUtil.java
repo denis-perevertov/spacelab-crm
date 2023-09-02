@@ -31,6 +31,14 @@ public class AuthUtil {
         else throw new AccessDeniedException("No access to creating new students for this course! (courseID: "+courseID+") !");
     }
 
+    public static void checkPermissionToCreateCourse() {
+        PermissionType createCoursePermission = getLoggedInAdmin().getRole()
+                .getPermissions().getWriteCourses();
+
+        if(createCoursePermission == PermissionType.NO_ACCESS)
+            throw new AccessDeniedException("No access to creating courses!");
+    }
+
 //    public static List<?> filterListByAllowedCourse(List<?> list, Long courseID, String permissionName) {
 //        Admin admin = getLoggedInAdmin();
 //        PermissionType permissionToCheck = getPermission(permissionName);

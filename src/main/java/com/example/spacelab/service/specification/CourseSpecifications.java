@@ -2,11 +2,18 @@ package com.example.spacelab.service.specification;
 
 import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.model.course.Course;
+import com.example.spacelab.model.student.Student;
+import jakarta.persistence.criteria.Join;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDate;
 
 public class CourseSpecifications {
+
+    public static Specification<Course> hasCourseIDs(Long... ids) {
+        if(ids == null) return (root, query, cb) -> null;
+        return (root, query, cb) -> root.in("id", ids);
+    }
 
     public static Specification<Course> hasNameLike(String name) {
         if(name == null) return (root, query, cb) -> null;

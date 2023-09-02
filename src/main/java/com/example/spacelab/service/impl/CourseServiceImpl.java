@@ -45,6 +45,22 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
+    public List<Course> getAllowedCourses(Long... ids) {
+        return courseRepository.findAllowedCourses(ids);
+    }
+
+    @Override
+    public Page<Course> getAllowedCourses(Pageable pageable, Long... ids) {
+        return courseRepository.findAllowedCoursesPage(pageable, ids);
+    }
+
+    @Override
+    public Page<Course> getAllowedCourses(FilterForm filters, Pageable pageable, Long... ids) {
+        Specification<Course> spec = buildSpecificationFromFilters(filters).and(CourseSpecifications.hasCourseIDs(ids));
+        return courseRepository.findAll(spec, pageable);
+    }
+
+    @Override
     public Page<Course> getCoursesByName(String name, Pageable pageable) {
         FilterForm filters = new FilterForm();
         filters.setName(name);

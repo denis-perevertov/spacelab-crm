@@ -1,5 +1,6 @@
 package com.example.spacelab.service;
 
+import com.example.spacelab.model.lesson.Lesson;
 import com.example.spacelab.model.literature.Literature;
 import com.example.spacelab.util.FilterForm;
 import org.springframework.data.domain.Page;
@@ -11,6 +12,11 @@ public interface LiteratureService extends EntityFilterService<Literature>{
     List<Literature> getLiterature();
     Page<Literature> getLiterature(Pageable pageable);
     Page<Literature> getLiterature(FilterForm filters, Pageable pageable);
+
+    List<Literature> getLiteratureByAllowedCourses(Long... ids);
+    Page<Literature> getLiteratureByAllowedCourses(Pageable pageable, Long... ids);
+    Page<Literature> getLiteratureByAllowedCourses(FilterForm filters, Pageable pageable, Long... ids);
+
     Literature getLiteratureById(Long id);
     Literature createNewLiterature(Literature literature);
     Literature editLiterature(Literature literature);

@@ -4,6 +4,7 @@ import com.example.spacelab.exception.ResourceNotFoundException;
 import com.example.spacelab.model.lesson.Lesson;
 import com.example.spacelab.repository.LessonRepository;
 import com.example.spacelab.service.LessonService;
+import com.example.spacelab.service.specification.LessonSpecifications;
 import com.example.spacelab.util.FilterForm;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
@@ -34,6 +35,22 @@ public class LessonServiceImpl implements LessonService {
     @Override
     public Page<Lesson> getLesson(FilterForm filters, Pageable pageable) {
         Specification<Lesson> spec = buildSpecificationFromFilters(filters);
+        return lessonRepository.findAll(spec, pageable);
+    }
+
+    @Override
+    public List<Lesson> getLessonsByAllowedCourses(Long... ids) {
+        return lessonRepository.findAllByAllowedCourse(ids);
+    }
+
+    @Override
+    public Page<Lesson> getLessonsByAllowedCourses(Pageable pageable, Long... ids) {
+        return lessonRepository.findAllByAllowedCoursePage(pageable, ids);
+    }
+
+    @Override
+    public Page<Lesson> getLessonsByAllowedCourses(FilterForm filters, Pageable pageable, Long... ids) {
+        Specification<Lesson> spec = buildSpecificationFromFilters(filters).and(LessonSpecifications.hasCourseIDs(ids));
         return lessonRepository.findAll(spec, pageable);
     }
 

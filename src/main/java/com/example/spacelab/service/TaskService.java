@@ -1,5 +1,6 @@
 package com.example.spacelab.service;
 
+import com.example.spacelab.model.student.Student;
 import com.example.spacelab.model.task.Task;
 import com.example.spacelab.util.FilterForm;
 import org.springframework.data.domain.Page;
@@ -12,6 +13,11 @@ public interface TaskService extends EntityFilterService<Task>{
     List<Task> getTasks();
     Page<Task> getTasks(Pageable pageable);
     Page<Task> getTasks(FilterForm filters, Pageable pageable);
+
+    List<Task> getTasksByAllowedCourses(Long... ids);
+    Page<Task> getTasksByAllowedCourses(Pageable pageable, Long... ids);
+    Page<Task> getTasksByAllowedCourses(FilterForm filters, Pageable pageable, Long... ids);
+
     Task getTaskById(Long id);
     Task createNewTask(Task task);
     Task editTask(Task task);

@@ -4,7 +4,9 @@ import com.example.spacelab.dto.course.*;
 import com.example.spacelab.exception.ErrorMessage;
 import com.example.spacelab.exception.ObjectValidationException;
 import com.example.spacelab.mapper.CourseMapper;
+import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.model.course.Course;
+import com.example.spacelab.model.role.PermissionType;
 import com.example.spacelab.service.CourseService;
 import com.example.spacelab.util.AuthUtil;
 import com.example.spacelab.util.FilterForm;
@@ -20,6 +22,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -28,6 +31,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -57,10 +61,26 @@ public class CourseController {
                                                            @RequestParam(required = false) Integer page,
                                                            @RequestParam(required = false) Integer size) {
 
-        // todo фильтр показанной информации , если разрешение частичное (пример в контроллере студентов)
+        Page<CourseListDTO> courseListDTO = new PageImpl<>(new ArrayList<>());
 
-        Page<Course> courseList = courseService.getCourses(filters, PageRequest.of(page, size));
-        Page<CourseListDTO> courseListDTO = mapper.fromCoursePageToListDTOPage(courseList);
+        Admin loggedInAdmin = AuthUtil.getLoggedInAdmin();
+        PermissionType permissionForLoggedInAdmin = loggedInAdmin.getRole().getPermissions().getReadCourses();
+
+        if(permissionForLoggedInAdmin == PermissionType.FULL) {
+            if(page == null && size == null) courseListDTO = new PageImpl<>(courseService.getCourses().stream().map(mapper::fromCourseToListDTO).toList());
+            else if(page != null && size == null) courseListDTO = new PageImpl<>(courseService.getCourses(PageRequest.of(page, 10)).stream().map(mapper::fromCourseToListDTO).toList());
+            else courseListDTO = new PageImpl<>(courseService.getCourses(filters, PageRequest.of(page, size)).stream().map(mapper::fromCourseToListDTO).toList());
+        }
+        else if(permissionForLoggedInAdmin == PermissionType.PARTIAL) {
+
+            Long[] allowedCoursesIDs = (Long[]) loggedInAdmin.getCourses().stream().map(Course::getId).toArray();
+
+            if(page == null && size == null) courseListDTO = new PageImpl<>(courseService.getAllowedCourses(allowedCoursesIDs).stream().map(mapper::fromCourseToListDTO).toList());
+            else if(page != null && size == null) courseListDTO = new PageImpl<>(courseService.getAllowedCourses(PageRequest.of(page, 10), allowedCoursesIDs).stream().map(mapper::fromCourseToListDTO).toList());
+            else courseListDTO = new PageImpl<>(courseService.getAllowedCourses(filters, PageRequest.of(page, size), allowedCoursesIDs).stream().map(mapper::fromCourseToListDTO).toList());
+
+        }
+
         return new ResponseEntity<>(courseListDTO, HttpStatus.OK);
     }
 
@@ -113,7 +133,9 @@ public class CourseController {
     })
     @PreAuthorize("!hasAuthority('courses.write.NO_ACCESS')")
     @PostMapping
-    private ResponseEntity<String> createNewCourse(@Valid @RequestBody CourseSaveCreatedDTO dto, BindingResult bindingResult) {
+    private ResponseEntity<String> createNewCourse( @RequestBody CourseSaveCreatedDTO dto, BindingResult bindingResult) {
+
+        AuthUtil.checkPermissionToCreateCourse();
 
         courseCreateValidator.validate(dto, bindingResult);
 
@@ -139,8 +161,9 @@ public class CourseController {
     })
     @PreAuthorize("!hasAuthority('courses.edit.NO_ACCESS')")
     @PutMapping("/{id}")
-    private ResponseEntity<String> updateCourse(@PathVariable Long id, @Valid @RequestBody CourseSaveUpdatedDTO dto, BindingResult bindingResult) {
+    private ResponseEntity<String> updateCourse(@PathVariable Long id,  @RequestBody CourseSaveUpdatedDTO dto, BindingResult bindingResult) {
 
+        AuthUtil.checkAccessToCourse(dto.getId(), "courses.edit");
         AuthUtil.checkAccessToCourse(id, "courses.edit");
 
         courseUpdateValidator.validate(dto, bindingResult);
