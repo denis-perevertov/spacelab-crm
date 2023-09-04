@@ -2,10 +2,12 @@ package com.example.spacelab.dto.task;
 
 import com.example.spacelab.model.task.TaskLevel;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Map;
 
 @Data
+@NoArgsConstructor
 public class TaskInfoDTO {
 
     private Long id;
@@ -27,5 +29,8 @@ public class TaskInfoDTO {
 
     private Map<Long, String> recommendedLiterature;
 
-
+    public TaskInfoDTO(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 }

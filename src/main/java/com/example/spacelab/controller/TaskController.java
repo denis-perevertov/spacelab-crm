@@ -53,7 +53,7 @@ public class TaskController {
     })
     @PreAuthorize("!hasAuthority('task.read.NO_ACCESS')")
     @GetMapping
-    private ResponseEntity<Page<TaskListDTO>> getTasks(FilterForm filters,
+    public ResponseEntity<Page<TaskListDTO>> getTasks(FilterForm filters,
                                                        @RequestParam Integer page,
                                                        @RequestParam(required = false) Integer size) {
         Page<Task> taskList = taskService.getTasks(filters, PageRequest.of(page, (size == null) ? 10 : size));
@@ -72,7 +72,7 @@ public class TaskController {
     })
     @PreAuthorize("!hasAuthority('task.read.NO_ACCESS')")
     @GetMapping("/{id}")
-    private ResponseEntity<TaskInfoDTO> getTaskById(@PathVariable Long id) {
+    public ResponseEntity<TaskInfoDTO> getTaskById(@PathVariable Long id) {
         TaskInfoDTO task = mapper.fromTaskToInfoDTO(taskService.getTaskById(id));
         return new ResponseEntity<>(task, HttpStatus.OK);
     }
@@ -88,7 +88,7 @@ public class TaskController {
     })
     @PreAuthorize("!hasAuthority('task.write.NO_ACCESS')")
     @PostMapping
-    private ResponseEntity<String> createNewTask(@Valid @RequestBody TaskSaveDTO task, BindingResult bindingResult) {
+    public ResponseEntity<String> createNewTask(@Valid @RequestBody TaskSaveDTO task, BindingResult bindingResult) {
         taskValidator.validate(task, bindingResult);
         if (bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
@@ -110,7 +110,7 @@ public class TaskController {
     })
     @PreAuthorize("!hasAuthority('task.read.NO_ACCESS')")
     @GetMapping("/edit/{id}")
-    private ResponseEntity<TaskCardDTO> getTaskByIdForEdit(@PathVariable Long id) {
+    public ResponseEntity<TaskCardDTO> getTaskByIdForEdit(@PathVariable Long id) {
         TaskCardDTO task = mapper.fromTaskToCardDTO(taskService.getTaskById(id));
         return new ResponseEntity<>(task, HttpStatus.OK);
     }
@@ -127,7 +127,7 @@ public class TaskController {
     })
     @PreAuthorize("!hasAuthority('task.edit.NO_ACCESS')")
     @PutMapping
-    private ResponseEntity<String> editTask(@Valid @RequestBody TaskSaveDTO task, BindingResult bindingResult) {
+    public ResponseEntity<String> editTask(@Valid @RequestBody TaskSaveDTO task, BindingResult bindingResult) {
         taskValidator.validate(task, bindingResult);
         if (bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
@@ -150,7 +150,7 @@ public class TaskController {
     })
     @PreAuthorize("!hasAuthority('task.delete.NO_ACCESS')")
     @DeleteMapping("/{id}")
-    private ResponseEntity<String> deleteTask(@PathVariable Long id) {
+    public ResponseEntity<String> deleteTask(@PathVariable Long id) {
         taskService.deleteTaskById(id);
         return ResponseEntity.ok("Task with ID:"+id+" deleted");
     }

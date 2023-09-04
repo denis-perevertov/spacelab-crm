@@ -25,7 +25,7 @@ public class CourseServiceImpl implements CourseService {
 
     private final AdminRepository adminRepository;
     private final CourseRepository courseRepository;
-    private final CourseMapper courseMapper;
+
 
     @Override
     public List<Course> getCourses() {

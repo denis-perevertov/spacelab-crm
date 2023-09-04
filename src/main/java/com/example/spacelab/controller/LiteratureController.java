@@ -129,8 +129,12 @@ public class LiteratureController {
     })
     @PreAuthorize("!hasAuthority('literature.read.NO_ACCESS')")
     @GetMapping("/update/{id}")
-    private ResponseEntity<LiteratureCardDTO> getCourseForUpdate(@PathVariable Long id) {
+    public ResponseEntity<LiteratureCardDTO> getCourseForUpdate(@PathVariable Long id) {
+        System.out.println("123");
+        System.out.println("1"+literatureService.getLiteratureById(id));
+        System.out.println("2"+mapper.fromLiteratureToCardDTO(literatureService.getLiteratureById(id)));
         LiteratureCardDTO literatureCardDTO = mapper.fromLiteratureToCardDTO(literatureService.getLiteratureById(id));
+        System.out.println(literatureCardDTO);
         return new ResponseEntity<>(literatureCardDTO, HttpStatus.OK);
     }
 

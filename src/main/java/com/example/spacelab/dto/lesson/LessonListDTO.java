@@ -1,9 +1,11 @@
 package com.example.spacelab.dto.lesson;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 @Data
+@NoArgsConstructor
 public class LessonListDTO {
 
     private Long id;
@@ -25,6 +27,8 @@ public class LessonListDTO {
     private String presentStudentsQuantity;
 
 
-
-
+    public LessonListDTO(Long id, LocalDateTime datetime) {
+        this.id = id;
+        this.datetime = datetime;
+    }
 }

@@ -6,12 +6,14 @@ import com.example.spacelab.model.lesson.LessonReportRow;
 import com.example.spacelab.model.literature.Literature;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
 @Entity
 @Table(name="tasks")
+@NoArgsConstructor
 public class Task {
 
     /*
@@ -59,4 +61,8 @@ public class Task {
     @Enumerated(value = EnumType.STRING)
     private TaskStatus status;
 
+    public Task(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 }

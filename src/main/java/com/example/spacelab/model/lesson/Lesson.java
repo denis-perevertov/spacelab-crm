@@ -4,6 +4,7 @@ import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.model.course.Course;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 @Data
 @Entity
 @Table(name="lessons")
+@NoArgsConstructor
 public class Lesson {
 
     @Id
@@ -41,4 +43,9 @@ public class Lesson {
     @ManyToOne
     @JoinColumn(name = "admin_id")
     private Admin manager;
+
+    public Lesson(Long id, LocalDateTime datetime) {
+        this.id = id;
+        this.datetime = datetime;
+    }
 }
