@@ -42,6 +42,7 @@ public class ContactController {
     private final ContactInfoMapper contactMapper;
     private final ContactValidator contactValidator;
 
+
     // Получение всех контактов
     @Operation(description = "Get contacts page", summary = "Get Contacts", tags = {"Contact"})
     @ApiResponses(value = {
