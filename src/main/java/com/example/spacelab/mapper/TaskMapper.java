@@ -106,7 +106,7 @@ public class TaskMapper {
             /*Course course = courseRepository.getReferenceById(dto.getCourse().getId());
             task.setCourse(course);*/
 
-                if(dto.getCourse() != null) courseRepository.findById(dto.getCourse().getId()).ifPresent(task::setCourse);
+//                if(dto.getCourse() != null) courseRepository.findById(dto.getCourse().getId()).ifPresent(task::setCourse);
             } catch (Exception e) {
                 log.severe("Mapping error: " + e.getMessage());
                 log.warning("Entity: " + task);

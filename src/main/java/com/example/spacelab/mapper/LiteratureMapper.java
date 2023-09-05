@@ -32,7 +32,7 @@ public class LiteratureMapper {
             dto.setCourseName(course.getName());
         }
 
-        dto.setType(literature.getType().toString());
+//        dto.setType(literature.getType().toString());
         dto.setAuthor_name(literature.getAuthor());
         dto.setKeywords(literature.getKeywords());
         dto.setResource_link(literature.getResource_link());
@@ -84,7 +84,7 @@ public class LiteratureMapper {
         course.setName(dto.getCourseName());
         literature.setCourse(course);
 
-        literature.setType(LiteratureType.valueOf(dto.getType()));
+//        literature.setType(LiteratureType.valueOf(dto.getType()));
         literature.setAuthor(dto.getAuthor_name());
         literature.setKeywords(dto.getKeywords());
         literature.setResource_link(dto.getResource_link());
@@ -97,7 +97,7 @@ public class LiteratureMapper {
         dto.setName(literature.getName());
         dto.setCourseId(literature.getCourse().getId());
         dto.setCourseName(literature.getCourse().getName());
-        dto.setType(literature.getType().toString());
+//        dto.setType(literature.getType().toString());
         dto.setAuthor_name(literature.getAuthor());
         dto.setKeywords(literature.getKeywords());
         dto.setDescription(literature.getDescription());
