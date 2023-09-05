@@ -28,6 +28,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -57,13 +58,14 @@ public class CourseController {
     })
     @PreAuthorize("!hasAuthority('courses.read.NO_ACCESS')")
     @GetMapping
-    private ResponseEntity<Page<CourseListDTO>> getCourses(FilterForm filters,
+    private ResponseEntity<Page<CourseListDTO>> getCourses(@AuthenticationPrincipal Admin loggedInAdmin,
+                                                           FilterForm filters,
                                                            @RequestParam(required = false) Integer page,
                                                            @RequestParam(required = false) Integer size) {
 
         Page<CourseListDTO> courseListDTO = new PageImpl<>(new ArrayList<>());
 
-        Admin loggedInAdmin = AuthUtil.getLoggedInAdmin();
+//        Admin loggedInAdmin = AuthUtil.getLoggedInAdmin();
         PermissionType permissionForLoggedInAdmin = loggedInAdmin.getRole().getPermissions().getReadCourses();
 
         if(permissionForLoggedInAdmin == PermissionType.FULL) {

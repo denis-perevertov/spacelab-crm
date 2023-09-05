@@ -13,51 +13,51 @@ public class PermissionSet {
     @Transient List<String> authorities;
 
     // статистика
-    PermissionType readStatistics = PermissionType.UNDEFINED;
+    PermissionType readStatistics = PermissionType.FULL;
 
     // задания
-    PermissionType readTasks = PermissionType.UNDEFINED;
-    PermissionType writeTasks = PermissionType.UNDEFINED;
-    PermissionType editTasks = PermissionType.UNDEFINED;
-    PermissionType deleteTasks = PermissionType.UNDEFINED;
+    PermissionType readTasks = PermissionType.FULL;
+    PermissionType writeTasks = PermissionType.FULL;
+    PermissionType editTasks = PermissionType.FULL;
+    PermissionType deleteTasks = PermissionType.FULL;
 
     // студенты
-    PermissionType readStudents = PermissionType.UNDEFINED;
-    PermissionType writeStudents = PermissionType.UNDEFINED;
-    PermissionType inviteStudents = PermissionType.UNDEFINED;
-    PermissionType editStudents = PermissionType.UNDEFINED;
-    PermissionType deleteStudents = PermissionType.UNDEFINED;
+    PermissionType readStudents = PermissionType.FULL;
+    PermissionType writeStudents = PermissionType.FULL;
+    PermissionType inviteStudents = PermissionType.FULL;
+    PermissionType editStudents = PermissionType.FULL;
+    PermissionType deleteStudents = PermissionType.FULL;
 
     // курсы
-    PermissionType readCourses = PermissionType.UNDEFINED;
-    PermissionType writeCourses = PermissionType.UNDEFINED;
-    PermissionType editCourses = PermissionType.UNDEFINED;
-    PermissionType deleteCourses = PermissionType.UNDEFINED;
+    PermissionType readCourses = PermissionType.FULL;
+    PermissionType writeCourses = PermissionType.FULL;
+    PermissionType editCourses = PermissionType.FULL;
+    PermissionType deleteCourses = PermissionType.FULL;
 
     // занятия
-    PermissionType readLessons = PermissionType.UNDEFINED;
-    PermissionType writeLessons = PermissionType.UNDEFINED;
-    PermissionType editLessons = PermissionType.UNDEFINED;
-    PermissionType deleteLessons = PermissionType.UNDEFINED;
+    PermissionType readLessons = PermissionType.FULL;
+    PermissionType writeLessons = PermissionType.FULL;
+    PermissionType editLessons = PermissionType.FULL;
+    PermissionType deleteLessons = PermissionType.FULL;
 
     // литература
-    PermissionType readLiteratures = PermissionType.UNDEFINED;
-    PermissionType writeLiteratures = PermissionType.UNDEFINED;
-    PermissionType editLiteratures = PermissionType.UNDEFINED;
-    PermissionType verifyLiteratures = PermissionType.UNDEFINED;
-    PermissionType deleteLiteratures = PermissionType.UNDEFINED;
+    PermissionType readLiteratures = PermissionType.FULL;
+    PermissionType writeLiteratures = PermissionType.FULL;
+    PermissionType editLiteratures = PermissionType.FULL;
+    PermissionType verifyLiteratures = PermissionType.FULL;
+    PermissionType deleteLiteratures = PermissionType.FULL;
 
     // роли
-    PermissionType readRoles = PermissionType.UNDEFINED;
-    PermissionType writeRoles = PermissionType.UNDEFINED;
-    PermissionType editRoles = PermissionType.UNDEFINED;
-    PermissionType deleteRoles = PermissionType.UNDEFINED;
+    PermissionType readRoles = PermissionType.FULL;
+    PermissionType writeRoles = PermissionType.FULL;
+    PermissionType editRoles = PermissionType.FULL;
+    PermissionType deleteRoles = PermissionType.FULL;
 
     // настройки системы
-    PermissionType readSettings = PermissionType.UNDEFINED;
-    PermissionType writeSettings = PermissionType.UNDEFINED;
-    PermissionType editSettings = PermissionType.UNDEFINED;
-    PermissionType deleteSettings = PermissionType.UNDEFINED;
+    PermissionType readSettings = PermissionType.FULL;
+    PermissionType writeSettings = PermissionType.FULL;
+    PermissionType editSettings = PermissionType.FULL;
+    PermissionType deleteSettings = PermissionType.FULL;
 
     public PermissionType getPermission(String permissionName) {
         return switch(permissionName) {
@@ -70,6 +70,7 @@ public class PermissionSet {
             case "students.write" -> this.writeStudents;
             case "students.edit" -> this.editStudents;
             case "students.delete" -> this.deleteStudents;
+            case "students.invite" -> this.inviteStudents;
             case "courses.read" -> this.readCourses;
             case "courses.write" -> this.writeCourses;
             case "courses.edit" -> this.editCourses;
@@ -80,6 +81,7 @@ public class PermissionSet {
             case "lessons.delete" -> this.deleteLessons;
             case "literatures.read" -> this.readLiteratures;
             case "literatures.write" -> this.writeLiteratures;
+            case "literatures.verify" -> this.verifyLiteratures;
             case "literatures.edit" -> this.editLiteratures;
             case "literatures.delete" -> this.deleteLiteratures;
             case "roles.read" -> this.readRoles;

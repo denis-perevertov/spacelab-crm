@@ -84,47 +84,5 @@ public class TaskServiceImpl implements TaskService {
         return null;
     }
 
-//    @Override
-//    public List<TaskListDTO> getTasks() {
-//        return taskRepository.findAll().stream().map(mapper::fromTaskToListDTO).toList();
-//    }
-//
-//    @Override
-//    public List<TaskListDTO> getTasks(Pageable pageable) {
-//        return taskRepository.findAll(pageable)
-//                .getContent()
-//                .stream()
-//                .map(mapper::fromTaskToListDTO)
-//                .toList();
-//    }
-//
-//    @Override
-//    public List<TaskListDTO> getTasks(FilterForm filters, Pageable pageable) {
-//        Specification<Task> spec = buildSpecificationFromFilters(filters);
-//        return taskRepository.findAll(spec, pageable)
-//                .getContent()
-//                .stream()
-//                .map(mapper::fromTaskToListDTO)
-//                .toList();
-//    }
-//
-//    @Override
-//    public TaskListDTO getTaskById(Long id) {
-//        Task task = taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Task not found"));
-//        return mapper.fromTaskToListDTO(task);
-//    }
-//
-//    @Override
-//    public TaskListDTO createNewTask(TaskListDTO dto) {
-//        Task task = mapper.fromListDTOToTask(dto);
-//        task = taskRepository.save(task);
-//        return mapper.fromTaskToListDTO(task);
-//    }
-//
-//    @Override
-//    public TaskListDTO editTask(TaskListDTO dto) {
-//        Task task = mapper.fromListDTOToTask(dto);
-//        task = taskRepository.save(task);
-//        return mapper.fromTaskToListDTO(task);
-//    }
+
 }

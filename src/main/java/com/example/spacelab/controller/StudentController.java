@@ -212,8 +212,7 @@ public class StudentController {
     })
     @PreAuthorize("!hasAuthority('students.invite.NO_ACCESS')")
     @PostMapping("/invite")
-    public ResponseEntity<String> createStudentInviteLink(@AuthenticationPrincipal Admin admin,
-                                                          @RequestBody StudentInviteRequest inviteRequest,
+    public ResponseEntity<String> createStudentInviteLink(@RequestBody StudentInviteRequest inviteRequest,
                                                           HttpServletRequest servletRequest) {
 
         AuthUtil.checkAccessToCourse(inviteRequest.getCourse().getId(), "students.invite");

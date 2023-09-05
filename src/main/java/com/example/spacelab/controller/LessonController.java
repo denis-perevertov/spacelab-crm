@@ -83,6 +83,9 @@ public class LessonController {
 
         }
 
+        System.out.println("HELLO");
+        System.out.println(dtoList.getContent().toString());
+
         return new ResponseEntity<>(dtoList, HttpStatus.OK);
     }
 
@@ -129,7 +132,6 @@ public class LessonController {
         lessonService.createNewLesson(mapper.BeforeStartDTOtoLesson(lesson));
         return new ResponseEntity<>("Successful save", HttpStatus.CREATED);
     }
-
 
 
     //Редактирование урока

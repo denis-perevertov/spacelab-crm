@@ -158,7 +158,7 @@ public class AdminController {
     // ==================================
 
     // Получение списка админов по ролям (для Select2)
-    @GetMapping("/get-admins-by-role/")
+    @GetMapping("/get-admins-by-role")
     public Map<String, Object> getAdminsByRole(@RequestParam Long roleID,
                                                  @RequestParam Integer page) {
         FilterForm form = FilterForm.with()

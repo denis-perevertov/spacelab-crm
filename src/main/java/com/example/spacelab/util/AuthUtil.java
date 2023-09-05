@@ -39,11 +39,4 @@ public class AuthUtil {
             throw new AccessDeniedException("No access to creating courses!");
     }
 
-//    public static List<?> filterListByAllowedCourse(List<?> list, Long courseID, String permissionName) {
-//        Admin admin = getLoggedInAdmin();
-//        PermissionType permissionToCheck = getPermission(permissionName);
-//        if(permissionToCheck == PermissionType.FULL) return list;
-//        else if(permissionToCheck == PermissionType.PARTIAL) return list.stream().filter(item -> )
-//        else throw new AccessDeniedException("No access to creating new students for this course! (courseID: "+courseID+") !");
-//    }
 }

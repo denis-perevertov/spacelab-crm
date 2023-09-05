@@ -2,10 +2,12 @@ package com.example.spacelab.dto.course;
 
 import com.example.spacelab.model.course.CourseStatus;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
+@NoArgsConstructor
 public class CourseInfoDTO {
 
     private Long id;
@@ -22,4 +24,8 @@ public class CourseInfoDTO {
 
     private Integer groupSize;
 
+    public CourseInfoDTO(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 }

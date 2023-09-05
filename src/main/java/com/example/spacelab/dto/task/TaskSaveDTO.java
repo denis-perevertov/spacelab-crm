@@ -3,10 +3,12 @@ package com.example.spacelab.dto.task;
 import com.example.spacelab.model.task.TaskLevel;
 import com.example.spacelab.model.task.TaskStatus;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
+@NoArgsConstructor
 public class TaskSaveDTO {
 
     private Long id;
@@ -32,5 +34,8 @@ public class TaskSaveDTO {
     private List<Long> recommendedLiteratureIds;
 
 
-
+    public TaskSaveDTO(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 }
