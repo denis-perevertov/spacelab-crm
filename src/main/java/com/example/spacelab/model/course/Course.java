@@ -6,6 +6,7 @@ import com.example.spacelab.model.task.Task;
 import com.example.spacelab.model.admin.Admin;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
@@ -14,6 +15,7 @@ import java.util.List;
 @Data
 @Entity
 @Table(name="courses")
+@NoArgsConstructor
 public class Course {
 
     @Id
@@ -50,4 +52,8 @@ public class Course {
     @OneToMany
     private List<Literature> literature;
 
+    public Course(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 }

@@ -3,12 +3,14 @@ package com.example.spacelab.dto.course;
 import com.example.spacelab.dto.student.StudentAvatarDTO;
 import com.example.spacelab.model.course.CourseStatus;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
 @Data
+@NoArgsConstructor
 public class CourseCardDTO {
 
     private Long id;
@@ -33,6 +35,10 @@ public class CourseCardDTO {
 
     private CourseInformationDTO courseInfo;
 
+    public CourseCardDTO(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 
 //    private Map<Long, String> manegers;
 //

@@ -2,8 +2,10 @@ package com.example.spacelab.dto.literature;
 
 import com.example.spacelab.model.literature.LiteratureType;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 public class LiteratureListDTO {
     private Long id;
 
@@ -19,4 +21,9 @@ public class LiteratureListDTO {
     private String keywords;
 
     private String resource_link;
+
+    public LiteratureListDTO(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 }
