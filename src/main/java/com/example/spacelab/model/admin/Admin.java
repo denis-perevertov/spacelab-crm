@@ -33,10 +33,10 @@ public class Admin extends UserEntity implements UserDetails {
     @Transient private String confirmPassword;
 
     @OneToMany
-    private List<Course> courses;
+    private List<Course> courses = new ArrayList<>();
 
     @OneToMany
-    private List<Lesson> lessons;
+    private List<Lesson> lessons = new ArrayList<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

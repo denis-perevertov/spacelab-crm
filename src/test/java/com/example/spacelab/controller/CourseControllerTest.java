@@ -3,11 +3,13 @@ package com.example.spacelab.controller;
 
 import com.example.spacelab.config.JwtService;
 import com.example.spacelab.config.SecurityConfig;
+import com.example.spacelab.config.TestSecurityConfig;
+import com.example.spacelab.config.WithMockCustomUser;
 import com.example.spacelab.dto.course.*;
 import com.example.spacelab.mapper.CourseMapper;
 import com.example.spacelab.model.course.Course;
-
 import com.example.spacelab.service.CourseService;
+import com.example.spacelab.util.AuthUtil;
 import com.example.spacelab.util.FilterForm;
 import com.example.spacelab.validator.CourseCreateValidator;
 import com.example.spacelab.validator.CourseUpdateValidator;
@@ -22,8 +24,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -33,14 +38,18 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 @SpringBootTest
 @AutoConfigureMockMvc
 @Import(SecurityConfig.class)
+@WithUserDetails("admin@gmail.com")
 class CourseControllerTest {
-
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private CourseController controller;
 
     @MockBean
     private CourseService courseService;
@@ -61,15 +70,19 @@ class CourseControllerTest {
     private JwtService jwtService;
 
     @Test
-    @WithMockUser(username = "user", authorities = {"course.read.ACCESS"})
+//    @WithMockUser(username = "test@gmail.com", password = "test", authorities = {"test"})
     public void testGetCourses() throws Exception {
         // Arrange
         FilterForm filters = new FilterForm();
         Page<Course> coursePage = new PageImpl<>(Arrays.asList(new Course(1L, "Sample Course")));
         Page<CourseListDTO> courseListDTOPage = new PageImpl<>(Collections.singletonList(new CourseListDTO(1L, "Sample Course")));
 
+        when(courseService.getCourses()).thenReturn(coursePage.getContent());
         when(courseService.getCourses(any(), any())).thenReturn(coursePage);
         when(courseMapper.fromCoursePageToListDTOPage(any())).thenReturn(courseListDTOPage);
+
+        MvcResult result = mockMvc.perform(get("/api/courses")).andReturn();
+        System.out.println(result.getResponse().getContentAsString());
 
         // Act and Assert
         mockMvc.perform(get("/api/courses"))

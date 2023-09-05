@@ -5,10 +5,12 @@ import com.example.spacelab.model.task.TaskLevel;
 import com.example.spacelab.model.task.TaskStatus;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Map;
 
 @Data
+@NoArgsConstructor
 public class TaskListDTO {
 
     private Long id;
@@ -19,6 +21,12 @@ public class TaskListDTO {
 
     private Long courseID;
     private String courseName;
+
+    public TaskListDTO(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
 //
 //    private CourseListDTO course;
 //    private String courseName;

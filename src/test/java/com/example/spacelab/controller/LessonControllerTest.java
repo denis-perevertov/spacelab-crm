@@ -1,6 +1,7 @@
 package com.example.spacelab.controller;
 
 import com.example.spacelab.config.SecurityConfig;
+import com.example.spacelab.config.TestSecurityConfig;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MvcResult;
@@ -48,9 +52,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Import(SecurityConfig.class)
+@Import(TestSecurityConfig.class)
+@WithUserDetails("test@gmail.com")
 class LessonControllerTest {
-
 
     @Autowired
     private MockMvc mockMvc;
@@ -65,8 +69,12 @@ class LessonControllerTest {
     private LessonBeforeStartValidator lessonBeforeStartValidator;
 
     @Test
-    @WithMockUser(username = "user", authorities = {"lesson.read.ACCESS"})
     public void testGetLesson() throws Exception {
+
+        Admin user = (Admin) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        System.out.println(user.toString());
+        System.out.println(user.getRole().toString());
+
         // Arrange
         FilterForm filters = new FilterForm();
         Page<Lesson> lessonPage = new PageImpl<>(Arrays.asList(new Lesson(1L, LocalDateTime.now())));
@@ -75,10 +83,11 @@ class LessonControllerTest {
         when(lessonService.getLesson(any(), any())).thenReturn(lessonPage);
         when(lessonMapper.pageLessonToPageLessonListDTO(any())).thenReturn(lessonListDTOPage);
 
+        MvcResult result = mockMvc.perform(get("/api/lessons")).andReturn();
+        System.out.println(result.getResponse().getContentAsString());
+
         // Act and Assert
-        mockMvc.perform(get("/api/lessons")
-                .param("page", "0")
-                .param("size", "10")
+        mockMvc.perform(get("/api/lessons?page=0&size=10")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].id").value(1))
@@ -86,7 +95,6 @@ class LessonControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "user", authorities = {"lesson.read.ACCESS"})
     public void testGetLessonById() throws Exception {
         // Arrange
         Long lessonId = 1L;

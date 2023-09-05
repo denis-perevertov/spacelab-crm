@@ -83,6 +83,9 @@ public class LessonController {
 
         }
 
+        System.out.println("HELLO");
+        System.out.println(dtoList.getContent().toString());
+
         return new ResponseEntity<>(dtoList, HttpStatus.OK);
     }
 

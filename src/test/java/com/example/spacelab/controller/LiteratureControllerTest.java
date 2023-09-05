@@ -3,6 +3,8 @@ package com.example.spacelab.controller;
 import com.example.spacelab.config.SecurityConfig;
 import com.example.spacelab.dto.literature.*;
 import com.example.spacelab.mapper.LiteratureMapper;
+import com.example.spacelab.model.admin.Admin;
+import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.literature.Literature;
 import com.example.spacelab.service.LiteratureService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,7 +17,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Arrays;
@@ -29,6 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Import(SecurityConfig.class)
+@WithUserDetails("admin@gmail.com")
 class LiteratureControllerTest {
 
     @Autowired
@@ -42,8 +47,11 @@ class LiteratureControllerTest {
 
 
     @Test
-    @WithMockUser(username = "user", authorities = {"literature.read.ACCESS"})
     public void testGetLiterature() throws Exception {
+
+        Admin admin = (Admin) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        System.out.println(admin.getRole().toString());
+
         Page<Literature> literaturePage = new PageImpl<>(Arrays.asList(new Literature(1L, "Sample Book")));
         when(literatureService.getLiterature(any(), any())).thenReturn(literaturePage);
         when(literatureMapper.fromPageLiteraturetoPageDTOList(any())).thenReturn(
@@ -58,9 +66,9 @@ class LiteratureControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "user", authorities = {"literature.read.ACCESS"})
     public void testGetLiteratureById() throws Exception {
         Literature literature = new Literature(1L, "Sample Book");
+        literature.setCourse(new Course());
         when(literatureService.getLiteratureById(1L)).thenReturn(literature);
         when(literatureMapper.fromLiteraturetoInfoDTO(any())).thenReturn(
                 new LiteratureInfoDTO(1L, "Sample Book"));
@@ -72,7 +80,6 @@ class LiteratureControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "user", authorities = {"literature.read.ACCESS"})
     public void testVerifyLiterature() throws Exception {
         mockMvc.perform(get("/api/literature/{id}/verify", 1))
                 .andExpect(status().isOk())
@@ -80,7 +87,6 @@ class LiteratureControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "user", authorities = {"literature.write.ACCESS"})
     public void testCreateNewLiterature() throws Exception {
         LiteratureSaveDTO saveDTO = new LiteratureSaveDTO(1L,"name",1L,"type","authoeName", "keywords", "description", "resourseLink");
 
@@ -94,7 +100,6 @@ class LiteratureControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "user", authorities = {"literature.read.ACCESS"})
     public void testGetCourseForUpdate() throws Exception {
         Literature literature = new Literature(1L, "Sample Book");
         when(literatureService.getLiteratureById(1L)).thenReturn(literature);
@@ -108,7 +113,6 @@ class LiteratureControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "user", authorities = {"literature.edit.ACCESS"})
     public void testEditLiterature() throws Exception {
         LiteratureSaveDTO saveDTO = new LiteratureSaveDTO(1L,"name",1L,"type","authoeName", "keywords", "description", "resourseLink");
 
@@ -122,7 +126,6 @@ class LiteratureControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "user", authorities = {"literature.delete.ACCESS"})
     public void testDeleteLiterature() throws Exception {
         mockMvc.perform(delete("/api/literature/{id}", 1))
                 .andExpect(status().isOk())
@@ -130,7 +133,6 @@ class LiteratureControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "user", authorities = {"literature.read.ACCESS"})
     public void testGetLiteratureForSelect2() throws Exception {
         Page<Literature> literaturePage = new PageImpl<>(Arrays.asList(new Literature(1L, "Sample Book")));
         when(literatureService.getLiteratureByName(any(), any())).thenReturn(literaturePage);
