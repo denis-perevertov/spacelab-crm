@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface CourseRepository extends JpaRepository<Course, Long>, JpaSpecificationExecutor<Course> {
@@ -20,4 +21,6 @@ public interface CourseRepository extends JpaRepository<Course, Long>, JpaSpecif
 
     @Query("SELECT c FROM Course c WHERE c.id IN :ids")
     Page<Course> findAllowedCoursesPage(Pageable pageable, @Param("ids") Long... ids);
+
+    Optional<Course> findByName(String name);
 }

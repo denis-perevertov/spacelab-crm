@@ -5,10 +5,18 @@ import com.example.spacelab.model.contact.ContactInfo;
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.course.CourseInfo;
 import com.example.spacelab.model.course.CourseStatus;
+import com.example.spacelab.model.lesson.Lesson;
+import com.example.spacelab.model.lesson.LessonReport;
+import com.example.spacelab.model.lesson.LessonStatus;
+import com.example.spacelab.model.literature.Literature;
+import com.example.spacelab.model.literature.LiteratureType;
 import com.example.spacelab.model.role.PermissionSet;
 import com.example.spacelab.model.role.PermissionType;
 import com.example.spacelab.model.role.UserRole;
 import com.example.spacelab.model.student.*;
+import com.example.spacelab.model.task.Task;
+import com.example.spacelab.model.task.TaskLevel;
+import com.example.spacelab.model.task.TaskStatus;
 import com.example.spacelab.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
@@ -17,6 +25,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Component
@@ -29,17 +38,12 @@ public class DefaultInitializer implements CommandLineRunner {
     private final StudentRepository studentRepository;
     private final ContactInfoRepository contactRepository;
     private final CourseRepository courseRepository;
-
-    private final PasswordEncoder passwordEncoder;
-
-    /*
-
-    in progress
-
     private final TaskRepository taskRepository;
     private final LiteratureRepository literatureRepository;
     private final LessonRepository lessonRepository;
-     */
+
+    private final PasswordEncoder passwordEncoder;
+
 
     @Override
     public void run(String... args) throws InterruptedException {
@@ -50,6 +54,9 @@ public class DefaultInitializer implements CommandLineRunner {
         Thread.sleep(50); checkForCourses();
         Thread.sleep(50); checkForContacts();
         Thread.sleep(50); checkForStudents();
+        Thread.sleep(50); checkForTasks();
+        Thread.sleep(50); checkForLiterature();
+        Thread.sleep(50); checkForLessons();
     }
 
 
@@ -245,7 +252,6 @@ public class DefaultInitializer implements CommandLineRunner {
 
         }
     }
-
     private void checkForAdmins() {
         if(adminRepository.count() < 1) {
             log.info("Adding default admins");
@@ -296,7 +302,6 @@ public class DefaultInitializer implements CommandLineRunner {
 
         }
     }
-
     private void checkForCourses() {
         if(courseRepository.count() < 1) {
 
@@ -349,7 +354,6 @@ public class DefaultInitializer implements CommandLineRunner {
             courseRepository.save(pythonCourse);
         }
     }
-
     private void checkForContacts() {
         if(contactRepository.count() < 1) {
 
@@ -366,7 +370,6 @@ public class DefaultInitializer implements CommandLineRunner {
             });
         }
     }
-
     private void checkForStudents() {
         if(studentRepository.count() < 1) {
 
@@ -443,6 +446,118 @@ public class DefaultInitializer implements CommandLineRunner {
             details.setAccountStatus(StudentAccountStatus.ACTIVE);
 
             studentRepository.save(student3);
+        }
+    }
+    private void checkForTasks() {
+        if(taskRepository.count() < 1) {
+            log.info("Adding default tasks");
+
+            Task task = new Task();
+            task.setCourse(courseRepository.findById(1L).orElseThrow());
+            task.setName("TestTask1");
+            task.setLevel(TaskLevel.ADVANCED);
+            task.setSkillsDescription("SkillsDescription");
+            task.setTaskDescription("TaskDescription");
+            task.setCompletionTime("6-8 m");
+            task.setStatus(TaskStatus.ACTIVE);
+
+            task = taskRepository.save(task);
+
+            Task task2 = new Task();
+            task2.setParentTask(task);
+            task2.setCourse(courseRepository.findById(1L).orElseThrow());
+            task2.setName("TestTask1 Subtask");
+            task2.setLevel(TaskLevel.ADVANCED);
+            task2.setSkillsDescription("SkillsDescription");
+            task2.setTaskDescription("TaskDescription");
+            task2.setCompletionTime("6-8 m");
+            task2.setStatus(TaskStatus.ACTIVE);
+
+            task2 = taskRepository.save(task2);
+            task.getSubtasks().add(task2);
+            taskRepository.save(task);
+
+            Task task3 = new Task();
+            task3.setCourse(courseRepository.findById(2L).orElseThrow());
+            task3.setName("TestTask2");
+            task3.setLevel(TaskLevel.ADVANCED);
+            task3.setSkillsDescription("SkillsDescription");
+            task3.setTaskDescription("TaskDescription");
+            task3.setCompletionTime("6-8 m");
+            task3.setStatus(TaskStatus.ACTIVE);
+
+            taskRepository.save(task3);
+        }
+    }
+    private void checkForLiterature() {
+        if(literatureRepository.count() < 1) {
+            log.info("Adding default literature");
+
+            Literature lit = new Literature();
+            lit.setName("Test");
+            lit.setAuthor("Test Author");
+            lit.setCourse(courseRepository.findById(1L).orElseThrow());
+            lit.setType(LiteratureType.LINK);
+            lit.setKeywords("Test1, Test2, Test3");
+            lit.setDescription("Test Description");
+            lit.setResource_link("http://www.lol.com");
+
+            literatureRepository.save(lit);
+
+            Literature lit2 = new Literature();
+            lit2.setName("Test2");
+            lit2.setAuthor("Test2 Author");
+            lit2.setCourse(courseRepository.findById(2L).orElseThrow());
+            lit2.setType(LiteratureType.BOOK);
+            lit2.setKeywords("Test1, Test2, Test3");
+            lit2.setDescription("Test2 Description");
+            lit2.setResource_link("test.pdf");
+
+            literatureRepository.save(lit2);
+        }
+    }
+    private void checkForLessons() {
+        if(lessonRepository.count() < 1) {
+            log.info("Adding default lessons");
+
+            Lesson lesson = new Lesson();
+            lesson.setDatetime(LocalDateTime.now().plusDays(1));
+            lesson.setCourse(courseRepository.findById(1L).orElseThrow());
+            lesson.setLink("http://www.test.com");
+            lesson.setStatus(LessonStatus.PLANNED);
+            lesson.setMentor(adminRepository.findByEmail("mentor@gmail.com").orElseThrow());
+            lesson.setManager(adminRepository.findByEmail("manager@gmail.com").orElseThrow());
+            LessonReport report = new LessonReport();
+            report.setLesson(lesson);
+            lesson.setLessonReport(report);
+
+            lessonRepository.save(lesson);
+
+            Lesson lesson2 = new Lesson();
+            lesson2.setDatetime(LocalDateTime.now().plusDays(1));
+            lesson2.setCourse(courseRepository.findById(2L).orElseThrow());
+            lesson2.setLink("http://www.test.com");
+            lesson2.setStatus(LessonStatus.PLANNED);
+            lesson2.setMentor(adminRepository.findByEmail("mentor@gmail.com").orElseThrow());
+            lesson2.setManager(adminRepository.findByEmail("manager@gmail.com").orElseThrow());
+            LessonReport report2 = new LessonReport();
+            report2.setLesson(lesson2);
+            lesson2.setLessonReport(report2);
+
+            lessonRepository.save(lesson2);
+
+            Lesson lesson3 = new Lesson();
+            lesson3.setDatetime(LocalDateTime.now().plusDays(1));
+            lesson3.setCourse(courseRepository.findById(3L).orElseThrow());
+            lesson3.setLink("http://www.test.com");
+            lesson3.setStatus(LessonStatus.PLANNED);
+            lesson3.setMentor(adminRepository.findByEmail("seniormanager@gmail.com").orElseThrow());
+            lesson3.setManager(adminRepository.findByEmail("admin@gmail.com").orElseThrow());
+            LessonReport report3 = new LessonReport();
+            report3.setLesson(lesson3);
+            lesson3.setLessonReport(report3);
+
+            lessonRepository.save(lesson3);
         }
     }
 

@@ -36,5 +36,5 @@ public class Literature {
         this.name = name;
     }
 
-    private Boolean is_verified;
+    private Boolean is_verified = false;
 }

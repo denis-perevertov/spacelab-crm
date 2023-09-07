@@ -2,6 +2,7 @@ package com.example.spacelab.service.impl;
 
 import com.example.spacelab.exception.ResourceNotFoundException;
 import com.example.spacelab.model.lesson.Lesson;
+import com.example.spacelab.model.lesson.LessonStatus;
 import com.example.spacelab.repository.LessonRepository;
 import com.example.spacelab.service.LessonService;
 import com.example.spacelab.service.specification.LessonSpecifications;
@@ -68,12 +69,23 @@ public class LessonServiceImpl implements LessonService {
 
     @Override
     public Lesson editLesson(Lesson lesson) {
+        if(lesson.getStatus().equals(LessonStatus.ACTIVE)) {
+            log.warning("Attempt to delete a lesson already in progress");
+            log.warning(lesson.toString());
+            throw new RuntimeException("Cannot edit an active lesson!");
+        }
         return lessonRepository.save(lesson);
     }
 
     @Override
     public void deleteLessonById(Long id) {
-        lessonRepository.deleteById(id);
+        Lesson lesson = lessonRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Lesson with this ID doesn't exist!"));
+        if(lesson.getStatus().equals(LessonStatus.ACTIVE)) {
+            log.warning("Attempt to delete a lesson already in progress");
+            log.warning(lesson.toString());
+            throw new RuntimeException("Cannot delete an active lesson!");
+        }
+        lessonRepository.delete(lesson);
     }
 
     @Override

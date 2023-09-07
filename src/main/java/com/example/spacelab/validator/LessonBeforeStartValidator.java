@@ -33,7 +33,7 @@ public class LessonBeforeStartValidator implements Validator {
 
         if(dto.getDate() == null) {
             e.rejectValue("date", "date.empty", "Enter date!");
-        }else {
+        } else {
             if (dto.getTime() == null) {
                 e.rejectValue("time", "time.empty", "Enter time!");
             } else {
@@ -45,21 +45,21 @@ public class LessonBeforeStartValidator implements Validator {
         }
 
 
-        if(dto.getCourseId() == null || dto.getCourseId() == 0)
+        if(dto.getCourseID() == null || dto.getCourseID() == 0)
             e.rejectValue("courseID", "courseID.empty", "Select course!");
-        else if(!courseRepository.existsById(dto.getCourseId()))
+        else if(!courseRepository.existsById(dto.getCourseID()))
             e.rejectValue("courseID", "courseID.no-match", "Course with this ID doesn't exist!");
 
 
-        if(dto.getMentorId() == null || dto.getMentorId() == 0)
+        if(dto.getMentorID() == null || dto.getMentorID() == 0)
             e.rejectValue("mentorID", "mentorID.empty", "Select mentor!");
-        else if(!adminRepository.existsById(dto.getMentorId()))
+        else if(!adminRepository.existsById(dto.getMentorID()))
             e.rejectValue("mentorID", "mentorID.no-match", "Mentor with this ID doesn't exist!");
 
 
-        if(dto.getManagerId() == null || dto.getManagerId() == 0)
+        if(dto.getManagerID() == null || dto.getManagerID() == 0)
             e.rejectValue("managerID", "managerID.empty", "Select manager!");
-        else if(!adminRepository.existsById(dto.getManagerId()))
+        else if(!adminRepository.existsById(dto.getManagerID()))
             e.rejectValue("managerID", "managerID.no-match", "Manager with this ID doesn't exist!");
 
 

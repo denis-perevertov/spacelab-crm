@@ -28,12 +28,13 @@ public class Lesson {
 
     private String link;
 
-    private Boolean startsAutomatically;
+    private Boolean startsAutomatically = false;
 
     @Enumerated(value = EnumType.STRING)
     private LessonStatus status;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name="lesson_report_id")
     private LessonReport lessonReport;
 
     @ManyToOne
@@ -41,7 +42,7 @@ public class Lesson {
     private Admin mentor;
 
     @ManyToOne
-    @JoinColumn(name = "admin_id")
+    @JoinColumn(name = "manager_id")
     private Admin manager;
 
     public Lesson(Long id, LocalDateTime datetime) {

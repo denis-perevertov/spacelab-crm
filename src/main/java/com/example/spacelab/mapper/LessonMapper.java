@@ -123,13 +123,13 @@ public class LessonMapper {
 
         lesson.setDatetime(LocalDateTime.of(dto.getDate(), dto.getTime()));
 
-        Course course = courseService.getCourseById(dto.getCourseId());
+        Course course = courseService.getCourseById(dto.getCourseID());
         lesson.setCourse(course);
 
-        Admin mentor = adminService.getAdminById(dto.getMentorId());
+        Admin mentor = adminService.getAdminById(dto.getMentorID());
         lesson.setMentor(mentor);
 
-        Admin manager = adminService.getAdminById(dto.getManagerId());
+        Admin manager = adminService.getAdminById(dto.getManagerID());
         lesson.setManager(manager);
 
         lesson.setLink(dto.getLink());
@@ -138,7 +138,7 @@ public class LessonMapper {
 
         lesson.setStatus(LessonStatus.PLANNED);
 
-        lesson.setLessonReport(new LessonReport());
+//        lesson.setLessonReport(new LessonReport());
 
         return lesson;
     }

@@ -83,13 +83,8 @@ public class LessonController {
 
         }
 
-        System.out.println("HELLO");
-        System.out.println(dtoList.getContent().toString());
-
         return new ResponseEntity<>(dtoList, HttpStatus.OK);
     }
-
-
 
     //Получение урока по id
     @Operation(description = "Get lesson by id", summary = "Get lesson by id", tags = {"Lesson"})
@@ -121,7 +116,9 @@ public class LessonController {
     @PostMapping
     public ResponseEntity<String> createNewLessonBeforeStart(@RequestBody LessonSaveBeforeStartDTO lesson, BindingResult bindingResult) {
 
-        AuthUtil.checkAccessToCourse(lesson.getCourseId(), "lessons.write");
+        AuthUtil.checkAccessToCourse(lesson.getCourseID(), "lessons.write");
+
+        lesson.setId(null);
 
         lessonBeforeStartValidator.validate(lesson, bindingResult);
         if (bindingResult.hasErrors()) {
@@ -147,7 +144,9 @@ public class LessonController {
     public ResponseEntity<String> editLessonBeforeStart(@PathVariable Long id, @RequestBody LessonSaveBeforeStartDTO lesson, BindingResult bindingResult) {
 
         AuthUtil.checkAccessToCourse(lessonService.getLessonById(id).getCourse().getId(), "lessons.edit");
-        AuthUtil.checkAccessToCourse(lesson.getCourseId(), "lessons.edit");
+        AuthUtil.checkAccessToCourse(lesson.getCourseID(), "lessons.edit");
+
+        lesson.setId(id);
 
         lessonBeforeStartValidator.validate(lesson, bindingResult);
         if (bindingResult.hasErrors()) {

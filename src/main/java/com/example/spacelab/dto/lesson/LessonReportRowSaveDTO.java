@@ -9,7 +9,10 @@ public class LessonReportRowSaveDTO {
 
     private Long id;
 
+/*
     private Long lessonId;
+    private Long studentId;
+*/
 
     private Boolean wasPresent;
 
