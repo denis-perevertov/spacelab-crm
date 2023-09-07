@@ -13,11 +13,11 @@ public class LessonSaveBeforeStartDTO {
     private LocalDate date;
     private LocalTime time;
 
-    private Long courseId;
+    private Long courseID;
 
-    private Long mentorId;
+    private Long mentorID;
 
-    private Long managerId;
+    private Long managerID;
 
     private String link;
 

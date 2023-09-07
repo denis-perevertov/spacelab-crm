@@ -8,6 +8,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -47,16 +48,16 @@ public class Task {
     private String taskDescription;
 
     @OneToMany
-    private List<Task> subtasks;
+    private List<Task> subtasks = new ArrayList<>();
 
     @ManyToMany
-    private List<Literature> recommendedLiterature;
+    private List<Literature> recommendedLiterature = new ArrayList<>();
 
     @ManyToMany
-    private List<Student> activeStudents;
+    private List<Student> activeStudents = new ArrayList<>();
 
     @ManyToMany
-    private List<LessonReportRow> lessonReportRows;
+    private List<LessonReportRow> lessonReportRows = new ArrayList<>();
 
     @Enumerated(value = EnumType.STRING)
     private TaskStatus status;

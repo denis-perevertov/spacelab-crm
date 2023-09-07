@@ -15,6 +15,7 @@ public class LessonReport {
     private Long id;
 
     @OneToOne
+    @JoinColumn(name = "lesson_id")
     private Lesson lesson;
 
     @OneToMany
