@@ -2,6 +2,7 @@ package com.example.spacelab.config;
 
 import com.example.spacelab.service.AdminService;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -9,14 +10,17 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
+import java.security.SignatureException;
 
 @Component
 @Log
@@ -25,6 +29,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final AdminService userDetailsService;
+
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -37,6 +42,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 username = jwtService.extractUsername(token);
             } catch (MalformedJwtException e) {
                 log.severe("JWT token is malformed");
+                log.severe(e.getMessage());
+            } catch (ExpiredJwtException e) {
+                log.severe("JWT expired");
                 log.severe(e.getMessage());
             }
         }

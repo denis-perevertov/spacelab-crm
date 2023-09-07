@@ -9,6 +9,7 @@ import com.example.spacelab.model.literature.Literature;
 import com.example.spacelab.model.student.Student;
 import com.example.spacelab.model.task.Task;
 import com.example.spacelab.repository.*;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 @Component
+@Data
 @RequiredArgsConstructor
 public class CourseMapper {
 

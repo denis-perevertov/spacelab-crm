@@ -17,7 +17,7 @@ import java.util.function.Function;
 @Component
 public class JwtService {
 
-    public static final String SECRETKEY = "lol";
+    public static final String SECRETKEY = "SDFDSF123SDASDCCSAHHADQDQSADXZZCSCASCAWDWACWACCAS";
 
     public String generateToken(String userName) {
         Map<String, Object> claims = new HashMap<>();
@@ -25,11 +25,13 @@ public class JwtService {
     }
 
     private String createToken(Map<String, Object> claims, String userName) {
+        System.out.println(System.currentTimeMillis());
+        System.out.println(System.currentTimeMillis() + (1000 * 60 * 30));
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(userName)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 30))
+                .setExpiration(new Date(System.currentTimeMillis() + (1000 * 60 * 30)))
                 .signWith(getSignKey(), SignatureAlgorithm.HS256).compact();
     }
 

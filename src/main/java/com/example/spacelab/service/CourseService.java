@@ -3,6 +3,7 @@ package com.example.spacelab.service;
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.student.Student;
 import com.example.spacelab.util.FilterForm;
+import lombok.Data;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

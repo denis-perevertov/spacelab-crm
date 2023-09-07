@@ -9,6 +9,7 @@ import com.example.spacelab.repository.CourseRepository;
 import com.example.spacelab.service.CourseService;
 import com.example.spacelab.service.specification.CourseSpecifications;
 import com.example.spacelab.util.FilterForm;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.data.domain.Page;
@@ -19,13 +20,13 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
+@Data
 @Log
 @RequiredArgsConstructor
 public class CourseServiceImpl implements CourseService {
 
     private final AdminRepository adminRepository;
     private final CourseRepository courseRepository;
-
 
     @Override
     public List<Course> getCourses() {

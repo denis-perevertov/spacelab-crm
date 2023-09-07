@@ -3,12 +3,14 @@ package com.example.spacelab.util;
 import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.role.PermissionType;
+import lombok.extern.java.Log;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Log
 public class AuthUtil {
 
     public static Admin getLoggedInAdmin() {
@@ -21,6 +23,7 @@ public class AuthUtil {
     }
 
     public static void checkAccessToCourse(Long courseID, String permissionName) {
+        if(courseID == null) return;
         Admin admin = getLoggedInAdmin();
         PermissionType permissionToCheck = getPermission(permissionName);
         if(permissionToCheck == PermissionType.FULL) return;

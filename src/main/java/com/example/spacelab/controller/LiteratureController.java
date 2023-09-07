@@ -137,8 +137,9 @@ public class LiteratureController {
     @PostMapping
     public ResponseEntity<String> createNewLiterature( @RequestBody LiteratureSaveDTO literature, BindingResult bindingResult) {
 
-        AuthUtil.checkAccessToCourse(literature.getCourseId(), "literatures.write");
+        AuthUtil.checkAccessToCourse(literature.getCourseID(), "literatures.write");
 
+        literature.setId(null);
 
         validator.validate(literature, bindingResult);
         if (bindingResult.hasErrors()) {
@@ -187,8 +188,9 @@ public class LiteratureController {
         // проверка и для того курса , куда пихаешь источник , и для того курса , который у источника был раньше
 
         AuthUtil.checkAccessToCourse(literatureService.getLiteratureById(id).getCourse().getId(), "literatures.edit");
-        AuthUtil.checkAccessToCourse(literature.getCourseId(), "literatures.edit");
+        AuthUtil.checkAccessToCourse(literature.getCourseID(), "literatures.edit");
 
+        literature.setId(id);
 
         validator.validate(literature, bindingResult);
         if (bindingResult.hasErrors()) {

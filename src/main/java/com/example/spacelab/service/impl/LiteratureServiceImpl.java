@@ -84,6 +84,7 @@ public class LiteratureServiceImpl implements LiteratureService{
 
     @Override
     public Literature createNewLiterature(Literature literature) {
+        literature.setIs_verified(false);
         return literatureRepository.save(literature);
     }
 
