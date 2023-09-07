@@ -58,7 +58,7 @@ public class TaskController {
     })
     @PreAuthorize("!hasAuthority('tasks.read.NO_ACCESS')")
     @GetMapping
-    private ResponseEntity<Page<TaskListDTO>> getTasks(FilterForm filters,
+    public ResponseEntity<Page<TaskListDTO>> getTasks(FilterForm filters,
                                                        @RequestParam(required = false) Integer page,
                                                        @RequestParam(required = false) Integer size) {
 
@@ -95,7 +95,7 @@ public class TaskController {
     })
     @PreAuthorize("!hasAuthority('tasks.read.NO_ACCESS')")
     @GetMapping("/{id}")
-    private ResponseEntity<TaskInfoDTO> getTaskById(@PathVariable Long id) {
+    public ResponseEntity<TaskInfoDTO> getTaskById(@PathVariable Long id) {
 
         AuthUtil.checkAccessToCourse(taskService.getTaskById(id).getCourse().getId(), "tasks.read");
 
@@ -114,7 +114,7 @@ public class TaskController {
     })
     @PreAuthorize("!hasAuthority('tasks.write.NO_ACCESS')")
     @PostMapping
-    private ResponseEntity<String> createNewTask( @RequestBody TaskSaveDTO task, BindingResult bindingResult) {
+    public ResponseEntity<String> createNewTask( @RequestBody TaskSaveDTO task, BindingResult bindingResult) {
 
         AuthUtil.checkAccessToCourse(task.getCourseId(), "tasks.write");
 
@@ -139,7 +139,7 @@ public class TaskController {
     })
     @PreAuthorize("!hasAuthority('tasks.read.NO_ACCESS')")
     @GetMapping("/edit/{id}")
-    private ResponseEntity<TaskCardDTO> getTaskByIdForEdit(@PathVariable Long id) {
+    public ResponseEntity<TaskCardDTO> getTaskByIdForEdit(@PathVariable Long id) {
 
         AuthUtil.checkAccessToCourse(taskService.getTaskById(id).getCourse().getId(), "tasks.read");
 
@@ -159,7 +159,7 @@ public class TaskController {
     })
     @PreAuthorize("!hasAuthority('tasks.edit.NO_ACCESS')")
     @PutMapping("/{id}")
-    private ResponseEntity<String> editTask(@PathVariable Long id,  @RequestBody TaskSaveDTO task, BindingResult bindingResult) {
+    public ResponseEntity<String> editTask(@PathVariable Long id,  @RequestBody TaskSaveDTO task, BindingResult bindingResult) {
 
         AuthUtil.checkAccessToCourse(taskService.getTaskById(id).getCourse().getId(), "tasks.edit");
         AuthUtil.checkAccessToCourse(task.getCourseId(), "tasks.edit");
@@ -186,7 +186,7 @@ public class TaskController {
     })
     @PreAuthorize("!hasAuthority('tasks.delete.NO_ACCESS')")
     @DeleteMapping("/{id}")
-    private ResponseEntity<String> deleteTask(@PathVariable Long id) {
+    public ResponseEntity<String> deleteTask(@PathVariable Long id) {
 
         AuthUtil.checkAccessToCourse(taskService.getTaskById(id).getCourse().getId(), "tasks.delete");
 
