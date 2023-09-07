@@ -1,5 +1,6 @@
 package com.example.spacelab.dto.lesson;
 
+import com.example.spacelab.model.lesson.LessonStatus;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -18,6 +19,8 @@ public class LessonSaveBeforeStartDTO {
     private Long mentorID;
 
     private Long managerID;
+
+    private LessonStatus status;
 
     private String link;
 

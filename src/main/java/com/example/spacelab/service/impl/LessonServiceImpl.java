@@ -1,5 +1,6 @@
 package com.example.spacelab.service.impl;
 
+import com.example.spacelab.exception.LessonException;
 import com.example.spacelab.exception.ResourceNotFoundException;
 import com.example.spacelab.model.lesson.Lesson;
 import com.example.spacelab.model.lesson.LessonStatus;
@@ -69,11 +70,11 @@ public class LessonServiceImpl implements LessonService {
 
     @Override
     public Lesson editLesson(Lesson lesson) {
-        if(lesson.getStatus().equals(LessonStatus.ACTIVE)) {
+        /*if(lesson.getStatus().equals(LessonStatus.ACTIVE)) {
             log.warning("Attempt to delete a lesson already in progress");
             log.warning(lesson.toString());
             throw new RuntimeException("Cannot edit an active lesson!");
-        }
+        }*/
         return lessonRepository.save(lesson);
     }
 
@@ -86,6 +87,22 @@ public class LessonServiceImpl implements LessonService {
             throw new RuntimeException("Cannot delete an active lesson!");
         }
         lessonRepository.delete(lesson);
+    }
+
+    @Override
+    public void startLesson(Long id) {
+        Lesson lesson = getLessonById(id);
+        if(!lesson.getStatus().equals(LessonStatus.PLANNED)) throw new LessonException("Can't start an active/completed lesson!");
+        lesson.setStatus(LessonStatus.ACTIVE);
+        lessonRepository.save(lesson);
+    }
+
+    @Override
+    public void completeLesson(Long id) {
+        Lesson lesson = getLessonById(id);
+        if(!lesson.getStatus().equals(LessonStatus.ACTIVE)) throw new LessonException("Can't complete a completed/planned lesson!");
+        lesson.setStatus(LessonStatus.COMPLETED);
+        lessonRepository.save(lesson);
     }
 
     @Override

@@ -22,4 +22,7 @@ public interface LessonService extends EntityFilterService<Lesson>{
     Lesson editLesson(Lesson lesson);
 
     void deleteLessonById(Long id);
+
+    void startLesson(Long id);
+    void completeLesson(Long id);
 }

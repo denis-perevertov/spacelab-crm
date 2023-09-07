@@ -10,6 +10,7 @@ import com.example.spacelab.mapper.LessonMapper;
 import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.lesson.Lesson;
+import com.example.spacelab.model.lesson.LessonStatus;
 import com.example.spacelab.model.role.PermissionType;
 import com.example.spacelab.service.LessonReportRowService;
 import com.example.spacelab.service.LessonService;
@@ -25,6 +26,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
+import org.apache.coyote.Response;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -119,6 +121,7 @@ public class LessonController {
         AuthUtil.checkAccessToCourse(lesson.getCourseID(), "lessons.write");
 
         lesson.setId(null);
+        lesson.setStatus(LessonStatus.PLANNED);
 
         lessonBeforeStartValidator.validate(lesson, bindingResult);
         if (bindingResult.hasErrors()) {
@@ -158,8 +161,6 @@ public class LessonController {
         return new ResponseEntity<>("Successful update", HttpStatus.OK);
     }
 
-
-
     //Удаление урока
     @Operation(description = "Delete lesson", summary = "Delete lesson", tags = {"Lesson"})
     @ApiResponses(value = {
@@ -177,8 +178,6 @@ public class LessonController {
         return new ResponseEntity<>("Deleted", HttpStatus.OK);
     }
 
-
-
     //Сохранение ответа студента на уроке
     @Operation(description = "Start lesson", summary = "Start lesson", tags = {"Lesson"})
     @ApiResponses(value = {
@@ -194,6 +193,20 @@ public class LessonController {
         return new ResponseEntity<>("Successful update", HttpStatus.OK);
     }
 
+
+    // ========================
+
+    @GetMapping("/{id}/start")
+    public ResponseEntity<String> startLesson(@PathVariable Long id) {
+        lessonService.startLesson(id);
+        return new ResponseEntity<>("Lesson started", HttpStatus.ACCEPTED);
+    }
+
+    @GetMapping("/{id}/complete")
+    public ResponseEntity<String> completeLesson(@PathVariable Long id) {
+        lessonService.completeLesson(id);
+        return new ResponseEntity<>("Lesson completed", HttpStatus.ACCEPTED);
+    }
 
 
 }

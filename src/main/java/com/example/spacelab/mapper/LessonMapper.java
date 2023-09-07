@@ -132,11 +132,11 @@ public class LessonMapper {
         Admin manager = adminService.getAdminById(dto.getManagerID());
         lesson.setManager(manager);
 
+        lesson.setStatus(dto.getStatus());
+
         lesson.setLink(dto.getLink());
 
         lesson.setStartsAutomatically(dto.getStartsAutomatically());
-
-        lesson.setStatus(LessonStatus.PLANNED);
 
 //        lesson.setLessonReport(new LessonReport());
 

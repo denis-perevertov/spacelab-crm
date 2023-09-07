@@ -51,6 +51,15 @@ public class GlobalControllerAdvice {
         );
     }
 
+    @ExceptionHandler(LessonException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<ErrorMessage> lessonExceptionHandler(LessonException e) {
+        return new ResponseEntity<>(
+                new ErrorMessage(e.getMessage(), HttpStatus.BAD_REQUEST.value(), Map.of("lesson", e.getMessage())),
+                HttpStatus.BAD_REQUEST
+        );
+    }
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<String> fallbackInternalErrorHandler(Exception ex) {
