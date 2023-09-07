@@ -20,6 +20,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 
 @Configuration
 @RequiredArgsConstructor
@@ -33,6 +34,7 @@ public class SecurityConfig {
     private final JwtAuthFilter jwtAuthFilter;
     private final AdminService adminService;
 
+
 //    @Bean
 //    public UserDetailsService userDetailsService() {
 //        return adminService;
@@ -44,7 +46,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(hb -> {})
                 .authorizeHttpRequests(customizer -> customizer
-                                                    .requestMatchers("/api/auth/register", "/api/auth/login", "/api/auth/logout").permitAll()
+                                                    .requestMatchers("/api/auth/**").permitAll()
                                                     .requestMatchers("/api/students/register").permitAll()
                                                     .requestMatchers("/swagger-ui/**", "/api-docs").permitAll()
                                                     .anyRequest().authenticated())

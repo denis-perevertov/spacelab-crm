@@ -180,7 +180,8 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public Long getStudentCourseID(Long studentID) {
-        return getStudentById(studentID).getCourse().getId();
+        Course studentCourse = getStudentById(studentID).getCourse();
+        return (studentCourse != null) ? studentCourse.getId() : null;
     }
 
     @Override

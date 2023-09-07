@@ -1,5 +1,6 @@
 package com.example.spacelab.dto.literature;
 
+import com.example.spacelab.model.literature.LiteratureType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -15,7 +16,7 @@ public class LiteratureCardDTO {
     private Long courseId;
     private String courseName;
 
-    private String type;
+    private LiteratureType type;
 
     private String author_name;
 

@@ -19,7 +19,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 import lombok.extern.java.Log;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -39,6 +41,7 @@ import java.util.Map;
 @Tag(name = "Course", description = "Course controller")
 @RestController
 @Log
+@Data
 @RequiredArgsConstructor
 @RequestMapping("/api/courses")
 public class CourseController {
@@ -47,8 +50,6 @@ public class CourseController {
     private final CourseMapper mapper;
     private final CourseCreateValidator courseCreateValidator;
     private final CourseUpdateValidator courseUpdateValidator;
-
-
 
     // Получение списка курсов  (с фильтрами/страницами)
     @Operation(description = "Get courses list", summary = "Get courses list", tags = {"Course"})
@@ -62,6 +63,11 @@ public class CourseController {
                                                            FilterForm filters,
                                                            @RequestParam(required = false) Integer page,
                                                            @RequestParam(required = false) Integer size) {
+
+        log.info(mapper.toString());
+        log.info(courseCreateValidator.toString());
+        log.info(courseUpdateValidator.toString());
+        log.info(courseService.toString());
 
         Page<CourseListDTO> courseListDTO = new PageImpl<>(new ArrayList<>());
 

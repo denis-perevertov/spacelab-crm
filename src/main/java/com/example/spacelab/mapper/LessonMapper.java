@@ -53,7 +53,7 @@ public class LessonMapper {
             dto.setManagerName(manager.getFirstName()+" "+manager.getLastName());
         }
 
-        dto.setPresentStudentsQuantity(lesson.getLessonReport().getRows().stream().filter(row -> row.getWasPresent()).count()+
+        if(lesson.getLessonReport() != null) dto.setPresentStudentsQuantity(lesson.getLessonReport().getRows().stream().filter(row -> row.getWasPresent()).count()+
                 "/ "+lesson.getLessonReport().getRows().size());
 
         return dto;

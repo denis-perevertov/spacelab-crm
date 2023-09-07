@@ -24,6 +24,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 import lombok.extern.java.Log;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -44,6 +45,7 @@ import java.util.Map;
 @Tag(name="Admin", description = "Admin controller")
 @RestController
 @Log
+@ToString
 @RequiredArgsConstructor
 @RequestMapping("/api/admins")
 public class AdminController {
