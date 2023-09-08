@@ -87,5 +87,5 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           password: ${{ secrets.SERVER_PASSWORD }}
 #          script: sudo docker run -p 9002:8080 -P --name myhome -e SPRING_DATASOURCE_URL=jdbc:mysql://172.17.0.2:3306/myhome -d temporalparadox/myhome:latest
-          script: sudo docker run -p 9005:8080 -P --name spacelab_api -e SPRING_DATASOURCE_URL=jdbc:mysql://172.17.0.2:3306/myhome -d temporalparadox/spacelab_admin:latest
+          script: sudo docker run -p 9006:1488 -P --name spacelab_api -e SPRING_DATASOURCE_URL=jdbc:mysql://172.17.0.2:3306/spacelab?createDatabaseIfNotExist=true -d temporalparadox/spacelab_admin:latest
 
