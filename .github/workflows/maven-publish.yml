@@ -1,0 +1,91 @@
+name: Maven Package
+
+on:
+  release:
+    types: [created]
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        server-id: github
+        settings-path: ${{ github.workspace }}
+
+    - name: Build with Maven
+      run: mvn -B package -DskipTests --file pom.xml
+
+    - uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+      name: Log in to Docker Hub
+      with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+      with:
+        context: .
+        file: ./Dockerfile
+        push: true
+        tags: temporalparadox/spacelab_admin:latest
+
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: appleboy/ssh-action@v0.1.10
+        name: Stop existing container
+        if: ${{ success() || failure() }}
+        with:
+            host: ${{ secrets.SERVER_HOST }}
+            username: ${{ secrets.SERVER_USERNAME }}
+            password: ${{ secrets.SERVER_PASSWORD }}
+            script: sudo docker stop spacelab_api
+
+      - uses: appleboy/ssh-action@v0.1.10
+        name: Delete old container
+        if: ${{ success() || failure() }}
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          script: sudo docker rm spacelab_api
+
+      - uses: appleboy/ssh-action@v0.1.10
+        name: Delete old image
+        if: ${{ success() || failure() }}
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          script: sudo docker rmi temporalparadox/spacelab_admin:latest
+
+      - uses: appleboy/ssh-action@v0.1.10
+        name: Create new container with updated image
+        if: ${{ success() || failure() }}
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+#          script: sudo docker run -p 9002:8080 -P --name myhome -e SPRING_DATASOURCE_URL=jdbc:mysql://172.17.0.2:3306/myhome -d temporalparadox/myhome:latest
+          script: sudo docker run -p 9005:8080 -P --name spacelab_api -e SPRING_DATASOURCE_URL=jdbc:mysql://172.17.0.2:3306/myhome -d temporalparadox/spacelab_api:latest
+
