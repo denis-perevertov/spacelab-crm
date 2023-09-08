@@ -5,15 +5,16 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Embeddable
 @Data
 public class CourseInfo {
 
-    private String main_description;
-    private List<String> topics;
-    private String completionTime;
-    private Integer groupSize;
-    private Integer hoursNorm;
+    private String main_description = "Empty description";
+    private List<String> topics = new ArrayList<>();
+    private String completionTime = "Unspecified time";
+    private Integer groupSize = -1;
+    private Integer hoursNorm = -1;
 }

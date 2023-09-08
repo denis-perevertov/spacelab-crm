@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -39,18 +40,19 @@ public class Course {
     private Admin manager;
 
     @OneToMany
-    private List<Student> students;
+    private List<Student> students = new ArrayList<>();
 
-    @OneToMany
-    private List<Task> tasks;
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Task> tasks = new ArrayList<>();
 
     @Embedded
-    private CourseInfo courseInfo;
+    private CourseInfo courseInfo = new CourseInfo();
 
+    @Enumerated(value = EnumType.STRING)
     private CourseStatus status;
 
     @OneToMany
-    private List<Literature> literature;
+    private List<Literature> literature = new ArrayList<>();
 
     public Course(Long id, String name) {
         this.id = id;

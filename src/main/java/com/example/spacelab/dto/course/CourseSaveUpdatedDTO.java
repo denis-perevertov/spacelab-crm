@@ -15,13 +15,13 @@ public class CourseSaveUpdatedDTO {
 
     private String name;
 
-    private LocalDate beginningDate;
+    private LocalDate beginDate;
 
     private LocalDate endDate;
 
-    private Long mentorId;
+    private Long mentorID;
 
-    private Long managerId;
+    private Long managerID;
 
     private List<Long> students;
 

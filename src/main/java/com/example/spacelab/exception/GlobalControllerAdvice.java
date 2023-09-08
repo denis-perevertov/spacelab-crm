@@ -9,7 +9,9 @@ import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import javax.naming.AuthenticationException;
 import java.util.Map;
 
 @ControllerAdvice
@@ -56,6 +58,17 @@ public class GlobalControllerAdvice {
     public ResponseEntity<ErrorMessage> lessonExceptionHandler(LessonException e) {
         return new ResponseEntity<>(
                 new ErrorMessage(e.getMessage(), HttpStatus.BAD_REQUEST.value(), Map.of("lesson", e.getMessage())),
+                HttpStatus.BAD_REQUEST
+        );
+    }
+
+    @ExceptionHandler({
+            MethodArgumentTypeMismatchException.class
+    })
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<ErrorMessage> badRequestHandler(Exception e) {
+        return new ResponseEntity<>(
+                new ErrorMessage("Bad request!", HttpStatus.BAD_REQUEST.value(), Map.of("error", e.getMessage())),
                 HttpStatus.BAD_REQUEST
         );
     }

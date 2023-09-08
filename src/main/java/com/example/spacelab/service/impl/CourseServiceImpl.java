@@ -4,6 +4,7 @@ import com.example.spacelab.exception.ResourceNotFoundException;
 import com.example.spacelab.mapper.CourseMapper;
 import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.model.course.Course;
+import com.example.spacelab.model.course.CourseStatus;
 import com.example.spacelab.repository.AdminRepository;
 import com.example.spacelab.repository.CourseRepository;
 import com.example.spacelab.service.CourseService;
@@ -102,6 +103,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public Course createNewCourse(Course course) {
+        course.setStatus(CourseStatus.ACTIVE);
         return courseRepository.save(course);
     }
 

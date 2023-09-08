@@ -15,9 +15,9 @@ public class TaskSaveDTO {
 
     private String name;
 
-    private Long parentTaskId; // ?
+    private Long parentTaskID; // ?
 
-    private Long courseId;
+    private Long courseID;
 
     private TaskLevel level;
 
@@ -29,9 +29,9 @@ public class TaskSaveDTO {
 
     private String taskDescription;
 
-    private List<Long> subtasksIds;
+    private List<Long> subtasksIDs;
 
-    private List<Long> recommendedLiteratureIds;
+    private List<Long> recommendedLiteratureIDs;
 
 
     public TaskSaveDTO(Long id, String name) {

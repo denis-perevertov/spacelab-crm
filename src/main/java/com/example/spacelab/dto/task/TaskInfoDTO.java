@@ -5,6 +5,8 @@ import com.example.spacelab.model.task.TaskLevel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,12 +26,12 @@ public class TaskInfoDTO {
     private String skillsDescription;
     private String taskDescription;
 
-    private Map<Long, String> subtasks;
+    private Map<Long, String> subtasks = new HashMap<>();
 
-    private Map<Long, String> recommendedLiterature;
+    private Map<Long, String> recommendedLiterature = new HashMap<>();
 
     // для показа выполняющих задание студентов - ID, имя и аватарка
-    private List<StudentAvatarDTO> students;
+    private List<StudentAvatarDTO> students = new ArrayList<>();
 
     public TaskInfoDTO(Long id, String name) {
         this.id = id;

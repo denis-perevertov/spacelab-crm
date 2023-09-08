@@ -173,16 +173,16 @@ public class CourseMapper {
         Course course = new Course();
         course.setId(courseDTO.getId());
         course.setName(courseDTO.getName());
-        course.setBeginningDate(courseDTO.getBeginningDate());
+        course.setBeginningDate(courseDTO.getBeginDate());
 
 
-        Admin mentor = adminRepository.findById(courseDTO.getMentorId()).orElse(null);
+        Admin mentor = adminRepository.findById(courseDTO.getMentorID()).orElse(null);
         if (mentor != null) {
             course.setMentor(mentor);
         }
 
 
-        Admin manager = adminRepository.findById(courseDTO.getManagerId()).orElse(null);
+        Admin manager = adminRepository.findById(courseDTO.getManagerID()).orElse(null);
         if (manager != null) {
             course.setManager(manager);
         }
@@ -194,17 +194,17 @@ public class CourseMapper {
         Course course = new Course();
         course.setId(courseDTO.getId());
         course.setName(courseDTO.getName());
-        course.setBeginningDate(courseDTO.getBeginningDate());
+        course.setBeginningDate(courseDTO.getBeginDate());
         course.setEndDate(courseDTO.getEndDate());
         course.setStatus(courseDTO.getStatus());
 
-        Admin mentor = adminRepository.findById(courseDTO.getMentorId()).orElse(null);
+        Admin mentor = adminRepository.findById(courseDTO.getMentorID()).orElse(null);
         if (mentor != null) {
             course.setMentor(mentor);
         }
 
 
-        Admin manager = adminRepository.findById(courseDTO.getManagerId()).orElse(null);
+        Admin manager = adminRepository.findById(courseDTO.getManagerID()).orElse(null);
         if (manager != null) {
             course.setManager(manager);
         }

@@ -43,8 +43,8 @@ public class TaskMapper {
             dto.setName(task.getName());
             dto.setLevel(task.getLevel());
             dto.setStatus(task.getStatus());
+            dto.setCourseID(task.getCourse().getId());
             dto.setCourseName(task.getCourse().getName());
-//            dto.setCourse(new CourseDTO());   // todo
 
         } catch (Exception e) {
             log.severe("Mapping error: " + e.getMessage());
@@ -180,13 +180,13 @@ public class TaskMapper {
         task.setId(taskSaveDTO.getId());
         task.setName(taskSaveDTO.getName());
 
-        if (taskSaveDTO.getParentTaskId() != null) {
-            Task parentTask = taskRepository.findById(taskSaveDTO.getParentTaskId()).orElseThrow();
+        if (taskSaveDTO.getParentTaskID() != null) {
+            Task parentTask = taskRepository.findById(taskSaveDTO.getParentTaskID()).orElseThrow();
             task.setParentTask(parentTask);
         }
 
-        if (taskSaveDTO.getCourseId() != null) {
-            Course course = courseRepository.findById(taskSaveDTO.getCourseId()).orElseThrow();
+        if (taskSaveDTO.getCourseID() != null) {
+            Course course = courseRepository.findById(taskSaveDTO.getCourseID()).orElseThrow();
             task.setCourse(course);
         }
 
@@ -196,8 +196,8 @@ public class TaskMapper {
         task.setTaskDescription(taskSaveDTO.getTaskDescription());
 
         List<Task> subtasks = new ArrayList<>();
-        if (taskSaveDTO.getSubtasksIds() != null) {
-            for (Long subtaskId : taskSaveDTO.getSubtasksIds()) {
+        if (taskSaveDTO.getSubtasksIDs() != null) {
+            for (Long subtaskId : taskSaveDTO.getSubtasksIDs()) {
                 Task subtask = taskRepository.findById(subtaskId).orElseThrow();
                 subtasks.add(subtask);
             }
@@ -205,8 +205,8 @@ public class TaskMapper {
         task.setSubtasks(subtasks);
 
         List<Literature> recommendedLiterature = new ArrayList<>();
-        if (taskSaveDTO.getRecommendedLiteratureIds() != null) {
-            for (Long literatureId : taskSaveDTO.getRecommendedLiteratureIds()) {
+        if (taskSaveDTO.getRecommendedLiteratureIDs() != null) {
+            for (Long literatureId : taskSaveDTO.getRecommendedLiteratureIDs()) {
                 Literature literature = literatureRepository.findById(literatureId).orElseThrow();
                 recommendedLiterature.add(literature);
             }

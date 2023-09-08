@@ -15,11 +15,11 @@ public class CourseSaveCreatedDTO {
 
     private String name;
 
-    private LocalDate beginningDate;
+    private LocalDate beginDate;
 
-    private Long mentorId;
+    private Long mentorID;
 
-    private Long managerId;
+    private Long managerID;
 
     public CourseSaveCreatedDTO(Long id, String name) {
         this.id = id;

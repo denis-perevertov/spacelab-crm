@@ -35,26 +35,26 @@ public class CourseCreateValidator implements Validator {
             e.rejectValue("name", "name.length", "Name length: 2-100");
 
 
-        if(dto.getMentorId() == null || dto.getMentorId() == 0)
+        if(dto.getMentorID() == null || dto.getMentorID() == 0)
             e.rejectValue("mentorID", "mentorID.empty", "Select mentor!");
-        else if(!adminRepository.existsById(dto.getMentorId()))
+        else if(!adminRepository.existsById(dto.getMentorID()))
             e.rejectValue("mentorID", "mentorID.no-match", "Mentor with this ID doesn't exist!");
 
 
-        if(dto.getManagerId() == null || dto.getManagerId() == 0)
+        if(dto.getManagerID() == null || dto.getManagerID() == 0)
             e.rejectValue("managerID", "managerID.empty", "Select manager!");
-        else if(!adminRepository.existsById(dto.getManagerId()))
+        else if(!adminRepository.existsById(dto.getManagerID()))
             e.rejectValue("managerID", "managerID.no-match", "Manager with this ID doesn't exist!");
 
 
-        if(dto.getBeginningDate() == null)
-            e.rejectValue("beginningDate", "beginningDate.empty", "Enter beginning date!");
-        else if(dto.getBeginningDate().isBefore(java.time.LocalDate.now()))
-            e.rejectValue("beginningDate", "beginningDate.no-match", "Beginning date can't be in the past!");
-        else if(dto.getBeginningDate().isEqual(java.time.LocalDate.now()))
-            e.rejectValue("beginningDate", "beginningDate.no-match", "Beginning date must be in future!");
-        else if(dto.getBeginningDate().isAfter(java.time.LocalDate.now().plusYears(1)))
-            e.rejectValue("beginningDate", "beginningDate.no-match", "Beginning date can't be later than one year!");
+        if(dto.getBeginDate() == null)
+            e.rejectValue("beginDate", "beginDate.empty", "Enter beginning date!");
+        else if(dto.getBeginDate().isBefore(java.time.LocalDate.now()))
+            e.rejectValue("beginDate", "beginDate.no-match", "Beginning date can't be in the past!");
+        else if(dto.getBeginDate().isEqual(java.time.LocalDate.now()))
+            e.rejectValue("beginDate", "beginDate.no-match", "Beginning date must be in future!");
+        else if(dto.getBeginDate().isAfter(java.time.LocalDate.now().plusYears(1)))
+            e.rejectValue("beginDate", "beginDate.no-match", "Beginning date can't be later than one year!");
 
 
     }

@@ -116,7 +116,9 @@ public class TaskController {
     @PostMapping
     public ResponseEntity<String> createNewTask( @RequestBody TaskSaveDTO task, BindingResult bindingResult) {
 
-        AuthUtil.checkAccessToCourse(task.getCourseId(), "tasks.write");
+        task.setId(null);
+
+        AuthUtil.checkAccessToCourse(task.getCourseID(), "tasks.write");
 
         taskValidator.validate(task, bindingResult);
         if (bindingResult.hasErrors()) {
@@ -161,8 +163,10 @@ public class TaskController {
     @PutMapping("/{id}")
     public ResponseEntity<String> editTask(@PathVariable Long id,  @RequestBody TaskSaveDTO task, BindingResult bindingResult) {
 
+        task.setId(id);
+
         AuthUtil.checkAccessToCourse(taskService.getTaskById(id).getCourse().getId(), "tasks.edit");
-        AuthUtil.checkAccessToCourse(task.getCourseId(), "tasks.edit");
+        AuthUtil.checkAccessToCourse(task.getCourseID(), "tasks.edit");
 
         taskValidator.validate(task, bindingResult);
         if (bindingResult.hasErrors()) {

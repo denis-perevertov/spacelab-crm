@@ -119,6 +119,7 @@
 
 
 	<build>
+		<finalName>spacelab_admin</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

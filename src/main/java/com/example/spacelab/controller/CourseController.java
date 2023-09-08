@@ -143,6 +143,8 @@ public class CourseController {
     @PostMapping
     public ResponseEntity<String> createNewCourse( @RequestBody CourseSaveCreatedDTO dto, BindingResult bindingResult) {
 
+        dto.setId(null);
+
         AuthUtil.checkPermissionToCreateCourse();
 
         courseCreateValidator.validate(dto, bindingResult);
@@ -170,6 +172,8 @@ public class CourseController {
     @PreAuthorize("!hasAuthority('courses.edit.NO_ACCESS')")
     @PutMapping("/{id}")
     public ResponseEntity<String> updateCourse(@PathVariable Long id,  @RequestBody CourseSaveUpdatedDTO dto, BindingResult bindingResult) {
+
+        dto.setId(id);
 
         AuthUtil.checkAccessToCourse(dto.getId(), "courses.edit");
         AuthUtil.checkAccessToCourse(id, "courses.edit");
