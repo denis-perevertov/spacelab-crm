@@ -59,7 +59,7 @@ public class CourseController {
     })
     @PreAuthorize("!hasAuthority('courses.read.NO_ACCESS')")
     @GetMapping
-    private ResponseEntity<Page<CourseListDTO>> getCourses(@AuthenticationPrincipal Admin loggedInAdmin,
+    public ResponseEntity<Page<CourseListDTO>> getCourses(@AuthenticationPrincipal Admin loggedInAdmin,
                                                            FilterForm filters,
                                                            @RequestParam(required = false) Integer page,
                                                            @RequestParam(required = false) Integer size) {
@@ -103,7 +103,7 @@ public class CourseController {
     })
     @PreAuthorize("!hasAuthority('courses.read.NO_ACCESS')")
     @GetMapping("/{id}")
-    private ResponseEntity<CourseInfoDTO> getCourse(@PathVariable Long id) {
+    public ResponseEntity<CourseInfoDTO> getCourse(@PathVariable Long id) {
 
         AuthUtil.checkAccessToCourse(id, "courses.read");
 
@@ -122,7 +122,7 @@ public class CourseController {
     })
     @PreAuthorize("!hasAuthority('courses.read.NO_ACCESS')")
     @GetMapping("/update/{id}")
-    private ResponseEntity<CourseCardDTO> getCourseForUpdate(@PathVariable Long id) {
+    public ResponseEntity<CourseCardDTO> getCourseForUpdate(@PathVariable Long id) {
 
         AuthUtil.checkAccessToCourse(id, "courses.read");
 
@@ -141,7 +141,7 @@ public class CourseController {
     })
     @PreAuthorize("!hasAuthority('courses.write.NO_ACCESS')")
     @PostMapping
-    private ResponseEntity<String> createNewCourse( @RequestBody CourseSaveCreatedDTO dto, BindingResult bindingResult) {
+    public ResponseEntity<String> createNewCourse( @RequestBody CourseSaveCreatedDTO dto, BindingResult bindingResult) {
 
         AuthUtil.checkPermissionToCreateCourse();
 
@@ -169,7 +169,7 @@ public class CourseController {
     })
     @PreAuthorize("!hasAuthority('courses.edit.NO_ACCESS')")
     @PutMapping("/{id}")
-    private ResponseEntity<String> updateCourse(@PathVariable Long id,  @RequestBody CourseSaveUpdatedDTO dto, BindingResult bindingResult) {
+    public ResponseEntity<String> updateCourse(@PathVariable Long id,  @RequestBody CourseSaveUpdatedDTO dto, BindingResult bindingResult) {
 
         AuthUtil.checkAccessToCourse(dto.getId(), "courses.edit");
         AuthUtil.checkAccessToCourse(id, "courses.edit");
@@ -197,7 +197,7 @@ public class CourseController {
     })
     @PreAuthorize("!hasAuthority('courses.delete.NO_ACCESS')")
     @DeleteMapping("/{id}")
-    private ResponseEntity<String> deleteCourse(@PathVariable Long id) {
+    public ResponseEntity<String> deleteCourse(@PathVariable Long id) {
 
         AuthUtil.checkAccessToCourse(id, "courses.delete");
 

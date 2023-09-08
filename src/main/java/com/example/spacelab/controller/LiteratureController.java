@@ -163,7 +163,7 @@ public class LiteratureController {
     })
     @PreAuthorize("!hasAuthority('literatures.read.NO_ACCESS')")
     @GetMapping("/update/{id}")
-    private ResponseEntity<LiteratureCardDTO> getCourseForUpdate(@PathVariable Long id) {
+    public ResponseEntity<LiteratureCardDTO> getCourseForUpdate(@PathVariable Long id) {
 
         AuthUtil.checkAccessToCourse(literatureService.getLiteratureById(id).getCourse().getId(), "literatures.read");
 
