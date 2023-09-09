@@ -31,7 +31,7 @@ class LessonServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        lessonService = new LessonServiceImpl(lessonRepository);
+//        lessonService = new LessonServiceImpl(lessonRepository);
     }
 
     @Test

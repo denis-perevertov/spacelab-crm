@@ -6,6 +6,7 @@ import com.example.spacelab.dto.lesson.LessonReportRowSaveDTO;
 import com.example.spacelab.dto.lesson.LessonSaveBeforeStartDTO;
 import com.example.spacelab.exception.ErrorMessage;
 import com.example.spacelab.exception.ObjectValidationException;
+import com.example.spacelab.job.LessonMonitor;
 import com.example.spacelab.mapper.LessonMapper;
 import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.model.course.Course;
@@ -51,6 +52,8 @@ public class LessonController {
     private final LessonService lessonService;
     private final LessonMapper mapper;
     private final LessonBeforeStartValidator lessonBeforeStartValidator;
+
+    private final LessonMonitor monitor;
 
 
     //Получение списка уроков по фильтру и пагинации
@@ -206,6 +209,18 @@ public class LessonController {
     public ResponseEntity<String> completeLesson(@PathVariable Long id) {
         lessonService.completeLesson(id);
         return new ResponseEntity<>("Lesson completed", HttpStatus.ACCEPTED);
+    }
+
+    @GetMapping("/start")
+    public ResponseEntity<String> startMonitor() {
+        monitor.start();
+        return new ResponseEntity<>("Monitor started", HttpStatus.ACCEPTED);
+    }
+
+    @GetMapping("/stop")
+    public ResponseEntity<String> stopMonitor() {
+        monitor.stop();
+        return new ResponseEntity<>("Monitor stopped", HttpStatus.ACCEPTED);
     }
 
 

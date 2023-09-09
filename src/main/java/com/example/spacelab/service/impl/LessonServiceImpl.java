@@ -2,6 +2,7 @@ package com.example.spacelab.service.impl;
 
 import com.example.spacelab.exception.LessonException;
 import com.example.spacelab.exception.ResourceNotFoundException;
+import com.example.spacelab.job.LessonMonitor;
 import com.example.spacelab.model.lesson.Lesson;
 import com.example.spacelab.model.lesson.LessonStatus;
 import com.example.spacelab.repository.LessonRepository;
@@ -10,19 +11,28 @@ import com.example.spacelab.service.specification.LessonSpecifications;
 import com.example.spacelab.util.FilterForm;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 @Log
-@RequiredArgsConstructor
 public class LessonServiceImpl implements LessonService {
 
     private final LessonRepository lessonRepository;
+    private final LessonMonitor monitor;
+
+    public LessonServiceImpl(@Autowired LessonRepository lessonRepository,
+                             @Autowired @Lazy LessonMonitor monitor) {
+        this.lessonRepository = lessonRepository;
+        this.monitor = monitor;
+    }
 
     @Override
     public List<Lesson> getLesson() {
@@ -64,17 +74,17 @@ public class LessonServiceImpl implements LessonService {
 
     @Override
     public Lesson createNewLesson(Lesson lesson) {
+        if(lesson.getDatetime().isAfter(LocalDateTime.now()) && lesson.getStartsAutomatically())
+            monitor.getLessons().add(lesson);
         return lessonRepository.save(lesson);
     }
 
 
     @Override
     public Lesson editLesson(Lesson lesson) {
-        /*if(lesson.getStatus().equals(LessonStatus.ACTIVE)) {
-            log.warning("Attempt to delete a lesson already in progress");
-            log.warning(lesson.toString());
-            throw new RuntimeException("Cannot edit an active lesson!");
-        }*/
+
+        if(monitor.isMonitored(lesson) && !lesson.getStartsAutomatically()) monitor.removeFromMonitor(lesson);
+        if(!monitor.isMonitored(lesson) && lesson.getStartsAutomatically()) monitor.addToMonitor(lesson);
         return lessonRepository.save(lesson);
     }
 
@@ -86,6 +96,7 @@ public class LessonServiceImpl implements LessonService {
             log.warning(lesson.toString());
             throw new RuntimeException("Cannot delete an active lesson!");
         }
+        if(monitor.isMonitored(lesson)) monitor.removeFromMonitor(lesson);
         lessonRepository.delete(lesson);
     }
 

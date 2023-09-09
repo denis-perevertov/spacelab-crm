@@ -1,5 +1,6 @@
 package com.example.spacelab;
 
+import com.example.spacelab.job.LessonMonitor;
 import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.model.contact.ContactInfo;
 import com.example.spacelab.model.course.Course;
@@ -18,9 +19,12 @@ import com.example.spacelab.model.task.Task;
 import com.example.spacelab.model.task.TaskLevel;
 import com.example.spacelab.model.task.TaskStatus;
 import com.example.spacelab.repository.*;
+import com.example.spacelab.service.LessonService;
+import com.example.spacelab.service.specification.LessonSpecifications;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -44,6 +48,10 @@ public class DefaultInitializer implements CommandLineRunner {
 
     private final PasswordEncoder passwordEncoder;
 
+    private final LessonMonitor lessonMonitor;
+    private final LessonService lessonService;
+
+
 
     @Override
     public void run(String... args) throws InterruptedException {
@@ -57,6 +65,8 @@ public class DefaultInitializer implements CommandLineRunner {
         Thread.sleep(50); checkForTasks();
         Thread.sleep(50); checkForLiterature();
         Thread.sleep(50); checkForLessons();
+
+        Thread.sleep(100); automaticLessons();
     }
 
 
@@ -559,6 +569,15 @@ public class DefaultInitializer implements CommandLineRunner {
 
             lessonRepository.save(lesson3);
         }
+    }
+
+    // ==============
+
+    private void automaticLessons() {
+        Specification<Lesson> spec = Specification.where(LessonSpecifications.hasBeginDateInFuture()).and(LessonSpecifications.hasAutomaticStart());
+        List<Lesson> lessonsToMonitor = lessonRepository.findAll(spec);
+        lessonMonitor.setLessons(lessonsToMonitor);
+        lessonMonitor.start();
     }
 
 }

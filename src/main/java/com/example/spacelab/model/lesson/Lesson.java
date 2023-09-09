@@ -49,4 +49,14 @@ public class Lesson {
         this.id = id;
         this.datetime = datetime;
     }
+
+    @Override
+    public String toString() {
+        return "Lesson{" +
+                "id=" + id +
+                ", datetime=" + datetime +
+                ", startsAutomatically=" + startsAutomatically +
+                ", status=" + status +
+                '}';
+    }
 }
