@@ -58,10 +58,10 @@ public class RoleController {
 
     @Operation(description = "Get role DTO by its ID", summary = "Get Role By ID", tags = {"Role"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful Operation", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserRoleDTO.class))),
+            @ApiResponse(responseCode = "200", description = "Successful Operation"),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Role not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
+            @ApiResponse(responseCode = "404", description = "Role not found in DB", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('roles.read.NO_ACCESS')")
@@ -71,9 +71,9 @@ public class RoleController {
         return new ResponseEntity<>(role, HttpStatus.OK);
     }
 
-    @Operation(description = "Create new role", summary = "Create New Role", tags = {"Role"})
+    @Operation(description = "Create new role; ID field does not matter in write/edit operations", summary = "Create New Role", tags = {"Role"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Successfully created", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserRoleDTO.class))),
+            @ApiResponse(responseCode = "201", description = "Successfully created"),
             @ApiResponse(responseCode = "400", description = "Bad Request / Validation Error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
@@ -95,9 +95,9 @@ public class RoleController {
         return new ResponseEntity<>(roleMapper.fromRoleToDTO(role), HttpStatus.CREATED);
     }
 
-    @Operation(description = "Update existing role in the application", summary = "Update Role", tags = {"Role"})
+    @Operation(description = "Update existing role in the application; ID field does not matter in write/edit operations", summary = "Update Role", tags = {"Role"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully updated", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserRoleDTO.class))),
+            @ApiResponse(responseCode = "200", description = "Successfully updated"),
             @ApiResponse(responseCode = "400", description = "Bad Request / Validation Error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
@@ -121,10 +121,10 @@ public class RoleController {
 
     @Operation(description = "Delete role by his ID", summary = "Delete Role", tags = {"Role"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully deleted", content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "200", description = "Successfully deleted"),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Role not found in DB", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
+            @ApiResponse(responseCode = "404", description = "Role not found in DB", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('roles.delete.NO_ACCESS')")

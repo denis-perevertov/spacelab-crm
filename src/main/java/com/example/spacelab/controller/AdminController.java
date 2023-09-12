@@ -66,7 +66,7 @@ public class AdminController {
     })
     @PreAuthorize("!hasAuthority('settings.read.NO_ACCESS')")
     @GetMapping
-    public ResponseEntity<Page<AdminDTO>> getAdmins(@Parameter(name = "Filter object", description = "Collection of all filters for search results", required = false) FilterForm filters,
+    public ResponseEntity<Page<AdminDTO>> getAdmins(@Parameter(name = "Filter object", description = "Collection of all filters for search results", required = false, example = "{}") FilterForm filters,
                                                     @RequestParam(required = false, defaultValue = "0") Integer page,
                                                     @RequestParam(required = false, defaultValue = "10") Integer size) {
         Page<AdminDTO> adminList;
@@ -92,7 +92,7 @@ public class AdminController {
     }
 
     // Создание нового админа
-    @Operation(description = "Create new admin in the application", summary = "Create New Admin", tags = {"Admin"})
+    @Operation(description = "Create new admin in the application; ID field does not matter in write/edit operations", summary = "Create New Admin", tags = {"Admin"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Successful Creation"),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
@@ -121,7 +121,7 @@ public class AdminController {
     }
 
     // Редактирование админа
-    @Operation(description = "Update existing admin in the application", summary = "Update Admin", tags = {"Admin"})
+    @Operation(description = "Update existing admin in the application; ID field does not matter in write/edit operations", summary = "Update Admin", tags = {"Admin"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Successful Update"),
             @ApiResponse(responseCode = "400", description = "Bad Request / Validation Error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),

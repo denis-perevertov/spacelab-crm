@@ -38,6 +38,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         RefreshToken token = opt.orElseGet(RefreshToken::new);
         token.setToken(UUID.randomUUID().toString());
         token.setExpiryDate(Instant.now().plus(Duration.ofDays(7)));
+        token.setAdmin(admin);
         return repository.save(token);
     }
 }

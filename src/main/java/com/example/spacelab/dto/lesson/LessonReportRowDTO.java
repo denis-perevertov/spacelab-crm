@@ -16,6 +16,7 @@ public class LessonReportRowDTO {
     @Schema(example = "true")
     private Boolean wasPresent;
 
+    @Schema(example = "[\"task1\",\"task2\",\"task3\"]")
     private List<String> currentTasks;
 
     @Schema(example = "35.2")

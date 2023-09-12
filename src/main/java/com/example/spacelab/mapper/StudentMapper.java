@@ -6,6 +6,7 @@ import com.example.spacelab.exception.MappingException;
 import com.example.spacelab.exception.ResourceNotFoundException;
 import com.example.spacelab.model.student.Student;
 import com.example.spacelab.model.student.StudentDetails;
+import com.example.spacelab.model.student.StudentInviteRequest;
 import com.example.spacelab.repository.CourseRepository;
 import com.example.spacelab.repository.StudentRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -191,5 +192,29 @@ public class StudentMapper {
         }
 
         return student;
+    }
+
+    public StudentInviteRequest fromDTOToInviteRequest(StudentInviteRequestDTO dto) {
+        StudentInviteRequest request = new StudentInviteRequest();
+
+        try {
+            request.setFirstName(dto.getFirstName());
+            request.setLastName(dto.getLastName());
+            request.setFathersName(dto.getFathersName());
+            request.setEmail(dto.getEmail());
+            request.setPhone(dto.getPhone());
+
+            if(dto.getCourseID() != null && dto.getCourseID() != 0)
+                request.setCourse(courseRepository.getReferenceById(dto.getCourseID()));
+
+        } catch (Exception e) {
+            log.severe("Mapping error: " + e.getMessage());
+            log.warning("Entity: " + request);
+            throw new MappingException(e.getMessage());
+
+        }
+
+
+        return request;
     }
 }

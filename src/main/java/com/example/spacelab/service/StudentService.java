@@ -31,6 +31,7 @@ public interface StudentService extends StudentTaskService,
 
     String createInviteStudentToken(StudentInviteRequest request);
 
+
     List<LessonReportRow> getStudentLessonData(Long studentID);
     Long getStudentCourseID(Long studentID);
 }

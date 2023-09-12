@@ -63,7 +63,7 @@ public class CourseController {
     @PreAuthorize("!hasAuthority('courses.read.NO_ACCESS')")
     @GetMapping
     public ResponseEntity<Page<CourseListDTO>> getCourses(@AuthenticationPrincipal Admin loggedInAdmin,
-                                                           FilterForm filters,
+                                                           @Parameter(name = "Filter object", description = "Collection of all filters for search results", example = "{}") FilterForm filters,
                                                            @RequestParam(required = false, defaultValue = "0") Integer page,
                                                            @RequestParam(required = false, defaultValue = "10") Integer size) {
 
@@ -140,7 +140,7 @@ public class CourseController {
 
 
     // Сохранение нового курса
-    @Operation(description = "Create new course; \n Beginning date can't be in the future, mentor/manager has to be present",
+    @Operation(description = "Create new course; ID field does not matter in write/edit operations",
             summary = "Create new course", tags = {"Course"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Course created"),
@@ -172,7 +172,7 @@ public class CourseController {
 
 
     // Сохранение изменениий курса
-    @Operation(description = "Edit course; \n Beginning date can't be in the future, mentor/manager has to be present", summary = "Edit course", tags = {"Course"})
+    @Operation(description = "Edit course; ID field does not matter in write/edit operations", summary = "Edit course", tags = {"Course"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Course updated"),
             @ApiResponse(responseCode = "400", description = "Bad Request / Validation Error", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),

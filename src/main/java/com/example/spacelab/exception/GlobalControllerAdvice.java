@@ -94,7 +94,7 @@ public class GlobalControllerAdvice {
     public ResponseEntity<String> fallbackInternalErrorHandler(Exception ex) {
         log.severe(ex.getMessage());
         ex.printStackTrace();
-        return new ResponseEntity<>("Unknown server error", HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>("Server error: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 }

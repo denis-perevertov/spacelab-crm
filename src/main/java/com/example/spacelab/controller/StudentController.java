@@ -66,7 +66,7 @@ public class StudentController {
     })
     @PreAuthorize("!hasAuthority('students.read.NO_ACCESS')")
     @GetMapping
-    public ResponseEntity<Page<StudentDTO>> getStudents(FilterForm filters,
+    public ResponseEntity<Page<StudentDTO>> getStudents(@Parameter(name = "Filter object", description = "Collection of all filters for search results", example = "{}") FilterForm filters,
                                                         @RequestParam(required = false, defaultValue = "0") Integer page,
                                                         @RequestParam(required = false, defaultValue = "10") Integer size) {
 
@@ -95,10 +95,10 @@ public class StudentController {
     // Получение одного студента
     @Operation(description = "Get student DTO by its ID", summary = "Get Student", tags = {"Student"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful Operation", content = @Content(mediaType = "application/json", schema = @Schema(implementation = StudentDTO.class))),
+            @ApiResponse(responseCode = "200", description = "Successful Operation"),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Student not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
+            @ApiResponse(responseCode = "404", description = "Student not found in DB", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('students.read.NO_ACCESS')")
@@ -117,7 +117,7 @@ public class StudentController {
             @ApiResponse(responseCode = "200", description = "Successful Operation"),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Student not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
+            @ApiResponse(responseCode = "404", description = "Student not found in DB", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('students.read.NO_ACCESS')")
@@ -141,7 +141,7 @@ public class StudentController {
             @ApiResponse(responseCode = "200", description = "Successful Operation", content = @Content(mediaType = "application/json", schema = @Schema(implementation = StudentTaskDTO.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Student/task not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
+            @ApiResponse(responseCode = "404", description = "Student/task not found in DB", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('students.read.NO_ACCESS')")
@@ -159,10 +159,10 @@ public class StudentController {
     // Получение карточки информации о студенте
     @Operation(description = "Get student card DTO by his ID", summary = "Get Student Info Card", tags = {"Student"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful Operation", content = @Content(mediaType = "application/json", schema = @Schema(implementation = StudentCardDTO.class))),
+            @ApiResponse(responseCode = "200", description = "Successful Operation"),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Student not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
+            @ApiResponse(responseCode = "404", description = "Student not found in DB", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('students.read.NO_ACCESS')")
@@ -178,10 +178,10 @@ public class StudentController {
     // Получение списка занятий студента
     @Operation(description = "Get all lesson data associated with a student, by his ID", summary = "Get Student Lesson Data", tags = {"Student Lesson"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful Operation", content = @Content(mediaType = "application/json", schema = @Schema(implementation = LessonReportRow.class))),
+            @ApiResponse(responseCode = "200", description = "Successful Operation"),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Student not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
+            @ApiResponse(responseCode = "404", description = "Student not found in DB", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('students.read.NO_ACCESS')")
@@ -192,9 +192,9 @@ public class StudentController {
     }
 
     // Создание нового студента (не регистрация)
-    @Operation(description = "Create new student (create manually, not register)", summary = "Create New Student", tags = {"Student"})
+    @Operation(description = "Create new student (create manually, not register) - helper method, might remove later", summary = "Create New Student", tags = {"Student"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Successfully created", content = @Content(mediaType = "application/json", schema = @Schema(implementation = StudentDTO.class))),
+            @ApiResponse(responseCode = "201", description = "Successfully created"),
             @ApiResponse(responseCode = "400", description = "Bad Request / Validation Error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
@@ -222,19 +222,19 @@ public class StudentController {
     // Формирование ссылки на приглашение студента
     @Operation(description = "Create new link that students can use to register in the application", summary = "Create New Register Link For Students", tags = {"Student"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Successfully created", content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "201", description = "Successfully created"),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('students.invite.NO_ACCESS')")
     @PostMapping("/invite")
-    public ResponseEntity<String> createStudentInviteLink(@RequestBody StudentInviteRequest inviteRequest,
+    public ResponseEntity<String> createStudentInviteLink(@RequestBody StudentInviteRequestDTO inviteRequest,
                                                           HttpServletRequest servletRequest) {
 
-        AuthUtil.checkAccessToCourse(inviteRequest.getCourse().getId(), "students.invite");
+        AuthUtil.checkAccessToCourse(inviteRequest.getCourseID(), "students.invite");
 
-        String token = studentService.createInviteStudentToken(inviteRequest);
+        String token = studentService.createInviteStudentToken(studentMapper.fromDTOToInviteRequest(inviteRequest));
         String url = "http://" + servletRequest.getServerName() + ":" + servletRequest.getServerPort() + "/register/" + token;
         return new ResponseEntity<>(url, HttpStatus.CREATED);
 
@@ -243,7 +243,7 @@ public class StudentController {
     // Регистрация студента ; для захода сюда защита не нужна
     @Operation(description = "Register new student (register by using the created link)", summary = "Register New Student", tags = {"Student"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Successfully created", content = @Content(mediaType = "application/json", schema = @Schema(implementation = StudentDTO.class))),
+            @ApiResponse(responseCode = "201", description = "Successfully created"),
             @ApiResponse(responseCode = "400", description = "Bad Request / Validation Error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
@@ -266,9 +266,9 @@ public class StudentController {
     }
 
     // Редактирование студента
-    @Operation(description = "Update existing student in the application", summary = "Update Role", tags = {"Student"})
+    @Operation(description = "Update existing student in the application; ID field does not matter in write/edit operations", summary = "Update Role", tags = {"Student"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully updated", content = @Content(mediaType = "application/json", schema = @Schema(implementation = StudentDTO.class))),
+            @ApiResponse(responseCode = "200", description = "Successfully updated"),
             @ApiResponse(responseCode = "400", description = "Bad Request / Validation Error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
@@ -300,10 +300,10 @@ public class StudentController {
     // Удаление студента
     @Operation(description = "Delete student by his ID", summary = "Delete Student", tags = {"Student"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully deleted", content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "200", description = "Successfully deleted"),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Student not found in DB", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
+            @ApiResponse(responseCode = "404", description = "Student not found in DB", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('students.delete.NO_ACCESS')")
@@ -321,8 +321,8 @@ public class StudentController {
     // Получение списка аватарок студентов
     @Operation(description = "Get the list of Students' ID, Name and Avatar picture", summary = "Get Students Avatar List", tags = {"Student"})
     @GetMapping("/get-student-avatars")
-    public Page<StudentAvatarDTO> getStudentAvatars(@RequestParam(required = false) Integer page,
-                                                    @RequestParam(required = false) Integer size) {
+    public Page<StudentAvatarDTO> getStudentAvatars(@RequestParam(required = false, defaultValue = "0") Integer page,
+                                                    @RequestParam(required = false, defaultValue = "0") Integer size) {
 
         Page<Student> studentPage;
         if(page == null) studentPage = new PageImpl<>(studentService.getStudents());

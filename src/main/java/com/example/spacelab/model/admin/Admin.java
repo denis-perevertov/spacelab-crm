@@ -1,5 +1,6 @@
 package com.example.spacelab.model.admin;
 
+import com.example.spacelab.model.contact.ContactInfo;
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.UserEntity;
 import jakarta.persistence.*;
@@ -37,6 +38,9 @@ public class Admin extends UserEntity implements UserDetails {
 
     @OneToMany
     private List<Lesson> lessons = new ArrayList<>();
+
+    @OneToMany
+    private List<ContactInfo> contacts = new ArrayList<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

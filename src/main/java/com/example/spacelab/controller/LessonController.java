@@ -67,7 +67,7 @@ public class LessonController {
     })
     @PreAuthorize("!hasAuthority('lessons.read.NO_ACCESS')")
     @GetMapping
-    public ResponseEntity<Page<LessonListDTO>> getLesson(FilterForm filters,
+    public ResponseEntity<Page<LessonListDTO>> getLesson(@Parameter(name = "Filter object", description = "Collection of all filters for search results", example = "{}") FilterForm filters,
                                                                  @RequestParam(required = false, defaultValue = "0") Integer page,
                                                                  @RequestParam(required = false, defaultValue = "10") Integer size) {
 
@@ -116,7 +116,7 @@ public class LessonController {
 
 
     //Создание урока
-    @Operation(description = "Create new lesson w/ PLANNED status", summary = "Create new lesson", tags = {"Lesson"})
+    @Operation(description = "Create new lesson w/ PLANNED status; ID field does not matter in write/edit operations", summary = "Create new lesson", tags = {"Lesson"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Successful save"),
             @ApiResponse(responseCode = "400", description = "Bad Request / Validation Error", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
@@ -145,13 +145,13 @@ public class LessonController {
 
 
     //Редактирование урока
-    @Operation(description = "Edit lesson", summary = "Edit lesson", tags = {"Lesson"})
+    @Operation(description = "Edit lesson; ID field does not matter in write/edit operations", summary = "Edit lesson", tags = {"Lesson"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful update"),
             @ApiResponse(responseCode = "400", description = "Bad Request / Validation Error", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Lesson not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
+            @ApiResponse(responseCode = "404", description = "Lesson not found in DB", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('lessons.edit.NO_ACCESS')")
@@ -180,7 +180,7 @@ public class LessonController {
             @ApiResponse(responseCode = "200", description = "Successful delete"),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Lesson not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
+            @ApiResponse(responseCode = "404", description = "Lesson not found in DB", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('lessons.delete.NO_ACCESS')")
@@ -199,7 +199,7 @@ public class LessonController {
             @ApiResponse(responseCode = "200", description = "Successful start"),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Lesson not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
+            @ApiResponse(responseCode = "404", description = "Lesson not found in DB", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('lessons.edit.NO_ACCESS')")

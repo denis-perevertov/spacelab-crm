@@ -1,5 +1,6 @@
 package com.example.spacelab.model.role;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -10,6 +11,7 @@ import java.util.List;
 public class PermissionSet {
 
     // список данных разрешений
+    @Schema(example = "[\"permission1.read.FULL\", \"permission2.write.PARTIAL\", \"permission3.delete.NO_ACCESS\"]")
     @Transient List<String> authorities;
 
     // статистика
@@ -131,5 +133,10 @@ public class PermissionSet {
                 "settings.delete." + this.deleteSettings.name()
         );
         return authorities;
+    }
+
+    @Override
+    public String toString() {
+        return getAuthorities().toString();
     }
 }

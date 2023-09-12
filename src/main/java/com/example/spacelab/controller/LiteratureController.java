@@ -63,7 +63,7 @@ public class LiteratureController {
     })
     @PreAuthorize("!hasAuthority('literatures.read.NO_ACCESS')")
     @GetMapping
-    public ResponseEntity<Page<LiteratureListDTO>> getLiterature(FilterForm filters,
+    public ResponseEntity<Page<LiteratureListDTO>> getLiterature(@Parameter(name = "Filter object", description = "Collection of all filters for search results", example = "{}") FilterForm filters,
                                                                  @RequestParam(required = false, defaultValue = "0") Integer page,
                                                                  @RequestParam(required = false, defaultValue = "10") Integer size) {
 
@@ -97,7 +97,7 @@ public class LiteratureController {
             @ApiResponse(responseCode = "200", description = "Successful Operation", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Literature not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
+            @ApiResponse(responseCode = "404", description = "Literature not found in DB", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('literatures.read.NO_ACCESS')")
@@ -118,7 +118,7 @@ public class LiteratureController {
             @ApiResponse(responseCode = "200", description = "Successful Operation", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Literature not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
+            @ApiResponse(responseCode = "404", description = "Literature not found in DB", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('literatures.read.NO_ACCESS')")
@@ -134,10 +134,10 @@ public class LiteratureController {
 
 
     // Создание новой литературы
-    @Operation(description = "Create new Literature", summary = "Create Literature", tags = {"Literature"})
+    @Operation(description = "Create new Literature; ID field does not matter in write/edit operations", summary = "Create Literature", tags = {"Literature"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Successful Operation", content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "400", description = "Invalid Literature object", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
+            @ApiResponse(responseCode = "400", description = "Invalid Literature object", content = @Content),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
@@ -169,7 +169,7 @@ public class LiteratureController {
             @ApiResponse(responseCode = "200", description = "Successful Operation"),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Literature not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
+            @ApiResponse(responseCode = "404", description = "Literature not found in DB", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('literatures.read.NO_ACCESS')")
@@ -185,13 +185,13 @@ public class LiteratureController {
 
 
     // Редактирование литературы
-    @Operation(description = "Edit Literature by id", summary = "Edit Literature", tags = {"Literature"})
+    @Operation(description = "Edit Literature by id; ID field does not matter in write/edit operations", summary = "Edit Literature", tags = {"Literature"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful Operation", content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "400", description = "Invalid Literature object", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
+            @ApiResponse(responseCode = "400", description = "Bad Request / Validation Error", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Literature not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
+            @ApiResponse(responseCode = "404", description = "Literature not found in DB", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('literatures.edit.NO_ACCESS')")
@@ -223,7 +223,7 @@ public class LiteratureController {
             @ApiResponse(responseCode = "200", description = "Successful Operation", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Literature not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
+            @ApiResponse(responseCode = "404", description = "Literature not found in DB", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('literatures.delete.NO_ACCESS')")

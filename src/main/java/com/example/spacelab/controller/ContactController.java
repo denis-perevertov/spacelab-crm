@@ -80,7 +80,7 @@ public class ContactController {
     }
 
     // Добавление нового контакта
-    @Operation(description = "Create new contact card (one for each admin)", summary = "Create New Contact", tags = {"Contact"})
+    @Operation(description = "Create new contact card (one for each admin); ID field does not matter in write/edit operations", summary = "Create New Contact", tags = {"Contact"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Successfully created"),
             @ApiResponse(responseCode = "400", description = "Bad Request / Validation Error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
@@ -105,7 +105,7 @@ public class ContactController {
     }
 
     // Редактирование контакта
-    @Operation(description = "Update existing contact in the application", summary = "Update Contact", tags = {"Contact"})
+    @Operation(description = "Update existing contact in the application; ID field does not matter in write/edit operations", summary = "Update Contact", tags = {"Contact"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully updated"),
             @ApiResponse(responseCode = "400", description = "Bad Request / Validation Error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),

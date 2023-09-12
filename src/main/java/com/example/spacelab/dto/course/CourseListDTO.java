@@ -1,6 +1,7 @@
 package com.example.spacelab.dto.course;
 
 import com.example.spacelab.model.course.CourseStatus;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,22 +11,30 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class CourseListDTO {
 
+    @Schema(example = "10")
     private Long id;
 
+    @Schema(example = "CourseName")
     private String name;
 
+    @Schema(example = "20")
     private Long studentsQuantity;
 
     private LocalDate begin_date;
 
     private LocalDate end_date;
 
+    @Schema(example = "3")
     private Long mentorId;
+    @Schema(example = "MentorName")
     private String mentorName;
 
+    @Schema(example = "4")
     private Long managerId;
+    @Schema(example = "ManagerName")
     private String managerName;
 
+    @Schema(example = "ACTIVE")
     private CourseStatus status;
 
     public CourseListDTO(Long id, String name) {

@@ -12,6 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 public class CourseSaveCreatedDTO {
 
+    @Schema(example = "10")
     private Long id;
 
     @Schema(example = "NewCourse")

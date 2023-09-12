@@ -13,7 +13,7 @@ public class ContactInfo {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @OneToOne
+    @ManyToOne
     private Admin admin;
 
     private String phone;

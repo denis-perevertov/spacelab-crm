@@ -61,7 +61,7 @@ public class TaskController {
     })
     @PreAuthorize("!hasAuthority('tasks.read.NO_ACCESS')")
     @GetMapping
-    public ResponseEntity<Page<TaskListDTO>> getTasks(FilterForm filters,
+    public ResponseEntity<Page<TaskListDTO>> getTasks(@Parameter(name = "Filter object", description = "Collection of all filters for search results", example = "{}") FilterForm filters,
                                                       @RequestParam(required = false, defaultValue = "0") Integer page,
                                                       @RequestParam(required = false, defaultValue = "10") Integer size) {
 
@@ -95,7 +95,7 @@ public class TaskController {
             @ApiResponse(responseCode = "200", description = "Successful Operation"),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Task not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
+            @ApiResponse(responseCode = "404", description = "Task not found in DB", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('tasks.read.NO_ACCESS')")
@@ -111,12 +111,12 @@ public class TaskController {
 
 
     // Создание новой задачи
-    @Operation(description = "Create new task", summary = "Create new task", tags = {"Task"})
+    @Operation(description = "Create new task", summary = "Create new task; ID field does not matter in write/edit operations", tags = {"Task"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful Operation"),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
-            @ApiResponse(responseCode = "400", description = "Task not valid", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
+            @ApiResponse(responseCode = "400", description = "Task not valid", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('tasks.write.NO_ACCESS')")
@@ -137,15 +137,13 @@ public class TaskController {
         return ResponseEntity.ok("Task with ID:"+newTask.getId()+" created");
     }
 
-
-
     // Получение задачи для редактирования по id
     @Operation(description = "Get task by id for edit", summary = "Get task by id for edit", tags = {"Task"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful Operation"),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Task not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
+            @ApiResponse(responseCode = "404", description = "Task not found in DB", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('tasks.read.NO_ACCESS')")
@@ -161,13 +159,13 @@ public class TaskController {
 
 
     // Редактирование задачи
-    @Operation(description = "Edit task", summary = "Edit task", tags = {"Task"})
+    @Operation(description = "Edit task", summary = "Edit task; ID field does not matter in write/edit operations", tags = {"Task"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful Operation"),
-            @ApiResponse(responseCode = "400", description = "Task not valid", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
+            @ApiResponse(responseCode = "400", description = "Bad Request / Validation Error", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Task not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
+            @ApiResponse(responseCode = "404", description = "Task not found in DB", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('tasks.edit.NO_ACCESS')")
@@ -198,7 +196,7 @@ public class TaskController {
             @ApiResponse(responseCode = "200", description = "Successful Operation"),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Task not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
+            @ApiResponse(responseCode = "404", description = "Task not found in DB", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('tasks.delete.NO_ACCESS')")
