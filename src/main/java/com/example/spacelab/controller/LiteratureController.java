@@ -16,6 +16,7 @@ import com.example.spacelab.util.AuthUtil;
 import com.example.spacelab.util.FilterForm;
 import com.example.spacelab.validator.LiteratureValidator;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -53,16 +54,18 @@ public class LiteratureController {
 
 
     // Получение списка литературы с фильтрацией и пагинацией
-    @Operation(description = "Get Page<LiteratureListDTO>", summary = "Get Literature List", tags = {"Literature"})
+    @Operation(description = "Get list of literature paginated by 'page/size' params (default values are 0/10), output depends on permission type(full/partial)", summary = "Get Literature List", tags = {"Literature"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation", content = @Content(mediaType = "application/json")),
-            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            @ApiResponse(responseCode = "200", description = "Successful Operation", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('literatures.read.NO_ACCESS')")
     @GetMapping
     public ResponseEntity<Page<LiteratureListDTO>> getLiterature(FilterForm filters,
-                                                                 @RequestParam(required = false) Integer page,
-                                                                 @RequestParam(required = false) Integer size) {
+                                                                 @RequestParam(required = false, defaultValue = "0") Integer page,
+                                                                 @RequestParam(required = false, defaultValue = "10") Integer size) {
 
         Page<LiteratureListDTO> dtoList = new PageImpl<>(new ArrayList<>());
 
@@ -91,13 +94,15 @@ public class LiteratureController {
     // Получение литературы по id
     @Operation(description = "Get LiteratureInfoDTO by id>", summary = "Get LiteratureInfoDTO", tags = {"Literature"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "200", description = "Successful Operation", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
             @ApiResponse(responseCode = "404", description = "Literature not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
-            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('literatures.read.NO_ACCESS')")
     @GetMapping("/{id}")
-    public ResponseEntity<LiteratureInfoDTO> getLiteratureById(@PathVariable Long id) {
+    public ResponseEntity<LiteratureInfoDTO> getLiteratureById(@PathVariable @Parameter(example = "1") Long id) {
 
         AuthUtil.checkAccessToCourse(literatureService.getLiteratureById(id).getCourse().getId(), "literatures.read");
 
@@ -110,13 +115,15 @@ public class LiteratureController {
     // Верификация литературы
     @Operation(description = "Verify Literature by id", summary = "Verify Literature", tags = {"Literature"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "200", description = "Successful Operation", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
             @ApiResponse(responseCode = "404", description = "Literature not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
-            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('literatures.read.NO_ACCESS')")
     @GetMapping("/{id}/verify")
-    public ResponseEntity<String> verifyLiterature(@PathVariable Long id) {
+    public ResponseEntity<String> verifyLiterature(@PathVariable @Parameter(example = "1") Long id) {
 
         AuthUtil.checkAccessToCourse(literatureService.getLiteratureById(id).getCourse().getId(), "literatures.verify");
 
@@ -129,9 +136,11 @@ public class LiteratureController {
     // Создание новой литературы
     @Operation(description = "Create new Literature", summary = "Create Literature", tags = {"Literature"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Successful operation", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "201", description = "Successful Operation", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "400", description = "Invalid Literature object", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
-            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('literatures.write.NO_ACCESS')")
     @PostMapping
@@ -157,13 +166,15 @@ public class LiteratureController {
     // Получение литературы для редактирования по id
     @Operation(description = "Get Literature by id for edit", summary = "Get Literature by id for edit", tags = {"Literature"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation"),
+            @ApiResponse(responseCode = "200", description = "Successful Operation"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
             @ApiResponse(responseCode = "404", description = "Literature not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
-            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('literatures.read.NO_ACCESS')")
     @GetMapping("/update/{id}")
-    public ResponseEntity<LiteratureCardDTO> getCourseForUpdate(@PathVariable Long id) {
+    public ResponseEntity<LiteratureCardDTO> getCourseForUpdate(@PathVariable @Parameter(example = "1") Long id) {
 
         AuthUtil.checkAccessToCourse(literatureService.getLiteratureById(id).getCourse().getId(), "literatures.read");
 
@@ -176,14 +187,16 @@ public class LiteratureController {
     // Редактирование литературы
     @Operation(description = "Edit Literature by id", summary = "Edit Literature", tags = {"Literature"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "200", description = "Successful Operation", content = @Content(mediaType = "application/json")),
             @ApiResponse(responseCode = "400", description = "Invalid Literature object", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
             @ApiResponse(responseCode = "404", description = "Literature not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
-            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('literatures.edit.NO_ACCESS')")
     @PutMapping("/{id}")
-    public ResponseEntity<String> editLiterature(@PathVariable Long id,  @RequestBody LiteratureSaveDTO literature, BindingResult bindingResult) {
+    public ResponseEntity<String> editLiterature(@PathVariable @Parameter(example = "1") Long id,  @RequestBody LiteratureSaveDTO literature, BindingResult bindingResult) {
 
         // проверка и для того курса , куда пихаешь источник , и для того курса , который у источника был раньше
 
@@ -207,13 +220,15 @@ public class LiteratureController {
     // Удаление литературы
     @Operation(description = "Delete Literature by id", summary = "Delete Literature", tags = {"Literature"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "200", description = "Successful Operation", content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
             @ApiResponse(responseCode = "404", description = "Literature not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
-            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('literatures.delete.NO_ACCESS')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteLiterature(@PathVariable Long id) {
+    public ResponseEntity<String> deleteLiterature(@PathVariable @Parameter(example = "1") Long id) {
 
         AuthUtil.checkAccessToCourse(literatureService.getLiteratureById(id).getCourse().getId(), "literatures.delete");
 
@@ -226,8 +241,10 @@ public class LiteratureController {
     // Select2
     @Operation(description = "Get Literature for select2", summary = "Get Literature for select2", tags = {"Literature"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation"),
-            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            @ApiResponse(responseCode = "200", description = "Successful Operation"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('literatures.read.NO_ACCESS')")
     @GetMapping("/getLiteratures")

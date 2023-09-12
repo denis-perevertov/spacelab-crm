@@ -19,6 +19,7 @@ import com.example.spacelab.util.AuthUtil;
 import com.example.spacelab.util.FilterForm;
 import com.example.spacelab.validator.LessonBeforeStartValidator;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -57,16 +58,18 @@ public class LessonController {
 
 
     //Получение списка уроков по фильтру и пагинации
-    @Operation(description = "Get lesson list", summary = "Get lesson list", tags = {"Lesson"})
+    @Operation(description = "Get list of lessons paginated by 'page/size' params (default values are 0/10), output depends on permission type(full/partial)", summary = "Get lesson list", tags = {"Lesson"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation"),
-            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            @ApiResponse(responseCode = "200", description = "Successful Operation"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('lessons.read.NO_ACCESS')")
     @GetMapping
     public ResponseEntity<Page<LessonListDTO>> getLesson(FilterForm filters,
-                                                                 @RequestParam(required = false) Integer page,
-                                                                 @RequestParam(required = false) Integer size) {
+                                                                 @RequestParam(required = false, defaultValue = "0") Integer page,
+                                                                 @RequestParam(required = false, defaultValue = "10") Integer size) {
 
         Page<LessonListDTO> dtoList = new PageImpl<>(new ArrayList<>());
 
@@ -92,15 +95,17 @@ public class LessonController {
     }
 
     //Получение урока по id
-    @Operation(description = "Get lesson by id", summary = "Get lesson by id", tags = {"Lesson"})
+    @Operation(description = "Get lesson by ID", summary = "Get lesson by ID", tags = {"Lesson"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation"),
-            @ApiResponse(responseCode = "404", description = "Lesson not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
-            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            @ApiResponse(responseCode = "200", description = "Successful Operation"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Lesson not found in DB", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('lessons.read.NO_ACCESS')")
     @GetMapping("/{id}")
-    public ResponseEntity<LessonInfoDTO> getLessonById(@PathVariable Long id) {
+    public ResponseEntity<LessonInfoDTO> getLessonById(@PathVariable @Parameter(example = "1") Long id) {
 
         AuthUtil.checkAccessToCourse(lessonService.getLessonById(id).getCourse().getId(), "lessons.read");
 
@@ -111,11 +116,13 @@ public class LessonController {
 
 
     //Создание урока
-    @Operation(description = "Create new lesson", summary = "Create new lesson", tags = {"Lesson"})
+    @Operation(description = "Create new lesson w/ PLANNED status", summary = "Create new lesson", tags = {"Lesson"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Successful save"),
-            @ApiResponse(responseCode = "400", description = "Invalid input data", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
-            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            @ApiResponse(responseCode = "400", description = "Bad Request / Validation Error", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('lessons.write.NO_ACCESS')")
     @PostMapping
@@ -141,13 +148,16 @@ public class LessonController {
     @Operation(description = "Edit lesson", summary = "Edit lesson", tags = {"Lesson"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful update"),
-            @ApiResponse(responseCode = "400", description = "Invalid input data", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
+            @ApiResponse(responseCode = "400", description = "Bad Request / Validation Error", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
             @ApiResponse(responseCode = "404", description = "Lesson not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
-            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('lessons.edit.NO_ACCESS')")
     @PutMapping("/{id}")
-    public ResponseEntity<String> editLessonBeforeStart(@PathVariable Long id, @RequestBody LessonSaveBeforeStartDTO lesson, BindingResult bindingResult) {
+    public ResponseEntity<String> editLessonBeforeStart(@PathVariable @Parameter(example = "1") Long id,
+                                                        @RequestBody LessonSaveBeforeStartDTO lesson, BindingResult bindingResult) {
 
         AuthUtil.checkAccessToCourse(lessonService.getLessonById(id).getCourse().getId(), "lessons.edit");
         AuthUtil.checkAccessToCourse(lesson.getCourseID(), "lessons.edit");
@@ -168,12 +178,14 @@ public class LessonController {
     @Operation(description = "Delete lesson", summary = "Delete lesson", tags = {"Lesson"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful delete"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
             @ApiResponse(responseCode = "404", description = "Lesson not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
-            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('lessons.delete.NO_ACCESS')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteLesson(@PathVariable Long id) {
+    public ResponseEntity<String> deleteLesson(@PathVariable @Parameter(example = "1") Long id) {
 
         AuthUtil.checkAccessToCourse(lessonService.getLessonById(id).getCourse().getId(), "lessons.delete");
 
@@ -182,11 +194,13 @@ public class LessonController {
     }
 
     //Сохранение ответа студента на уроке
-    @Operation(description = "Start lesson", summary = "Start lesson", tags = {"Lesson"})
+    @Operation(description = "Save student's report to lesson report table", summary = "Save Student Info Into Report Table", tags = {"Lesson"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful start"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
             @ApiResponse(responseCode = "404", description = "Lesson not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
-            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('lessons.edit.NO_ACCESS')")
     @PostMapping("/update")
@@ -199,29 +213,43 @@ public class LessonController {
 
     // ========================
 
+    @Operation(description = "Start a lesson (change its status to ACTIVE). Can't start an already completed/active lesson", summary = "Start Lesson", tags = {"Lesson"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful Operation"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error")
+    })
     @GetMapping("/{id}/start")
-    public ResponseEntity<String> startLesson(@PathVariable Long id) {
+    public ResponseEntity<String> startLesson(@PathVariable @Parameter(example = "1") Long id) {
         lessonService.startLesson(id);
         return new ResponseEntity<>("Lesson started", HttpStatus.ACCEPTED);
     }
 
+    @Operation(description = "Stop a lesson (change its status to COMPLETED). Can't stop an already completed/planned lesson", summary = "Stop Lesson", tags = {"Lesson"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful Operation"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error")
+    })
     @GetMapping("/{id}/complete")
-    public ResponseEntity<String> completeLesson(@PathVariable Long id) {
+    public ResponseEntity<String> completeLesson(@PathVariable @Parameter(example = "1") Long id) {
         lessonService.completeLesson(id);
         return new ResponseEntity<>("Lesson completed", HttpStatus.ACCEPTED);
     }
-
-    @GetMapping("/start")
-    public ResponseEntity<String> startMonitor() {
-        monitor.start();
-        return new ResponseEntity<>("Monitor started", HttpStatus.ACCEPTED);
-    }
-
-    @GetMapping("/stop")
-    public ResponseEntity<String> stopMonitor() {
-        monitor.stop();
-        return new ResponseEntity<>("Monitor stopped", HttpStatus.ACCEPTED);
-    }
+//
+//    @GetMapping("/start")
+//    public ResponseEntity<String> startMonitor() {
+//        monitor.start();
+//        return new ResponseEntity<>("Monitor started", HttpStatus.ACCEPTED);
+//    }
+//
+//    @GetMapping("/stop")
+//    public ResponseEntity<String> stopMonitor() {
+//        monitor.stop();
+//        return new ResponseEntity<>("Monitor stopped", HttpStatus.ACCEPTED);
+//    }
 
 
 }

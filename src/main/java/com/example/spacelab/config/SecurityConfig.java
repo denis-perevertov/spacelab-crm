@@ -11,6 +11,7 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -44,11 +45,11 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                .httpBasic(hb -> {})
+                .httpBasic(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(customizer -> customizer
                                                     .requestMatchers("/api/auth/**").permitAll()
                                                     .requestMatchers("/api/students/register").permitAll()
-                                                    .requestMatchers("/swagger-ui/**", "/api-docs").permitAll()
+                                                    .requestMatchers("/swagger-ui", "/swagger-ui/**", "/api-docs/**").permitAll()
                                                     .anyRequest().authenticated())
                 .sessionManagement(customizer -> customizer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 //                .authenticationProvider(authenticationProvider())
@@ -56,6 +57,7 @@ public class SecurityConfig {
 
         return http.build();
     }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {

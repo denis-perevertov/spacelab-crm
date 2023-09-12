@@ -57,16 +57,18 @@ public class AdminController {
     private final PasswordEncoder passwordEncoder;
 
     // Получение админов (с фильтрами и страницами)
-    @Operation(description = "Get admins list", summary = "Get admins list", tags = {"Admin"})
+    @Operation(description = "Get list of admins paginated by 'page/size' params (default values are 0/10)", summary = "Get Admins (page)", tags = {"Admin"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation"),
-            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            @ApiResponse(responseCode = "200", description = "Successful Operation"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('settings.read.NO_ACCESS')")
     @GetMapping
-    public ResponseEntity<Page<AdminDTO>> getAdmins(FilterForm filters,
-                                                    @RequestParam(required = false) Integer page,
-                                                    @RequestParam(required = false) Integer size) {
+    public ResponseEntity<Page<AdminDTO>> getAdmins(@Parameter(name = "Filter object", description = "Collection of all filters for search results", required = false) FilterForm filters,
+                                                    @RequestParam(required = false, defaultValue = "0") Integer page,
+                                                    @RequestParam(required = false, defaultValue = "10") Integer size) {
         Page<AdminDTO> adminList;
         if(page == null || size == null) adminList = new PageImpl<>(adminService.getAdmins().stream().map(adminMapper::fromAdminToDTO).toList());
         else adminList = new PageImpl<>(adminService.getAdmins(filters, PageRequest.of(page, size)).stream().map(adminMapper::fromAdminToDTO).toList());
@@ -74,15 +76,17 @@ public class AdminController {
     }
 
     // Получение одного админа
-    @Operation(description = "Get admin info DTO by his ID", summary = "Get Admin DTO By ID", tags = {"Admin"})
+    @Operation(description = "Get admin info by his ID: Name, Phone, Email, Role & Courses", summary = "Get Admin DTO By ID", tags = {"Admin"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation", content = @Content(mediaType = "application/json", schema = @Schema(implementation = AdminDTO.class))),
-            @ApiResponse(responseCode = "404", description = "Admin not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
-            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            @ApiResponse(responseCode = "200", description = "Successful Operation"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('settings.read.NO_ACCESS')")
     @GetMapping("/{id}")
-    public ResponseEntity<AdminDTO> getAdmin(@PathVariable @Parameter(description = "Admin ID", example = "1") Long id) {
+    public ResponseEntity<AdminDTO> getAdmin(@PathVariable @Parameter(example = "1") Long id) {
         Admin admin = adminService.getAdminById(id);
         return new ResponseEntity<>(adminMapper.fromAdminToDTO(admin), HttpStatus.OK);
     }
@@ -90,14 +94,16 @@ public class AdminController {
     // Создание нового админа
     @Operation(description = "Create new admin in the application", summary = "Create New Admin", tags = {"Admin"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Successfully created", content = @Content(mediaType = "application/json", schema = @Schema(implementation = AdminDTO.class))),
-            @ApiResponse(responseCode = "400", description = "Validation error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
-            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            @ApiResponse(responseCode = "201", description = "Successful Creation"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
+            @ApiResponse(responseCode = "400", description = "Bad Request / Validation Error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('settings.write.NO_ACCESS')")
     @PostMapping
-    public ResponseEntity<?> createNewAdmin(@RequestBody AdminEditDTO admin,
-                                            BindingResult bindingResult) {
+    public ResponseEntity<AdminDTO> createNewAdmin(@RequestBody AdminEditDTO admin,
+                                                    BindingResult bindingResult) {
 
         admin.setId(null);
         adminValidator.validate(admin, bindingResult);
@@ -117,15 +123,17 @@ public class AdminController {
     // Редактирование админа
     @Operation(description = "Update existing admin in the application", summary = "Update Admin", tags = {"Admin"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully updated", content = @Content(mediaType = "application/json", schema = @Schema(implementation = AdminDTO.class))),
-            @ApiResponse(responseCode = "400", description = "Validation error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
-            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            @ApiResponse(responseCode = "201", description = "Successful Update"),
+            @ApiResponse(responseCode = "400", description = "Bad Request / Validation Error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('settings.edit.NO_ACCESS')")
     @PutMapping("/{id}")
-    public ResponseEntity<AdminDTO> updateAdmin(@PathVariable Long id,
-                                        @RequestBody AdminEditDTO admin,
-                                        BindingResult bindingResult) {
+    public ResponseEntity<AdminDTO> updateAdmin(@PathVariable @Parameter(example = "1") Long id,
+                                                @RequestBody @io.swagger.v3.oas.annotations.parameters.RequestBody AdminEditDTO admin,
+                                                BindingResult bindingResult) {
 
         admin.setId(id);
 
@@ -146,13 +154,15 @@ public class AdminController {
     // Удаление админа
     @Operation(description = "Delete admin by his ID", summary = "Delete Admin By ID", tags = {"Admin"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully deleted", content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "404", description = "Admin not found in DB", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
-            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            @ApiResponse(responseCode = "200", description = "Successful Operation"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('settings.delete.NO_ACCESS')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteAdmin(@PathVariable Long id) {
+    public ResponseEntity<String> deleteAdmin(@PathVariable @Parameter(example = "1") Long id) {
         adminService.deleteAdminById(id);
         return new ResponseEntity<>("Admin with ID: " + id + " deleted", HttpStatus.OK);
     }
@@ -160,9 +170,18 @@ public class AdminController {
     // ==================================
 
     // Получение списка админов по ролям (для Select2)
+    @Operation(description = "Get list of admins with a specified role (by its ID) - For Select2",
+                summary = "Get Admins By Role ID - For Select2", tags = {"Admin"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful Operation"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Role Not Found", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
+    })
     @GetMapping("/get-admins-by-role")
-    public Map<String, Object> getAdminsByRole(@RequestParam Long roleID,
-                                                 @RequestParam Integer page) {
+    public Map<String, Object> getAdminsByRole(@RequestParam @Parameter(example = "1", name = "Role ID") Long roleID,
+                                               @RequestParam @Parameter(example = "1") Integer page) {
         FilterForm form = FilterForm.with()
                                     .role(roleID)
                                     .build();
@@ -183,6 +202,13 @@ public class AdminController {
     }
 
     // Получение списка незанятых админов (админов без назначенных курсов)
+    @Operation(description = "Get list of admins not attached to any courses", summary = "Get Available Admins", tags = {"Admin"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful Operation"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
+    })
     @GetMapping("/get-available-admins")
     public List<AdminDTO> getAdminsWithoutCourses() {
         return adminService.getAdmins()

@@ -11,6 +11,7 @@ import com.example.spacelab.service.ContactInfoService;
 import com.example.spacelab.validator.ContactValidator;
 import com.example.spacelab.exception.ValidationErrorMessage;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -44,15 +45,17 @@ public class ContactController {
 
 
     // Получение всех контактов
-    @Operation(description = "Get contacts page", summary = "Get Contacts", tags = {"Contact"})
+    @Operation(description = "Get list of contacts paginated by 'page/size' params (default values are 0/10)", summary = "Get Contacts", tags = {"Contact"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation"),
-            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            @ApiResponse(responseCode = "200", description = "Successful Operation"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('settings.read.NO_ACCESS')")
     @GetMapping
-    public ResponseEntity<Page<ContactInfoDTO>> getContacts(@RequestParam(required = false) Integer page,
-                                                            @RequestParam(required = false) Integer size) {
+    public ResponseEntity<Page<ContactInfoDTO>> getContacts(@RequestParam(required = false, defaultValue = "0") Integer page,
+                                                            @RequestParam(required = false , defaultValue = "10") Integer size) {
         Page<ContactInfoDTO> contactList;
         if(page == null || size == null) contactList = new PageImpl<>(contactService.getContacts().stream().map(contactMapper::fromContactToContactDTO).toList());
         else contactList = new PageImpl<>(contactService.getContacts(PageRequest.of(page, size)).stream().map(contactMapper::fromContactToContactDTO).toList());
@@ -63,27 +66,31 @@ public class ContactController {
     // Получение одного контакта
     @Operation(description = "Get contact info DTO by its ID", summary = "Get Contact By ID", tags = {"Contact"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ContactInfoDTO.class))),
-            @ApiResponse(responseCode = "404", description = "Contact not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
-            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            @ApiResponse(responseCode = "200", description = "Successful Operation"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Contact not found in DB", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('settings.read.NO_ACCESS')")
     @GetMapping("/{id}")
-    public ResponseEntity<ContactInfoDTO> getContact(@PathVariable Long id) {
+    public ResponseEntity<ContactInfoDTO> getContact(@PathVariable @Parameter(example = "1") Long id) {
         ContactInfoDTO info = contactMapper.fromContactToContactDTO(contactService.getContact(id));
         return new ResponseEntity<>(info, HttpStatus.OK);
     }
 
     // Добавление нового контакта
-    @Operation(description = "Create new contact", summary = "Create New Contact", tags = {"Contact"})
+    @Operation(description = "Create new contact card (one for each admin)", summary = "Create New Contact", tags = {"Contact"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Successfully created", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ContactInfoDTO.class))),
-            @ApiResponse(responseCode = "400", description = "Validation error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
-            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            @ApiResponse(responseCode = "201", description = "Successfully created"),
+            @ApiResponse(responseCode = "400", description = "Bad Request / Validation Error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('settings.write.NO_ACCESS')")
     @PostMapping
-    public ResponseEntity<?> createNewContact(@RequestBody ContactInfoEditDTO contactInfoDTO,
+    public ResponseEntity<ContactInfoDTO> createNewContact(@RequestBody ContactInfoEditDTO contactInfoDTO,
                                                            BindingResult bindingResult) {
 
         contactValidator.validate(contactInfoDTO, bindingResult);
@@ -100,13 +107,15 @@ public class ContactController {
     // Редактирование контакта
     @Operation(description = "Update existing contact in the application", summary = "Update Contact", tags = {"Contact"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully updated", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ContactInfoDTO.class))),
-            @ApiResponse(responseCode = "400", description = "Validation error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
-            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            @ApiResponse(responseCode = "200", description = "Successfully updated"),
+            @ApiResponse(responseCode = "400", description = "Bad Request / Validation Error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('settings.edit.NO_ACCESS')")
     @PutMapping("/{id}")
-    public ResponseEntity<?> editContact(@PathVariable Long id,
+    public ResponseEntity<ContactInfoDTO> editContact(@PathVariable @Parameter(example = "1") Long id,
                                           @RequestBody ContactInfoEditDTO contactInfoDTO,
                                           BindingResult bindingResult) {
         contactInfoDTO.setId(id);
@@ -125,13 +134,13 @@ public class ContactController {
     // Удаление контакта
     @Operation(description = "Delete contact by his ID", summary = "Delete Contact", tags = {"Contact"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully deleted", content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "404", description = "Contact not found in DB", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
-            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            @ApiResponse(responseCode = "200", description = "Successfully deleted"),
+            @ApiResponse(responseCode = "404", description = "Contact not found in DB", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('settings.delete.NO_ACCESS')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteContact(@PathVariable Long id) {
+    public ResponseEntity<String> deleteContact(@PathVariable @Parameter(example = "1") Long id) {
         contactService.deleteContact(id);
         return new ResponseEntity<>("Contact with ID: " + id + " deleted", HttpStatus.OK);
     }

@@ -12,6 +12,7 @@ import com.example.spacelab.service.UserRoleService;
 import com.example.spacelab.validator.RoleValidator;
 import com.example.spacelab.exception.ValidationErrorMessage;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -41,10 +42,12 @@ public class RoleController {
     private final RoleMapper roleMapper;
     private final RoleValidator validator;
 
-    @Operation(description = "Get roles list", summary = "Get Roles", tags = {"Role"})
+    @Operation(description = "Get list of roles paginated by 'page/size' params (default values are 0/10)", summary = "Get Roles", tags = {"Role"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation"),
-            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            @ApiResponse(responseCode = "200", description = "Successful Operation"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('roles.read.NO_ACCESS')")
     @GetMapping
@@ -55,13 +58,15 @@ public class RoleController {
 
     @Operation(description = "Get role DTO by its ID", summary = "Get Role By ID", tags = {"Role"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserRoleDTO.class))),
+            @ApiResponse(responseCode = "200", description = "Successful Operation", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserRoleDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
             @ApiResponse(responseCode = "404", description = "Role not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
-            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('roles.read.NO_ACCESS')")
     @GetMapping("/{id}")
-    public ResponseEntity<UserRoleDTO> getRoleById(@PathVariable Long id) {
+    public ResponseEntity<UserRoleDTO> getRoleById(@PathVariable @Parameter(example = "1") Long id) {
         UserRoleDTO role = roleMapper.fromRoleToDTO(userRoleService.getRoleById(id));
         return new ResponseEntity<>(role, HttpStatus.OK);
     }
@@ -69,8 +74,10 @@ public class RoleController {
     @Operation(description = "Create new role", summary = "Create New Role", tags = {"Role"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Successfully created", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserRoleDTO.class))),
-            @ApiResponse(responseCode = "400", description = "Validation error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
-            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            @ApiResponse(responseCode = "400", description = "Bad Request / Validation Error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('roles.write.NO_ACCESS')")
     @PostMapping
@@ -91,12 +98,14 @@ public class RoleController {
     @Operation(description = "Update existing role in the application", summary = "Update Role", tags = {"Role"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully updated", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserRoleDTO.class))),
-            @ApiResponse(responseCode = "400", description = "Validation error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
-            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            @ApiResponse(responseCode = "400", description = "Bad Request / Validation Error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('roles.edit.NO_ACCESS')")
     @PutMapping("/{id}")
-    public ResponseEntity<UserRoleDTO> updateRole(@PathVariable Long id,
+    public ResponseEntity<UserRoleDTO> updateRole(@PathVariable @Parameter(example = "1") Long id,
                                         @RequestBody UserRoleEditDTO dto,
                                         BindingResult bindingResult) {
         dto.setId(id);
@@ -113,12 +122,14 @@ public class RoleController {
     @Operation(description = "Delete role by his ID", summary = "Delete Role", tags = {"Role"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully deleted", content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
             @ApiResponse(responseCode = "404", description = "Role not found in DB", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
-            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('roles.delete.NO_ACCESS')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteRole(@PathVariable Long id ){
+    public ResponseEntity<String> deleteRole(@PathVariable @Parameter(example = "1") Long id ){
         userRoleService.deleteRoleById(id);
         return new ResponseEntity<>("Role with ID: " + id + " deleted", HttpStatus.OK);
     }
@@ -126,6 +137,13 @@ public class RoleController {
     // ==============================
 
     // Получение списка ролей для Select2
+    @Operation(description = "Endpoint for Select2, without endless pagination", summary = "Get Roles for Select2", tags = {"Lesson"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful Operation"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error")
+    })
     @GetMapping("/get-all-roles")
     public List<SelectSearchDTO> getAllRoles() {
         return userRoleService.getRoles()

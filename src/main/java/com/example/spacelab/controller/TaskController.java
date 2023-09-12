@@ -17,6 +17,7 @@ import com.example.spacelab.util.AuthUtil;
 import com.example.spacelab.util.FilterForm;
 import com.example.spacelab.validator.TaskValidator;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -51,16 +52,18 @@ public class TaskController {
 
 
     // Получение списка задач (с фильтрами/страницами)
-    @Operation(description = "Get tasks list", summary = "Get tasks list", tags = {"Task"})
+    @Operation(description = "Get list of tasks paginated by 'page/size' params (default values are 0/10), output depends on permission type(full/partial)", summary = "Get tasks list", tags = {"Task"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation"),
-            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            @ApiResponse(responseCode = "200", description = "Successful Operation"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('tasks.read.NO_ACCESS')")
     @GetMapping
     public ResponseEntity<Page<TaskListDTO>> getTasks(FilterForm filters,
-                                                       @RequestParam(required = false) Integer page,
-                                                       @RequestParam(required = false) Integer size) {
+                                                      @RequestParam(required = false, defaultValue = "0") Integer page,
+                                                      @RequestParam(required = false, defaultValue = "10") Integer size) {
 
         Page<TaskListDTO> taskListDTO = new PageImpl<>(new ArrayList<>());
 
@@ -89,13 +92,15 @@ public class TaskController {
     // Получение задачи по id
     @Operation(description = "Get task by id", summary = "Get task by id", tags = {"Task"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation"),
+            @ApiResponse(responseCode = "200", description = "Successful Operation"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
             @ApiResponse(responseCode = "404", description = "Task not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
-            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('tasks.read.NO_ACCESS')")
     @GetMapping("/{id}")
-    public ResponseEntity<TaskInfoDTO> getTaskById(@PathVariable Long id) {
+    public ResponseEntity<TaskInfoDTO> getTaskById(@PathVariable @Parameter(example = "1") Long id) {
 
         AuthUtil.checkAccessToCourse(taskService.getTaskById(id).getCourse().getId(), "tasks.read");
 
@@ -108,9 +113,11 @@ public class TaskController {
     // Создание новой задачи
     @Operation(description = "Create new task", summary = "Create new task", tags = {"Task"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation"),
+            @ApiResponse(responseCode = "200", description = "Successful Operation"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
             @ApiResponse(responseCode = "400", description = "Task not valid", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
-            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('tasks.write.NO_ACCESS')")
     @PostMapping
@@ -135,13 +142,15 @@ public class TaskController {
     // Получение задачи для редактирования по id
     @Operation(description = "Get task by id for edit", summary = "Get task by id for edit", tags = {"Task"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation"),
+            @ApiResponse(responseCode = "200", description = "Successful Operation"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
             @ApiResponse(responseCode = "404", description = "Task not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
-            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('tasks.read.NO_ACCESS')")
     @GetMapping("/edit/{id}")
-    public ResponseEntity<TaskCardDTO> getTaskByIdForEdit(@PathVariable Long id) {
+    public ResponseEntity<TaskCardDTO> getTaskByIdForEdit(@PathVariable @Parameter(example = "1") Long id) {
 
         AuthUtil.checkAccessToCourse(taskService.getTaskById(id).getCourse().getId(), "tasks.read");
 
@@ -154,14 +163,16 @@ public class TaskController {
     // Редактирование задачи
     @Operation(description = "Edit task", summary = "Edit task", tags = {"Task"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation"),
+            @ApiResponse(responseCode = "200", description = "Successful Operation"),
             @ApiResponse(responseCode = "400", description = "Task not valid", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
             @ApiResponse(responseCode = "404", description = "Task not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
-            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('tasks.edit.NO_ACCESS')")
     @PutMapping("/{id}")
-    public ResponseEntity<String> editTask(@PathVariable Long id,  @RequestBody TaskSaveDTO task, BindingResult bindingResult) {
+    public ResponseEntity<String> editTask(@PathVariable @Parameter(example = "1") Long id,  @RequestBody TaskSaveDTO task, BindingResult bindingResult) {
 
         task.setId(id);
 
@@ -184,13 +195,15 @@ public class TaskController {
     // Удаление задачи
     @Operation(description = "Delete task", summary = "Delete task", tags = {"Task"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation"),
+            @ApiResponse(responseCode = "200", description = "Successful Operation"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
             @ApiResponse(responseCode = "404", description = "Task not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
-            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('tasks.delete.NO_ACCESS')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteTask(@PathVariable Long id) {
+    public ResponseEntity<String> deleteTask(@PathVariable @Parameter(example = "1") Long id) {
 
         AuthUtil.checkAccessToCourse(taskService.getTaskById(id).getCourse().getId(), "tasks.delete");
 

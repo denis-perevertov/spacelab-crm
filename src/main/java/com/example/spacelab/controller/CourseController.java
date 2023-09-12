@@ -13,6 +13,7 @@ import com.example.spacelab.util.FilterForm;
 import com.example.spacelab.validator.CourseCreateValidator;
 import com.example.spacelab.validator.CourseUpdateValidator;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -52,17 +53,19 @@ public class CourseController {
     private final CourseUpdateValidator courseUpdateValidator;
 
     // Получение списка курсов  (с фильтрами/страницами)
-    @Operation(description = "Get courses list", summary = "Get courses list", tags = {"Course"})
+    @Operation(description = "Get list of courses paginated by 'page/size' params (default values are 0/10), output depends on permission type(full/partial)", summary = "Get courses list", tags = {"Course"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation"),
-            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            @ApiResponse(responseCode = "200", description = "Successful Operation"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('courses.read.NO_ACCESS')")
     @GetMapping
     public ResponseEntity<Page<CourseListDTO>> getCourses(@AuthenticationPrincipal Admin loggedInAdmin,
                                                            FilterForm filters,
-                                                           @RequestParam(required = false) Integer page,
-                                                           @RequestParam(required = false) Integer size) {
+                                                           @RequestParam(required = false, defaultValue = "0") Integer page,
+                                                           @RequestParam(required = false, defaultValue = "10") Integer size) {
 
         log.info(mapper.toString());
         log.info(courseCreateValidator.toString());
@@ -97,13 +100,15 @@ public class CourseController {
     // Получение курса по id
     @Operation(description = "Get course by id", summary = "Get course by id", tags = {"Course"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation"),
-            @ApiResponse(responseCode = "404", description = "Course not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
-            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            @ApiResponse(responseCode = "200", description = "Successful Operation"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Course not found in DB", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('courses.read.NO_ACCESS')")
     @GetMapping("/{id}")
-    public ResponseEntity<CourseInfoDTO> getCourse(@PathVariable Long id) {
+    public ResponseEntity<CourseInfoDTO> getCourse(@PathVariable @Parameter(example = "1") Long id) {
 
         AuthUtil.checkAccessToCourse(id, "courses.read");
 
@@ -116,13 +121,15 @@ public class CourseController {
     // Получение курса для редактирования по id
     @Operation(description = "Get course by id for edit", summary = "Get course by id for edit", tags = {"Course"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation"),
-            @ApiResponse(responseCode = "404", description = "Course not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
-            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            @ApiResponse(responseCode = "200", description = "Successful Operation"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Course not found in DB", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('courses.read.NO_ACCESS')")
     @GetMapping("/update/{id}")
-    public ResponseEntity<CourseCardDTO> getCourseForUpdate(@PathVariable Long id) {
+    public ResponseEntity<CourseCardDTO> getCourseForUpdate(@PathVariable @Parameter(example = "1") Long id) {
 
         AuthUtil.checkAccessToCourse(id, "courses.read");
 
@@ -133,11 +140,14 @@ public class CourseController {
 
 
     // Сохранение нового курса
-    @Operation(description = "Create new course", summary = "Create new course", tags = {"Course"})
+    @Operation(description = "Create new course; \n Beginning date can't be in the future, mentor/manager has to be present",
+            summary = "Create new course", tags = {"Course"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Course created"),
-            @ApiResponse(responseCode = "400", description = "Invalid input data", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
-            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            @ApiResponse(responseCode = "400", description = "Bad Request / Validation Error", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('courses.write.NO_ACCESS')")
     @PostMapping
@@ -162,16 +172,18 @@ public class CourseController {
 
 
     // Сохранение изменениий курса
-    @Operation(description = "Edit course", summary = "Edit course", tags = {"Course"})
+    @Operation(description = "Edit course; \n Beginning date can't be in the future, mentor/manager has to be present", summary = "Edit course", tags = {"Course"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Course updated"),
-            @ApiResponse(responseCode = "400", description = "Invalid input data", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
-            @ApiResponse(responseCode = "404", description = "Course not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
-            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            @ApiResponse(responseCode = "400", description = "Bad Request / Validation Error", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Course not found in DB", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('courses.edit.NO_ACCESS')")
     @PutMapping("/{id}")
-    public ResponseEntity<String> updateCourse(@PathVariable Long id,  @RequestBody CourseSaveUpdatedDTO dto, BindingResult bindingResult) {
+    public ResponseEntity<String> updateCourse(@PathVariable @Parameter(example = "1") Long id,  @RequestBody CourseSaveUpdatedDTO dto, BindingResult bindingResult) {
 
         dto.setId(id);
 
@@ -196,12 +208,14 @@ public class CourseController {
     @Operation(description = "Delete course", summary = "Delete course", tags = {"Course"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Course deleted"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
             @ApiResponse(responseCode = "404", description = "Course not found in DB", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
-            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('courses.delete.NO_ACCESS')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteCourse(@PathVariable Long id) {
+    public ResponseEntity<String> deleteCourse(@PathVariable @Parameter(example = "1") Long id) {
 
         AuthUtil.checkAccessToCourse(id, "courses.delete");
 
@@ -214,8 +228,10 @@ public class CourseController {
     // Select2
     @Operation(description = "Get courses for select2", summary = "Get courses for select2", tags = {"Course"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation"),
-            @ApiResponse(responseCode = "500", description = "Some unknown error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)))
+            @ApiResponse(responseCode = "200", description = "Successful Operation"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @PreAuthorize("!hasAuthority('courses.read.NO_ACCESS')")
     @GetMapping("/getCourses")

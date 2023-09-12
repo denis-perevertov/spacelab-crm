@@ -1,4 +1,6 @@
 package com.example.spacelab.util;
 
-public record RefreshTokenRequest(String refresh_token) {
+import io.swagger.v3.oas.annotations.media.Schema;
+
+public record RefreshTokenRequest(@Schema(example = "[insert your token here]") String refresh_token) {
 }

@@ -16,7 +16,9 @@ public class SwaggerConfig {
     private SecurityScheme createAPIKeyScheme() {
         return new SecurityScheme().type(SecurityScheme.Type.HTTP)
                                     .bearerFormat("JWT")
-                                    .scheme("bearer");
+                                    .scheme("bearer")
+                                    .description("Use JWT access token from \"login\" endpoint")
+                                    .name("JWT Authorization");
     }
 
     @Bean
@@ -25,13 +27,13 @@ public class SwaggerConfig {
                             .components(new Components()
                                             .addSecuritySchemes("Bearer Authentication", createAPIKeyScheme()))
                             .info(new Info()
-                                            .title("My REST API")
-                                            .description("Some custom description of API.")
+                                            .title("Spacelab LMS API")
+                                            .description("API for Spacelab LMS - working w/ students, content management, conducting lessons etc")
                                             .version("1.0")
                                             .contact(new Contact()
-                                                                .name("Denchik")
-                                                                .email("lul")
-                                                                .url("lol@gmail.com"))
+                                                                .name("Denis Perevertov & Evgeniy Shevchenko")
+                                                                .email("testemail@gmail.com")
+                                                                .url("http://www.test.com"))
                                             .license(new License()
                                                                 .name("License of API")
                                                                 .url("API license URL")));
