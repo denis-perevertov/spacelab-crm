@@ -39,6 +39,8 @@ springdoc:
 
 server:
   port: 1488
+  servlet:
+    context-path: /spacelab
   error:
     include-message: always
     include-binding-errors: always
