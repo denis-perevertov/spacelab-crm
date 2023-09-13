@@ -60,6 +60,10 @@ public class SecurityConfig {
                                                     .requestMatchers("*/api/**").authenticated()
                                                     .requestMatchers("/").permitAll()
                 )
+                .requiresChannel(customizer -> customizer
+                                                    .requestMatchers("/*/api/**", "/*/swagger-ui", "/*/swagger-ui/**", "/*/api-docs/**").requiresSecure()
+                                                    .anyRequest().requiresInsecure()
+                )
                 .sessionManagement(customizer -> customizer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 //                .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
