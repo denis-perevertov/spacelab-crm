@@ -47,10 +47,13 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(customizer -> customizer
-                                                    .requestMatchers("/api/auth/**").permitAll()
-                                                    .requestMatchers("/api/students/register").permitAll()
+                                                    .requestMatchers("/api/auth/**", "/*/api/auth/**").permitAll()
+                                                    .requestMatchers("/api/students/register","/*/api/students/register").permitAll()
                                                     .requestMatchers("/swagger-ui", "/swagger-ui/**", "/api-docs/**").permitAll()
-                                                    .anyRequest().authenticated())
+                                                    .requestMatchers("/*/swagger-ui", "/*/swagger-ui/**", "/*/api-docs/**").permitAll()
+                                                    .requestMatchers("*/api/**").authenticated()
+                                                    .requestMatchers("/").permitAll()
+                )
                 .sessionManagement(customizer -> customizer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 //                .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

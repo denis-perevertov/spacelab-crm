@@ -277,8 +277,8 @@ public class StudentController {
     @PreAuthorize("!hasAuthority('students.edit.NO_ACCESS')")
     @PutMapping("/{id}")
     public ResponseEntity<StudentDTO> editStudent(@PathVariable @Parameter(example = "1") Long id,
-                                          @RequestBody StudentEditDTO dto,
-                                          BindingResult bindingResult) {
+                                                  @RequestBody StudentEditDTO dto,
+                                                  BindingResult bindingResult) {
 
         AuthUtil.checkAccessToCourse(dto.courseID(), "students.edit");
 

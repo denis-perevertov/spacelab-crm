@@ -123,7 +123,7 @@ public class AdminController {
     // Редактирование админа
     @Operation(description = "Update existing admin in the application; ID field does not matter in write/edit operations", summary = "Update Admin", tags = {"Admin"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Successful Update"),
+            @ApiResponse(responseCode = "200", description = "Successful Update"),
             @ApiResponse(responseCode = "400", description = "Bad Request / Validation Error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),

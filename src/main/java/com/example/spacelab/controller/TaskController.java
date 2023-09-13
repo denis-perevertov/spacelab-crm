@@ -111,9 +111,9 @@ public class TaskController {
 
 
     // Создание новой задачи
-    @Operation(description = "Create new task", summary = "Create new task; ID field does not matter in write/edit operations", tags = {"Task"})
+    @Operation(description = "Create new task; ID field does not matter in write/edit operations", summary = "Create new task", tags = {"Task"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful Operation"),
+            @ApiResponse(responseCode = "201", description = "Successful Creation"),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
             @ApiResponse(responseCode = "400", description = "Task not valid", content = @Content),
@@ -159,9 +159,9 @@ public class TaskController {
 
 
     // Редактирование задачи
-    @Operation(description = "Edit task", summary = "Edit task; ID field does not matter in write/edit operations", tags = {"Task"})
+    @Operation(description = "Edit task; ID field does not matter in write/edit operations", summary = "Edit task", tags = {"Task"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful Operation"),
+            @ApiResponse(responseCode = "200", description = "Successful Update"),
             @ApiResponse(responseCode = "400", description = "Bad Request / Validation Error", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
             @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
