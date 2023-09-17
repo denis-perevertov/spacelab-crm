@@ -44,3 +44,10 @@ server:
   error:
     include-message: always
     include-binding-errors: always
+
+#logging:
+#  level:
+#    org:
+#      springframework: DEBUG
+#  pattern:
+#    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%15thread] %-60([Class: %c{1})] :: %-60([Method: %logger{0}.%M]) - %msg - line %L%n"

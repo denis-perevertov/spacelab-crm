@@ -2,6 +2,7 @@ package com.example.spacelab.controller.auth;
 
 import com.example.spacelab.config.JwtService;
 import com.example.spacelab.exception.ErrorMessage;
+import com.example.spacelab.exception.ResourceNotFoundException;
 import com.example.spacelab.exception.TokenException;
 import com.example.spacelab.model.RefreshToken;
 import com.example.spacelab.service.RefreshTokenService;
@@ -18,6 +19,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -46,13 +48,17 @@ public class AuthController {
     })
     @PostMapping(value = "/login", consumes = "application/json")
     public AuthResponse login(@RequestBody AuthRequest authRequest) {
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.username(), authRequest.password()));
-        if(authentication.isAuthenticated()) {
-            String access_token = jwtService.generateToken(authRequest.username());
-            RefreshToken refreshToken = refreshTokenService.createRefreshToken(authRequest.username());
-            return new AuthResponse(access_token, refreshToken.getToken());
+        try {
+            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.username(), authRequest.password()));
+            if(authentication.isAuthenticated()) {
+                String access_token = jwtService.generateToken(authRequest.username());
+                RefreshToken refreshToken = refreshTokenService.createRefreshToken(authRequest.username());
+                return new AuthResponse(access_token, refreshToken.getToken());
+            }
+            else throw new ResourceNotFoundException("Incorrect authentication request");
+        } catch (BadCredentialsException ex) {
+            throw new ResourceNotFoundException("Incorrect authentication request");
         }
-        else throw new UsernameNotFoundException("Incorrect authentication request");
     }
 
     @Operation(description = "Logout & remove your authentication", summary = "Logout", tags = {"_Auth"})

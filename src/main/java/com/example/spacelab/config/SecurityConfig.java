@@ -3,6 +3,8 @@ package com.example.spacelab.config;
 import com.example.spacelab.service.AdminService;
 import com.example.spacelab.service.impl.AdminServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,7 +21,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -29,7 +33,6 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 import java.util.Arrays;
 
 @Configuration
-@RequiredArgsConstructor
 @EnableMethodSecurity(
         prePostEnabled = true,
         securedEnabled = true,
@@ -37,14 +40,11 @@ import java.util.Arrays;
 )
 public class SecurityConfig {
 
-    private final JwtAuthFilter jwtAuthFilter;
-    private final AdminService adminService;
+    @Autowired
+    private JwtAuthFilter jwtAuthFilter;
 
-
-//    @Bean
-//    public UserDetailsService userDetailsService() {
-//        return adminService;
-//    }
+    @Autowired
+    private AdminService adminService;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -53,19 +53,18 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(customizer -> customizer
-                                                    .requestMatchers("/api/auth/**", "/*/api/auth/**").permitAll()
-                                                    .requestMatchers("/api/students/register","/*/api/students/register").permitAll()
-                                                    .requestMatchers("/swagger-ui", "/swagger-ui/**", "/api-docs/**").permitAll()
-                                                    .requestMatchers("/*/swagger-ui", "/*/swagger-ui/**", "/*/api-docs/**").permitAll()
-                                                    .requestMatchers("*/api/**").authenticated()
-                                                    .requestMatchers("/").permitAll()
+                                    .requestMatchers("/").permitAll()
+                                    .requestMatchers("/api/auth/**", "/*/api/auth/**").permitAll()
+                                    .requestMatchers("/api/students/register","/*/api/students/register").permitAll()
+                                    .requestMatchers("/swagger-ui", "/swagger-ui/**", "/api-docs/**").permitAll()
+                                    .requestMatchers("/*/swagger-ui", "/*/swagger-ui/**", "/*/api-docs/**").permitAll()
+                                    .anyRequest().authenticated()
                 )
                 .requiresChannel(customizer -> customizer
                                                     .requestMatchers("/*/api/**", "/*/swagger-ui", "/*/swagger-ui/**", "/*/api-docs/**").requiresSecure()
                                                     .anyRequest().requiresInsecure()
                 )
                 .sessionManagement(customizer -> customizer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-//                .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

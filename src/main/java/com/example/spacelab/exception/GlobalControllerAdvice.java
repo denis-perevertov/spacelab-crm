@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import javax.naming.AuthenticationException;
+import java.nio.file.AccessDeniedException;
 import java.util.Map;
 
 @ControllerAdvice
@@ -60,6 +61,16 @@ public class GlobalControllerAdvice {
         );
     }
 
+    @ExceptionHandler({AccessDeniedException.class, AuthenticationException.class})
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ResponseEntity<ErrorMessage> accessDeniedHandler(AccessDeniedException ex) {
+        log.severe("ALLO POIMAL");
+        return new ResponseEntity<>(
+                new ErrorMessage("Access to this part of the API denied", HttpStatus.FORBIDDEN.value(), Map.of("access", ex.getMessage())),
+                HttpStatus.FORBIDDEN
+        );
+    }
+
     @ExceptionHandler(TokenException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<ErrorMessage> tokenExceptionHandler(TokenException e) {
@@ -88,13 +99,13 @@ public class GlobalControllerAdvice {
                 HttpStatus.BAD_REQUEST
         );
     }
-
-    @ExceptionHandler(Exception.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ResponseEntity<String> fallbackInternalErrorHandler(Exception ex) {
-        log.severe(ex.getMessage());
-        ex.printStackTrace();
-        return new ResponseEntity<>("Server error: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+//
+//    @ExceptionHandler(Exception.class)
+//    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+//    public ResponseEntity<String> fallbackInternalErrorHandler(Exception ex) {
+//        log.severe(ex.getMessage());
+//        ex.printStackTrace();
+//        return new ResponseEntity<>("Server error: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+//    }
 
 }

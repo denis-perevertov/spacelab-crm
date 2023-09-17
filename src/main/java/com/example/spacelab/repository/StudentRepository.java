@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface StudentRepository extends JpaRepository<Student, Long>, JpaSpecificationExecutor<Student> {
@@ -20,5 +21,6 @@ public interface StudentRepository extends JpaRepository<Student, Long>, JpaSpec
     @Query("SELECT s FROM Student s WHERE s.course.id IN :ids")
     Page<Student> findAllByAllowedCoursePage(Pageable pageable, @Param("ids") Long... ids);
 
+    Optional<Student> findByDetailsEmail(String email);
     boolean existsByDetailsEmail(String email);
 }
