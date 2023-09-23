@@ -114,6 +114,8 @@ public class AdminMapper {
                 (dto.getPassword() != null && !dto.getPassword().isEmpty()))
                 admin.setPassword(dto.getPassword());
 
+            admin.getCourses().add(courseRepository.getReferenceById(dto.getCourseID()));
+
             /*
                 TODO
                 курсы

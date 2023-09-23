@@ -35,13 +35,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 @RestController
@@ -56,6 +54,8 @@ public class StudentController {
     private final StudentValidator studentValidator;
     private final TaskMapper taskMapper;
 
+    private final AuthUtil authUtil;
+
     // Получение студентов (с фильтрами/страницами)
     @Operation(description = "Get list of students paginated by 'page/size' params (default values are 0/10), output depends on permission type(full/partial)", summary = "Get Students", tags = {"Student"})
     @ApiResponses(value = {
@@ -66,14 +66,21 @@ public class StudentController {
     })
     @PreAuthorize("!hasAuthority('students.read.NO_ACCESS')")
     @GetMapping
+    @Transactional
     public ResponseEntity<Page<StudentDTO>> getStudents(@Parameter(name = "Filter object", description = "Collection of all filters for search results", example = "{}") FilterForm filters,
                                                         @RequestParam(required = false, defaultValue = "0") Integer page,
                                                         @RequestParam(required = false, defaultValue = "10") Integer size) {
 
         Page<StudentDTO> students = new PageImpl<>(new ArrayList<>());
 
-        Admin loggedInAdmin = AuthUtil.getLoggedInAdmin();
+        Admin loggedInAdmin = authUtil.getLoggedInAdmin();
         PermissionType permissionForLoggedInAdmin = loggedInAdmin.getRole().getPermissions().getReadStudents();
+        List<Course> adminCourses = loggedInAdmin.getCourses();
+
+        log.info("CHECKING LOGGED IN ADMIN & PERMISSIONS");
+        log.info(loggedInAdmin.getFirstName() + loggedInAdmin.getLastName() + loggedInAdmin.getId());
+        log.info(permissionForLoggedInAdmin.toString());
+        log.info(adminCourses.toString());
 
         if(permissionForLoggedInAdmin == PermissionType.FULL) {
             if(page == null && size == null) students = new PageImpl<>(studentService.getStudents().stream().map(studentMapper::fromStudentToDTO).toList());
@@ -82,7 +89,7 @@ public class StudentController {
         }
         else if(permissionForLoggedInAdmin == PermissionType.PARTIAL) {
 
-            Long[] allowedCoursesIDs = (Long[]) loggedInAdmin.getCourses().stream().map(Course::getId).toArray();
+            Long[] allowedCoursesIDs = adminCourses.stream().map(Course::getId).toList().toArray(new Long[adminCourses.size()]);
 
             if(page == null && size == null) students = new PageImpl<>(studentService.getStudentsByAllowedCourses(allowedCoursesIDs).stream().map(studentMapper::fromStudentToDTO).toList());
             else if(page != null && size == null) students = new PageImpl<>(studentService.getStudentsByAllowedCourses(filters, PageRequest.of(page, 10),allowedCoursesIDs).stream().map(studentMapper::fromStudentToDTO).toList());
@@ -105,7 +112,7 @@ public class StudentController {
     @GetMapping("/{studentID}")
     public ResponseEntity<StudentDTO> getStudent(@PathVariable @Parameter(example = "1") Long studentID) {
 
-        AuthUtil.checkAccessToCourse(studentService.getStudentCourseID(studentID), "students.read");
+        authUtil.checkAccessToCourse(studentService.getStudentCourseID(studentID), "students.read");
 
         Student student = studentService.getStudentById(studentID);
         return new ResponseEntity<>(studentMapper.fromStudentToDTO(student), HttpStatus.OK);
@@ -125,7 +132,7 @@ public class StudentController {
     public ResponseEntity<List<StudentTaskDTO>> getStudentTasks(@PathVariable @Parameter(example = "1") Long studentID,
                                                                 @RequestParam(required = false) StudentTaskStatus status) {
 
-        AuthUtil.checkAccessToCourse(studentService.getStudentCourseID(studentID), "students.read");
+        authUtil.checkAccessToCourse(studentService.getStudentCourseID(studentID), "students.read");
 
         List<StudentTaskDTO> taskList;
         if(status == null) taskList = studentService.getStudentTasks(studentID).stream().map(taskMapper::fromStudentTaskToDTO).toList();
@@ -149,7 +156,7 @@ public class StudentController {
     public ResponseEntity<StudentTaskDTO> getStudentTask(@PathVariable @Parameter(example = "1") Long studentID,
                                                          @PathVariable @Parameter(example = "1") Long taskID) {
 
-        AuthUtil.checkAccessToCourse(studentService.getStudentCourseID(studentID), "students.read");
+        authUtil.checkAccessToCourse(studentService.getStudentCourseID(studentID), "students.read");
 
         StudentTaskDTO task = taskMapper.fromStudentTaskToDTO(studentService.getStudentTask(taskID));
 
@@ -169,7 +176,7 @@ public class StudentController {
     @GetMapping("/{studentID}/card")
     public ResponseEntity<StudentCardDTO> getStudentCard(@PathVariable @Parameter(example = "1") Long studentID) {
 
-        AuthUtil.checkAccessToCourse(studentService.getStudentCourseID(studentID), "students.read");
+        authUtil.checkAccessToCourse(studentService.getStudentCourseID(studentID), "students.read");
 
         StudentCardDTO card = studentService.getCard(studentID);
         return new ResponseEntity<>(card, HttpStatus.OK);
@@ -205,7 +212,7 @@ public class StudentController {
     public ResponseEntity<StudentDTO> createNewStudent(@RequestBody StudentEditDTO dto,
                                                     BindingResult bindingResult) {
 
-        AuthUtil.checkAccessToCourse(dto.courseID(), "students.write");
+        authUtil.checkAccessToCourse(dto.courseID(), "students.write");
         studentValidator.validate(dto, bindingResult);
 
         if(bindingResult.hasErrors()) {
@@ -232,7 +239,7 @@ public class StudentController {
     public ResponseEntity<String> createStudentInviteLink(@RequestBody StudentInviteRequestDTO inviteRequest,
                                                           HttpServletRequest servletRequest) {
 
-        AuthUtil.checkAccessToCourse(inviteRequest.getCourseID(), "students.invite");
+        authUtil.checkAccessToCourse(inviteRequest.getCourseID(), "students.invite");
 
         String token = studentService.createInviteStudentToken(studentMapper.fromDTOToInviteRequest(inviteRequest));
         String url = "http://" + servletRequest.getServerName() + ":" + servletRequest.getServerPort() + "/register/" + token;
@@ -280,7 +287,7 @@ public class StudentController {
                                                   @RequestBody StudentEditDTO dto,
                                                   BindingResult bindingResult) {
 
-        AuthUtil.checkAccessToCourse(dto.courseID(), "students.edit");
+        authUtil.checkAccessToCourse(dto.courseID(), "students.edit");
 
         StudentEditDTO dtoWithID = new StudentEditDTO(id, dto);
 
@@ -310,7 +317,7 @@ public class StudentController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteStudent(@PathVariable @Parameter(example = "1") Long id) {
 
-        AuthUtil.checkAccessToCourse(studentService.getStudentCourseID(id), "students.delete");
+        authUtil.checkAccessToCourse(studentService.getStudentCourseID(id), "students.delete");
 
         studentService.deleteStudentById(id);
         return new ResponseEntity<>("Student with ID:"+id+" deleted", HttpStatus.OK);

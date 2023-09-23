@@ -7,6 +7,7 @@ import com.example.spacelab.model.admin.Admin;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
@@ -43,6 +44,7 @@ public class Course {
     private List<Student> students = new ArrayList<>();
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
     private List<Task> tasks = new ArrayList<>();
 
     @Embedded

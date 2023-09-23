@@ -52,6 +52,8 @@ public class CourseController {
     private final CourseCreateValidator courseCreateValidator;
     private final CourseUpdateValidator courseUpdateValidator;
 
+    private final AuthUtil authUtil;
+
     // Получение списка курсов  (с фильтрами/страницами)
     @Operation(description = "Get list of courses paginated by 'page/size' params (default values are 0/10), output depends on permission type(full/partial)", summary = "Get courses list", tags = {"Course"})
     @ApiResponses(value = {
@@ -110,7 +112,7 @@ public class CourseController {
     @GetMapping("/{id}")
     public ResponseEntity<CourseInfoDTO> getCourse(@PathVariable @Parameter(example = "1") Long id) {
 
-        AuthUtil.checkAccessToCourse(id, "courses.read");
+        authUtil.checkAccessToCourse(id, "courses.read");
 
         CourseInfoDTO course = mapper.fromCourseToInfoDTO(courseService.getCourseById(id));
         return new ResponseEntity<>(course, HttpStatus.OK);
@@ -131,7 +133,7 @@ public class CourseController {
     @GetMapping("/update/{id}")
     public ResponseEntity<CourseCardDTO> getCourseForUpdate(@PathVariable @Parameter(example = "1") Long id) {
 
-        AuthUtil.checkAccessToCourse(id, "courses.read");
+        authUtil.checkAccessToCourse(id, "courses.read");
 
         CourseCardDTO course = mapper.fromCardDTOtoCourse(courseService.getCourseById(id));
         return new ResponseEntity<>(course, HttpStatus.OK);
@@ -155,7 +157,7 @@ public class CourseController {
 
         dto.setId(null);
 
-        AuthUtil.checkPermissionToCreateCourse();
+        authUtil.checkPermissionToCreateCourse();
 
         courseCreateValidator.validate(dto, bindingResult);
 
@@ -187,8 +189,8 @@ public class CourseController {
 
         dto.setId(id);
 
-        AuthUtil.checkAccessToCourse(dto.getId(), "courses.edit");
-        AuthUtil.checkAccessToCourse(id, "courses.edit");
+        authUtil.checkAccessToCourse(dto.getId(), "courses.edit");
+        authUtil.checkAccessToCourse(id, "courses.edit");
 
         courseUpdateValidator.validate(dto, bindingResult);
 
@@ -217,7 +219,7 @@ public class CourseController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteCourse(@PathVariable @Parameter(example = "1") Long id) {
 
-        AuthUtil.checkAccessToCourse(id, "courses.delete");
+        authUtil.checkAccessToCourse(id, "courses.delete");
 
         courseService.deleteCourseById(id);
         return new ResponseEntity<>("Course deleted", HttpStatus.OK);

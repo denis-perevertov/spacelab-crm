@@ -56,6 +56,8 @@ public class LessonController {
 
     private final LessonMonitor monitor;
 
+    private final AuthUtil authUtil;
+
 
     //Получение списка уроков по фильтру и пагинации
     @Operation(description = "Get list of lessons paginated by 'page/size' params (default values are 0/10), output depends on permission type(full/partial)", summary = "Get lesson list", tags = {"Lesson"})
@@ -73,7 +75,7 @@ public class LessonController {
 
         Page<LessonListDTO> dtoList = new PageImpl<>(new ArrayList<>());
 
-        Admin loggedInAdmin = AuthUtil.getLoggedInAdmin();
+        Admin loggedInAdmin = authUtil.getLoggedInAdmin();
         PermissionType permissionForLoggedInAdmin = loggedInAdmin.getRole().getPermissions().getReadCourses();
 
         if(permissionForLoggedInAdmin == PermissionType.FULL) {
@@ -107,7 +109,7 @@ public class LessonController {
     @GetMapping("/{id}")
     public ResponseEntity<LessonInfoDTO> getLessonById(@PathVariable @Parameter(example = "1") Long id) {
 
-        AuthUtil.checkAccessToCourse(lessonService.getLessonById(id).getCourse().getId(), "lessons.read");
+        authUtil.checkAccessToCourse(lessonService.getLessonById(id).getCourse().getId(), "lessons.read");
 
         LessonInfoDTO less = mapper.fromLessonToLessonInfoDTO(lessonService.getLessonById(id));
         return new ResponseEntity<>(less, HttpStatus.OK);
@@ -128,7 +130,7 @@ public class LessonController {
     @PostMapping
     public ResponseEntity<String> createNewLessonBeforeStart(@RequestBody LessonSaveBeforeStartDTO lesson, BindingResult bindingResult) {
 
-        AuthUtil.checkAccessToCourse(lesson.getCourseID(), "lessons.write");
+        authUtil.checkAccessToCourse(lesson.getCourseID(), "lessons.write");
 
         lesson.setId(null);
         lesson.setStatus(LessonStatus.PLANNED);
@@ -159,8 +161,8 @@ public class LessonController {
     public ResponseEntity<String> editLessonBeforeStart(@PathVariable @Parameter(example = "1") Long id,
                                                         @RequestBody LessonSaveBeforeStartDTO lesson, BindingResult bindingResult) {
 
-        AuthUtil.checkAccessToCourse(lessonService.getLessonById(id).getCourse().getId(), "lessons.edit");
-        AuthUtil.checkAccessToCourse(lesson.getCourseID(), "lessons.edit");
+        authUtil.checkAccessToCourse(lessonService.getLessonById(id).getCourse().getId(), "lessons.edit");
+        authUtil.checkAccessToCourse(lesson.getCourseID(), "lessons.edit");
 
         lesson.setId(id);
 
@@ -187,7 +189,7 @@ public class LessonController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteLesson(@PathVariable @Parameter(example = "1") Long id) {
 
-        AuthUtil.checkAccessToCourse(lessonService.getLessonById(id).getCourse().getId(), "lessons.delete");
+        authUtil.checkAccessToCourse(lessonService.getLessonById(id).getCourse().getId(), "lessons.delete");
 
         lessonService.deleteLessonById(id);
         return new ResponseEntity<>("Deleted", HttpStatus.OK);

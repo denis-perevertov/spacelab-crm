@@ -50,6 +50,8 @@ public class TaskController {
     private final TaskMapper mapper;
     private final TaskValidator taskValidator;
 
+    private final AuthUtil authUtil;
+
 
     // Получение списка задач (с фильтрами/страницами)
     @Operation(description = "Get list of tasks paginated by 'page/size' params (default values are 0/10), output depends on permission type(full/partial)", summary = "Get tasks list", tags = {"Task"})
@@ -67,7 +69,7 @@ public class TaskController {
 
         Page<TaskListDTO> taskListDTO = new PageImpl<>(new ArrayList<>());
 
-        Admin loggedInAdmin = AuthUtil.getLoggedInAdmin();
+        Admin loggedInAdmin = authUtil.getLoggedInAdmin();
         PermissionType permissionForLoggedInAdmin = loggedInAdmin.getRole().getPermissions().getReadTasks();
 
         if(permissionForLoggedInAdmin == PermissionType.FULL) {
@@ -102,7 +104,7 @@ public class TaskController {
     @GetMapping("/{id}")
     public ResponseEntity<TaskInfoDTO> getTaskById(@PathVariable @Parameter(example = "1") Long id) {
 
-        AuthUtil.checkAccessToCourse(taskService.getTaskById(id).getCourse().getId(), "tasks.read");
+        authUtil.checkAccessToCourse(taskService.getTaskById(id).getCourse().getId(), "tasks.read");
 
         TaskInfoDTO task = mapper.fromTaskToInfoDTO(taskService.getTaskById(id));
         return new ResponseEntity<>(task, HttpStatus.OK);
@@ -125,7 +127,7 @@ public class TaskController {
 
         task.setId(null);
 
-        AuthUtil.checkAccessToCourse(task.getCourseID(), "tasks.write");
+        authUtil.checkAccessToCourse(task.getCourseID(), "tasks.write");
 
         taskValidator.validate(task, bindingResult);
         if (bindingResult.hasErrors()) {
@@ -150,7 +152,7 @@ public class TaskController {
     @GetMapping("/edit/{id}")
     public ResponseEntity<TaskCardDTO> getTaskByIdForEdit(@PathVariable @Parameter(example = "1") Long id) {
 
-        AuthUtil.checkAccessToCourse(taskService.getTaskById(id).getCourse().getId(), "tasks.read");
+        authUtil.checkAccessToCourse(taskService.getTaskById(id).getCourse().getId(), "tasks.read");
 
         TaskCardDTO task = mapper.fromTaskToCardDTO(taskService.getTaskById(id));
         return new ResponseEntity<>(task, HttpStatus.OK);
@@ -174,8 +176,8 @@ public class TaskController {
 
         task.setId(id);
 
-        AuthUtil.checkAccessToCourse(taskService.getTaskById(id).getCourse().getId(), "tasks.edit");
-        AuthUtil.checkAccessToCourse(task.getCourseID(), "tasks.edit");
+        authUtil.checkAccessToCourse(taskService.getTaskById(id).getCourse().getId(), "tasks.edit");
+        authUtil.checkAccessToCourse(task.getCourseID(), "tasks.edit");
 
         taskValidator.validate(task, bindingResult);
         if (bindingResult.hasErrors()) {
@@ -203,7 +205,7 @@ public class TaskController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteTask(@PathVariable @Parameter(example = "1") Long id) {
 
-        AuthUtil.checkAccessToCourse(taskService.getTaskById(id).getCourse().getId(), "tasks.delete");
+        authUtil.checkAccessToCourse(taskService.getTaskById(id).getCourse().getId(), "tasks.delete");
 
         taskService.deleteTaskById(id);
         return ResponseEntity.ok("Task with ID:"+id+" deleted");

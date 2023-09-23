@@ -51,6 +51,8 @@ public class LiteratureController {
     private final LiteratureMapper mapper;
     private final LiteratureValidator validator;
 
+    private final AuthUtil authUtil;
+
 
 
     // Получение списка литературы с фильтрацией и пагинацией
@@ -69,7 +71,7 @@ public class LiteratureController {
 
         Page<LiteratureListDTO> dtoList = new PageImpl<>(new ArrayList<>());
 
-        Admin loggedInAdmin = AuthUtil.getLoggedInAdmin();
+        Admin loggedInAdmin = authUtil.getLoggedInAdmin();
         PermissionType permissionForLoggedInAdmin = loggedInAdmin.getRole().getPermissions().getReadStudents();
 
         if(permissionForLoggedInAdmin == PermissionType.FULL) {
@@ -104,7 +106,7 @@ public class LiteratureController {
     @GetMapping("/{id}")
     public ResponseEntity<LiteratureInfoDTO> getLiteratureById(@PathVariable @Parameter(example = "1") Long id) {
 
-        AuthUtil.checkAccessToCourse(literatureService.getLiteratureById(id).getCourse().getId(), "literatures.read");
+        authUtil.checkAccessToCourse(literatureService.getLiteratureById(id).getCourse().getId(), "literatures.read");
 
         LiteratureInfoDTO lit = mapper.fromLiteraturetoInfoDTO(literatureService.getLiteratureById(id));
         return new ResponseEntity<>(lit, HttpStatus.OK);
@@ -125,7 +127,7 @@ public class LiteratureController {
     @GetMapping("/{id}/verify")
     public ResponseEntity<String> verifyLiterature(@PathVariable @Parameter(example = "1") Long id) {
 
-        AuthUtil.checkAccessToCourse(literatureService.getLiteratureById(id).getCourse().getId(), "literatures.verify");
+        authUtil.checkAccessToCourse(literatureService.getLiteratureById(id).getCourse().getId(), "literatures.verify");
 
         literatureService.verifyLiterature(id);
         return new ResponseEntity<>("Verified successfully!", HttpStatus.OK);
@@ -146,7 +148,7 @@ public class LiteratureController {
     @PostMapping
     public ResponseEntity<String> createNewLiterature( @RequestBody LiteratureSaveDTO literature, BindingResult bindingResult) {
 
-        AuthUtil.checkAccessToCourse(literature.getCourseID(), "literatures.write");
+        authUtil.checkAccessToCourse(literature.getCourseID(), "literatures.write");
 
         literature.setId(null);
 
@@ -176,7 +178,7 @@ public class LiteratureController {
     @GetMapping("/update/{id}")
     public ResponseEntity<LiteratureCardDTO> getCourseForUpdate(@PathVariable @Parameter(example = "1") Long id) {
 
-        AuthUtil.checkAccessToCourse(literatureService.getLiteratureById(id).getCourse().getId(), "literatures.read");
+        authUtil.checkAccessToCourse(literatureService.getLiteratureById(id).getCourse().getId(), "literatures.read");
 
         LiteratureCardDTO literatureCardDTO = mapper.fromLiteratureToCardDTO(literatureService.getLiteratureById(id));
         return new ResponseEntity<>(literatureCardDTO, HttpStatus.OK);
@@ -200,8 +202,8 @@ public class LiteratureController {
 
         // проверка и для того курса , куда пихаешь источник , и для того курса , который у источника был раньше
 
-        AuthUtil.checkAccessToCourse(literatureService.getLiteratureById(id).getCourse().getId(), "literatures.edit");
-        AuthUtil.checkAccessToCourse(literature.getCourseID(), "literatures.edit");
+        authUtil.checkAccessToCourse(literatureService.getLiteratureById(id).getCourse().getId(), "literatures.edit");
+        authUtil.checkAccessToCourse(literature.getCourseID(), "literatures.edit");
 
         literature.setId(id);
 
@@ -230,7 +232,7 @@ public class LiteratureController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteLiterature(@PathVariable @Parameter(example = "1") Long id) {
 
-        AuthUtil.checkAccessToCourse(literatureService.getLiteratureById(id).getCourse().getId(), "literatures.delete");
+        authUtil.checkAccessToCourse(literatureService.getLiteratureById(id).getCourse().getId(), "literatures.delete");
 
         literatureService.deleteLiteratureById(id);
         return new ResponseEntity<>("Deleted", HttpStatus.OK);

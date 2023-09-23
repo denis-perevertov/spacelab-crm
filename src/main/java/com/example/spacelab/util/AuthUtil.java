@@ -3,26 +3,36 @@ package com.example.spacelab.util;
 import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.role.PermissionType;
+import com.example.spacelab.repository.AdminRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Component
 @Log
+@RequiredArgsConstructor
+@Transactional
 public class AuthUtil {
 
-    public static Admin getLoggedInAdmin() {
+    private final AdminRepository adminRepository;
+
+    public Admin getLoggedInAdmin() {
         Admin admin = (Admin) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        admin = adminRepository.findById(admin.getId()).orElseThrow();
+        System.out.println(admin.getCourses().toString());
         return admin;
     }
 
-    public static PermissionType getPermission(String permissionName) {
+    public PermissionType getPermission(String permissionName) {
         return getLoggedInAdmin().getRole().getPermission(permissionName);
     }
 
-    public static void checkAccessToCourse(Long courseID, String permissionName) {
+    public void checkAccessToCourse(Long courseID, String permissionName) {
         if(courseID == null) return;
         Admin admin = getLoggedInAdmin();
         PermissionType permissionToCheck = getPermission(permissionName);
@@ -34,7 +44,7 @@ public class AuthUtil {
         else throw new AccessDeniedException("No access to creating new students for this course! (courseID: "+courseID+") !");
     }
 
-    public static void checkPermissionToCreateCourse() {
+    public void checkPermissionToCreateCourse() {
         PermissionType createCoursePermission = getLoggedInAdmin().getRole()
                 .getPermissions().getWriteCourses();
 
