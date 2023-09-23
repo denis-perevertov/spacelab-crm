@@ -61,6 +61,11 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    public Admin getAdminByEmail(String email) {
+        return adminRepository.findByEmail(email).orElseThrow();
+    }
+
+    @Override
     public Admin createAdmin(Admin admin) {
         log.info("Creating new admin");
         try {

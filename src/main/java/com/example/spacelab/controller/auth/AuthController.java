@@ -1,10 +1,14 @@
 package com.example.spacelab.controller.auth;
 
 import com.example.spacelab.config.JwtService;
+import com.example.spacelab.dto.admin.AdminDTO;
+import com.example.spacelab.dto.admin.AdminLoginInfoDTO;
 import com.example.spacelab.exception.ErrorMessage;
 import com.example.spacelab.exception.ResourceNotFoundException;
 import com.example.spacelab.exception.TokenException;
+import com.example.spacelab.mapper.AdminMapper;
 import com.example.spacelab.model.RefreshToken;
+import com.example.spacelab.service.AdminService;
 import com.example.spacelab.service.RefreshTokenService;
 import com.example.spacelab.util.AuthRequest;
 import com.example.spacelab.util.AuthResponse;
@@ -16,6 +20,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -36,6 +41,8 @@ import java.time.Instant;
 public class AuthController {
 
     private final JwtService jwtService;
+    private final AdminService adminService;
+    private final AdminMapper adminMapper;
     private final RefreshTokenService refreshTokenService;
     private final AuthenticationManager authenticationManager;
 
@@ -50,6 +57,14 @@ public class AuthController {
     public AuthResponse login(@RequestBody AuthRequest authRequest) {
         try {
             Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.username(), authRequest.password()));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            System.out.println("attempt to get me data from login method now");
+            System.out.println(SecurityContextHolder.getContext().getAuthentication().getDetails());
+            System.out.println(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+            System.out.println(SecurityContextHolder.getContext().getAuthentication().getCredentials());
+            System.out.println(SecurityContextHolder.getContext().getAuthentication().getAuthorities().toString());
+
             if(authentication.isAuthenticated()) {
                 String access_token = jwtService.generateToken(authRequest.username());
                 RefreshToken refreshToken = refreshTokenService.createRefreshToken(authRequest.username());
@@ -84,6 +99,14 @@ public class AuthController {
             return new AuthResponse(newAccessToken, refreshToken.getToken());
         }
         else throw new TokenException("Refresh token expired!");
+    }
+
+    @GetMapping("/me")
+    public AdminLoginInfoDTO getAuthData(HttpServletRequest request) {
+        System.out.println("attempt to get me data");
+        String token = request.getHeader("Authorization");
+        String adminEmail = jwtService.extractUsername(token);
+        return adminMapper.fromAdminToLoginInfoDTO(adminService.getAdminByEmail(adminEmail));
     }
 
 }

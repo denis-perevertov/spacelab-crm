@@ -1,5 +1,6 @@
 package com.example.spacelab.mapper;
 
+import com.example.spacelab.dto.admin.AdminLoginInfoDTO;
 import com.example.spacelab.dto.course.CourseListDTO;
 import com.example.spacelab.exception.MappingException;
 import com.example.spacelab.exception.ResourceNotFoundException;
@@ -8,6 +9,7 @@ import com.example.spacelab.dto.admin.AdminDTO;
 
 import com.example.spacelab.dto.admin.AdminContactDTO;
 import com.example.spacelab.dto.admin.AdminEditDTO;
+import com.example.spacelab.model.course.Course;
 import com.example.spacelab.repository.AdminRepository;
 import com.example.spacelab.repository.CourseRepository;
 import com.example.spacelab.repository.UserRoleRepository;
@@ -129,6 +131,18 @@ public class AdminMapper {
         }
 
         return admin;
+    }
+
+    public AdminLoginInfoDTO fromAdminToLoginInfoDTO(Admin admin) {
+        AdminLoginInfoDTO dto = new AdminLoginInfoDTO();
+
+        dto.setId(admin.getId());
+        dto.setFullName(admin.getFirstName() + " " + admin.getLastName());
+        dto.setRole(admin.getRole().getName());
+        dto.setCourses(admin.getCourses().stream().map(Course::getId).toList());
+        dto.setPermissions(admin.getRole().getAuthorities());
+
+        return dto;
     }
 
 /*

@@ -14,6 +14,7 @@ public interface AdminService extends EntityFilterService<Admin>, UserDetailsSer
     Page<Admin> getAdmins(FilterForm filters, Pageable pageable);
 
     Admin getAdminById(Long id);
+    Admin getAdminByEmail(String email);
     Admin createAdmin(Admin admin);
     Admin updateAdmin(Admin admin);
 

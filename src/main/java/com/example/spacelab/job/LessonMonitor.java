@@ -38,13 +38,13 @@ public class LessonMonitor {
         // 4. После прохождения по списку подождать 1 минуту
         // 5. Повторить
 
-        log.info("Starting monitor for automatic lesson start!");
+//        log.info("Starting monitor for automatic lesson start!");
 
         if(lessons != null) {
             Runnable runnable = () -> {
                 while(true) {
-                    log.info("Checking lessons to start...");
-                    log.info(lessons.toString());
+//                    log.info("Checking lessons to start...");
+//                    log.info(lessons.toString());
                     Iterator<Lesson> iterator = lessons.iterator();
                     while(iterator.hasNext()) {
                         Lesson lesson = iterator.next();
