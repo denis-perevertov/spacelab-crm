@@ -22,6 +22,7 @@ import lombok.extern.java.Log;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -45,6 +46,7 @@ public class ContactController {
 
 
     // Получение всех контактов
+    // Получение всех контактов ПО РОЛИ
     @Operation(description = "Get list of contacts paginated by 'page/size' params (default values are 0/10)", summary = "Get Contacts", tags = {"Contact"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful Operation"),
@@ -55,13 +57,17 @@ public class ContactController {
     @PreAuthorize("!hasAuthority('settings.read.NO_ACCESS')")
     @GetMapping
     public ResponseEntity<Page<ContactInfoDTO>> getContacts(@RequestParam(required = false, defaultValue = "0") Integer page,
-                                                            @RequestParam(required = false , defaultValue = "10") Integer size) {
+                                                            @RequestParam(required = false , defaultValue = "10") Integer size,
+                                                            @RequestParam(required = false) Long role) {
+        Pageable pageable = PageRequest.of(page, size);
         Page<ContactInfoDTO> contactList;
-        if(page == null || size == null) contactList = new PageImpl<>(contactService.getContacts().stream().map(contactMapper::fromContactToContactDTO).toList());
-        else contactList = new PageImpl<>(contactService.getContacts(PageRequest.of(page, size)).stream().map(contactMapper::fromContactToContactDTO).toList());
+        Page<ContactInfo> contactPage = contactService.getContactsForRole(role, pageable);
+        contactList = new PageImpl<>(contactPage.getContent().stream().map(contactMapper::fromContactToContactDTO).toList(),
+                pageable, contactPage.getTotalElements());
 
         return new ResponseEntity<>(contactList, HttpStatus.OK);
     }
+
 
     // Получение одного контакта
     @Operation(description = "Get contact info DTO by its ID", summary = "Get Contact By ID", tags = {"Contact"})

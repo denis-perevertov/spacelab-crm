@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Tag(name = "Course", description = "Course controller")
@@ -69,29 +70,21 @@ public class CourseController {
                                                            @RequestParam(required = false, defaultValue = "0") Integer page,
                                                            @RequestParam(required = false, defaultValue = "10") Integer size) {
 
-        log.info(mapper.toString());
-        log.info(courseCreateValidator.toString());
-        log.info(courseUpdateValidator.toString());
-        log.info(courseService.toString());
-
         Page<CourseListDTO> courseListDTO = new PageImpl<>(new ArrayList<>());
+        Page<Course> coursePage;
+        Pageable pageable = PageRequest.of(page, size);
 
-//        Admin loggedInAdmin = AuthUtil.getLoggedInAdmin();
         PermissionType permissionForLoggedInAdmin = loggedInAdmin.getRole().getPermissions().getReadCourses();
+        List<Course> adminCourses = loggedInAdmin.getCourses();
 
         if(permissionForLoggedInAdmin == PermissionType.FULL) {
-            if(page == null && size == null) courseListDTO = new PageImpl<>(courseService.getCourses().stream().map(mapper::fromCourseToListDTO).toList());
-            else if(page != null && size == null) courseListDTO = new PageImpl<>(courseService.getCourses(PageRequest.of(page, 10)).stream().map(mapper::fromCourseToListDTO).toList());
-            else courseListDTO = new PageImpl<>(courseService.getCourses(filters, PageRequest.of(page, size)).stream().map(mapper::fromCourseToListDTO).toList());
+            coursePage = courseService.getCourses(filters, pageable);
+            courseListDTO = new PageImpl<>(coursePage.getContent().stream().map(mapper::fromCourseToListDTO).toList(), pageable, coursePage.getTotalElements());
         }
         else if(permissionForLoggedInAdmin == PermissionType.PARTIAL) {
-
-            Long[] allowedCoursesIDs = (Long[]) loggedInAdmin.getCourses().stream().map(Course::getId).toArray();
-
-            if(page == null && size == null) courseListDTO = new PageImpl<>(courseService.getAllowedCourses(allowedCoursesIDs).stream().map(mapper::fromCourseToListDTO).toList());
-            else if(page != null && size == null) courseListDTO = new PageImpl<>(courseService.getAllowedCourses(PageRequest.of(page, 10), allowedCoursesIDs).stream().map(mapper::fromCourseToListDTO).toList());
-            else courseListDTO = new PageImpl<>(courseService.getAllowedCourses(filters, PageRequest.of(page, size), allowedCoursesIDs).stream().map(mapper::fromCourseToListDTO).toList());
-
+            Long[] allowedCoursesIDs = adminCourses.stream().map(Course::getId).toList().toArray(new Long[adminCourses.size()]);
+            coursePage = courseService.getAllowedCourses(filters, pageable, allowedCoursesIDs);
+            courseListDTO = new PageImpl<>(coursePage.getContent().stream().map(mapper::fromCourseToListDTO).toList(), pageable, coursePage.getTotalElements());
         }
 
         return new ResponseEntity<>(courseListDTO, HttpStatus.OK);
@@ -245,5 +238,11 @@ public class CourseController {
         Page<Course> courses = courseService.getCoursesByName(searchQuery, pageable);
         Page<CourseSelectDTO> ownerPage = courses.map(mapper::fromCourseToSelectDTO);
         return ownerPage;
+    }
+
+    @GetMapping("/get-all-courses")
+    @ResponseBody
+    public List<CourseSelectDTO> getCoursesIdAndNames() {
+        return courseService.getCourses().stream().map(mapper::fromCourseToSelectDTO).toList();
     }
 }

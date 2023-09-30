@@ -188,7 +188,8 @@ public class StudentServiceImpl implements StudentService {
     public Specification<Student> buildSpecificationFromFilters(FilterForm filters) {
 
         log.info("Building specification from filters: " + filters);
-        
+
+        String combined = filters.getCombined();
         String nameEmailInput = filters.getName();
         Long courseID = filters.getCourse();
         String phoneInput = filters.getPhone();
@@ -199,10 +200,11 @@ public class StudentServiceImpl implements StudentService {
         Course course = (courseID == null) ? null : courseRepository.getReferenceById(courseID);
         StudentAccountStatus status = (statusInput == null) ? null : StudentAccountStatus.valueOf(statusInput);
 
-        Specification<Student> spec = Specification.where(StudentSpecifications.hasNameOrEmailLike(nameEmailInput)
+        Specification<Student> combinedSpec = Specification.where(StudentSpecifications.hasNameOrEmailLike(combined).or(StudentSpecifications.hasTelegramLike(combined)));
+
+        Specification<Student> spec = Specification.where(combinedSpec
                                                     .and(StudentSpecifications.hasCourse(course))
                                                     .and(StudentSpecifications.hasPhoneLike(phoneInput))
-                                                    .and(StudentSpecifications.hasTelegramLike(telegramInput))
                                                     .and(StudentSpecifications.hasRatingOrHigher(ratingInput))
                                                     .and(StudentSpecifications.hasStatus(status)));
 

@@ -103,28 +103,22 @@ public class AdminServiceImpl implements AdminService {
 
         log.info("Building specification from filters: " + filters);
 
-        String name = filters.getName();
+        String combined = filters.getCombined();
+
         Long roleID = filters.getRole();
         Long courseID = filters.getCourse();
-        String dateString = filters.getDate();
-        String email = filters.getEmail();
         String phone = filters.getPhone();
 
         UserRole role = (roleID == null) ? null : userRoleRepository.getReferenceById(roleID);
         Course course = (courseID == null) ? null : courseRepository.getReferenceById(courseID);
 
-        /*
-            TODO
-            добавить фильтр по дате рождения (если он нужен)
-        */
+        Specification<Admin> combinedSpec = AdminSpecifications.hasNameLike(combined)
+                                            .or(AdminSpecifications.hasEmailLike(combined));
 
-        Specification<Admin> spec = Specification.where(
-                        AdminSpecifications.hasNameLike(name)
-                        .and(AdminSpecifications.hasRole(role))
-                        .and(AdminSpecifications.hasCourse(course))
-                        .and(AdminSpecifications.hasEmailLike(email))
-                        .and(AdminSpecifications.hasPhoneLike(phone))
-        );
+        Specification<Admin> spec = Specification.where(combinedSpec)
+                                    .and(AdminSpecifications.hasRole(role))
+                                    .and(AdminSpecifications.hasCourse(course))
+                                    .and(AdminSpecifications.hasPhoneLike(phone));
 
         return spec;
     }

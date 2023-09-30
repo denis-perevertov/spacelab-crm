@@ -84,6 +84,9 @@ public class RoleController {
     public ResponseEntity<UserRoleDTO> createNewRole(@RequestBody UserRoleEditDTO dto,
                                            BindingResult bindingResult) {
 
+        log.info(dto.toString());
+        log.info(dto.getPermissions().toString());
+
         validator.validate(dto, bindingResult);
 
         if(bindingResult.hasErrors()) {
@@ -109,6 +112,9 @@ public class RoleController {
                                         @RequestBody UserRoleEditDTO dto,
                                         BindingResult bindingResult) {
         dto.setId(id);
+
+        log.info(dto.toString());
+        log.info(dto.getPermissions().toString());
 
         if(bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();

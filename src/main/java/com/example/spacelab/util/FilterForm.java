@@ -30,6 +30,7 @@ public class FilterForm {
     private Long mentor;
     @Schema(defaultValue = "0", description = "Manager's ID")
     private Long manager;
+    private String combined;
     private Boolean active;
 
     public static FilterBuilder with() { return new FilterBuilder(); }

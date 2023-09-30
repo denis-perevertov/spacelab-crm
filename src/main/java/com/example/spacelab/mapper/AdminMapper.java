@@ -19,6 +19,7 @@ import lombok.extern.java.Log;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
 
 @Component
 @Log
@@ -80,6 +81,7 @@ public class AdminMapper {
         AdminEditDTO dto = new AdminEditDTO();
 
         try {
+            dto.setId(admin.getId());
             dto.setFirstName(admin.getFirstName());
             dto.setLastName(admin.getLastName());
             dto.setPhone(admin.getPhone());
@@ -114,7 +116,7 @@ public class AdminMapper {
                 (dto.getPassword() != null && !dto.getPassword().isEmpty()))
                 admin.setPassword(dto.getPassword());
 
-            admin.getCourses().add(courseRepository.getReferenceById(dto.getCourseID()));
+            if(dto.getCourseID() != null) admin.getCourses().add(courseRepository.getReferenceById(dto.getCourseID()));
 
             /*
                 TODO
@@ -128,7 +130,7 @@ public class AdminMapper {
             throw new ResourceNotFoundException(e.getMessage());
         } catch (Exception e) {
             log.severe("Mapping error: " + e.getMessage());
-            log.warning("Entity: " + admin);
+//            log.warning("Entity: " + admin);
             throw new MappingException(e.getMessage());
         }
 

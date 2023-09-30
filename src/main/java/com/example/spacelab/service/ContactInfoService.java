@@ -9,6 +9,7 @@ import java.util.List;
 public interface ContactInfoService {
 
     List<ContactInfo> getContacts();
+    Page<ContactInfo> getContactsForRole(Long role, Pageable pageable);
     Page<ContactInfo> getContacts(Pageable pageable);
 
     ContactInfo getContact(Long id);

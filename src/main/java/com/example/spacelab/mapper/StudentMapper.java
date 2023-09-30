@@ -96,6 +96,28 @@ public class StudentMapper {
         return dto;
     }
 
+    public StudentEditDTO fromStudentToEditDTO(Student student) {
+        try {
+
+            StudentEditDTO dto = new StudentEditDTO(student.getId(),
+                    student.getDetails().getFirstName(),
+                    student.getDetails().getLastName(),
+                    student.getDetails().getFathersName(),
+                    (student.getCourse() != null) ? student.getCourse().getId() : 0,
+                    student.getDetails().getEmail(),
+                    student.getDetails().getPhone(),
+                    student.getDetails().getTelegram(),
+                    student.getDetails().getBirthdate(),
+                    student.getDetails().getAccountStatus().name());
+
+            return dto;
+
+        } catch (Exception e) {
+            log.severe("Mapping error: " + e.getMessage());
+            throw new MappingException(e.getMessage());
+        }
+    }
+
     public Student fromDTOToStudent(StudentDTO studentDTO) {
         Student student =
                 (studentDTO.getId() != null ?

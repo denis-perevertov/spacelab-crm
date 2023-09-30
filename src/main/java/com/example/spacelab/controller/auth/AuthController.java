@@ -8,6 +8,7 @@ import com.example.spacelab.exception.ResourceNotFoundException;
 import com.example.spacelab.exception.TokenException;
 import com.example.spacelab.mapper.AdminMapper;
 import com.example.spacelab.model.RefreshToken;
+import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.service.AdminService;
 import com.example.spacelab.service.RefreshTokenService;
 import com.example.spacelab.util.AuthRequest;
@@ -29,6 +30,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,6 +47,7 @@ public class AuthController {
     private final AdminMapper adminMapper;
     private final RefreshTokenService refreshTokenService;
     private final AuthenticationManager authenticationManager;
+    private final PasswordEncoder encoder;
 
     @Operation(description = "Enter username & password to receive access token + refresh token", summary = "Login (JWT)", tags = {"_Auth"})
     @ApiResponses(value = {
@@ -103,10 +106,20 @@ public class AuthController {
 
     @GetMapping("/me")
     public AdminLoginInfoDTO getAuthData(HttpServletRequest request) {
-        System.out.println("attempt to get me data");
         String token = request.getHeader("Authorization");
+        System.out.println("attempt to get me data w/ token : " + token);
         String adminEmail = jwtService.extractUsername(token);
         return adminMapper.fromAdminToLoginInfoDTO(adminService.getAdminByEmail(adminEmail));
+    }
+
+    @PostMapping("/confirm-password")
+    @ResponseBody
+    public boolean confirmPassword(@RequestBody String password) {
+        Admin loggedInAdmin = (Admin) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        System.out.println(loggedInAdmin.getPassword());
+        System.out.println(password.substring(1, password.length()-1));
+        System.out.println(encoder.matches(loggedInAdmin.getPassword(), password));
+        return encoder.matches(password.substring(1, password.length()-1), loggedInAdmin.getPassword());
     }
 
 }

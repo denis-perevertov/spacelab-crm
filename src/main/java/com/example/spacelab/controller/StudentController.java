@@ -12,6 +12,7 @@ import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.lesson.LessonReportRow;
 import com.example.spacelab.model.role.PermissionType;
 import com.example.spacelab.model.student.Student;
+import com.example.spacelab.model.student.StudentAccountStatus;
 import com.example.spacelab.model.student.StudentInviteRequest;
 import com.example.spacelab.model.student.StudentTaskStatus;
 import com.example.spacelab.service.StudentService;
@@ -72,28 +73,26 @@ public class StudentController {
                                                         @RequestParam(required = false, defaultValue = "10") Integer size) {
 
         Page<StudentDTO> students = new PageImpl<>(new ArrayList<>());
+        Page<Student> studentPage;
+        Pageable pageable = PageRequest.of(page, size);
 
         Admin loggedInAdmin = authUtil.getLoggedInAdmin();
         PermissionType permissionForLoggedInAdmin = loggedInAdmin.getRole().getPermissions().getReadStudents();
         List<Course> adminCourses = loggedInAdmin.getCourses();
 
-        log.info("CHECKING LOGGED IN ADMIN & PERMISSIONS");
-        log.info(loggedInAdmin.getFirstName() + loggedInAdmin.getLastName() + loggedInAdmin.getId());
-        log.info(permissionForLoggedInAdmin.toString());
-        log.info(adminCourses.toString());
+//        log.info("CHECKING LOGGED IN ADMIN & PERMISSIONS");
+//        log.info(loggedInAdmin.getFirstName() + loggedInAdmin.getLastName() + loggedInAdmin.getId());
+//        log.info(permissionForLoggedInAdmin.toString());
+//        log.info(adminCourses.toString());
 
         if(permissionForLoggedInAdmin == PermissionType.FULL) {
-            if(page == null && size == null) students = new PageImpl<>(studentService.getStudents().stream().map(studentMapper::fromStudentToDTO).toList());
-            else if(page != null && size == null) students = new PageImpl<>(studentService.getStudents(filters, PageRequest.of(page, 10)).stream().map(studentMapper::fromStudentToDTO).toList());
-            else students = new PageImpl<>(studentService.getStudents(filters, PageRequest.of(page, size)).stream().map(studentMapper::fromStudentToDTO).toList());
+            studentPage = studentService.getStudents(filters, pageable);
+            students = new PageImpl<>(studentPage.getContent().stream().map(studentMapper::fromStudentToDTO).toList(), pageable, studentPage.getTotalElements());
         }
         else if(permissionForLoggedInAdmin == PermissionType.PARTIAL) {
-
             Long[] allowedCoursesIDs = adminCourses.stream().map(Course::getId).toList().toArray(new Long[adminCourses.size()]);
-
-            if(page == null && size == null) students = new PageImpl<>(studentService.getStudentsByAllowedCourses(allowedCoursesIDs).stream().map(studentMapper::fromStudentToDTO).toList());
-            else if(page != null && size == null) students = new PageImpl<>(studentService.getStudentsByAllowedCourses(filters, PageRequest.of(page, 10),allowedCoursesIDs).stream().map(studentMapper::fromStudentToDTO).toList());
-            else students = new PageImpl<>(studentService.getStudentsByAllowedCourses(filters, PageRequest.of(page, size), allowedCoursesIDs).stream().map(studentMapper::fromStudentToDTO).toList());
+            studentPage = studentService.getStudentsByAllowedCourses(filters, pageable, allowedCoursesIDs);
+            students = new PageImpl<>(studentPage.getContent().stream().map(studentMapper::fromStudentToDTO).toList(), pageable, studentPage.getTotalElements());
         }
 
         return new ResponseEntity<>(students, HttpStatus.OK);
@@ -272,6 +271,12 @@ public class StudentController {
         return new ResponseEntity<>(studentMapper.fromStudentToDTO(student), HttpStatus.CREATED);
     }
 
+    // Загрузка студента для редактирования
+    @GetMapping("/{id}/edit")
+    public ResponseEntity<StudentEditDTO> loadStudentForEdit(@PathVariable Long id) {
+        return new ResponseEntity<>(studentMapper.fromStudentToEditDTO(studentService.getStudentById(id)), HttpStatus.OK);
+    }
+
     // Редактирование студента
     @Operation(description = "Update existing student in the application; ID field does not matter in write/edit operations", summary = "Update Role", tags = {"Student"})
     @ApiResponses(value = {
@@ -345,6 +350,12 @@ public class StudentController {
     public List<SelectSearchDTO> getStudentsWithoutCourse() {
         return studentService.getStudents().stream().filter(student -> student.getCourse() == null)
                 .map(student -> new SelectSearchDTO(student.getId(), student.getFullName())).toList();
+    }
+
+    // Получение списка статусов студентов
+    @GetMapping("/get-status-list")
+    public List<StudentAccountStatus> getStatusList() {
+        return List.of(StudentAccountStatus.values());
     }
 
 

@@ -33,13 +33,13 @@ public class Admin extends UserEntity implements UserDetails {
     private String password;
     @Transient private String confirmPassword;
 
-    @OneToMany
+    @ManyToMany
     private List<Course> courses = new ArrayList<>();
 
     @OneToMany
     private List<Lesson> lessons = new ArrayList<>();
 
-    @OneToMany
+    @OneToMany(mappedBy="admin", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ContactInfo> contacts = new ArrayList<>();
 
     @Override

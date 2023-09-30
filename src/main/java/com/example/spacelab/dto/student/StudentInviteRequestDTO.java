@@ -10,8 +10,6 @@ public class StudentInviteRequestDTO {
     private String fathersName;
     private String email;
     private String phone;
-
     private Long courseID;
-
 
 }

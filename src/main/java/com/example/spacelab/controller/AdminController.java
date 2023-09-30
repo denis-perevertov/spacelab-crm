@@ -70,8 +70,11 @@ public class AdminController {
                                                     @RequestParam(required = false, defaultValue = "0") Integer page,
                                                     @RequestParam(required = false, defaultValue = "10") Integer size) {
         Page<AdminDTO> adminList;
-        if(page == null || size == null) adminList = new PageImpl<>(adminService.getAdmins().stream().map(adminMapper::fromAdminToDTO).toList());
-        else adminList = new PageImpl<>(adminService.getAdmins(filters, PageRequest.of(page, size)).stream().map(adminMapper::fromAdminToDTO).toList());
+        Page<Admin> adminPage;
+        Pageable pageable = PageRequest.of(page, size);
+        adminPage = adminService.getAdmins(filters, pageable);
+        adminList = new PageImpl<>(adminPage.stream().map(adminMapper::fromAdminToDTO).toList(), pageable, adminPage.getTotalElements());
+
         return new ResponseEntity<>(adminList, HttpStatus.OK);
     }
 
@@ -118,6 +121,13 @@ public class AdminController {
 
         Admin savedAdmin = adminService.createAdmin(adminMapper.fromEditDTOToAdmin(admin));
         return new ResponseEntity<>(adminMapper.fromAdminToDTO(savedAdmin), HttpStatus.CREATED);
+    }
+
+    // Получение формы админа на редактирование
+    @GetMapping("/{id}/edit")
+    public ResponseEntity<AdminEditDTO> getAdminForEdit(@PathVariable Long id) {
+
+        return new ResponseEntity<>(adminMapper.fromAdminToEditDTO(adminService.getAdminById(id)), HttpStatus.OK);
     }
 
     // Редактирование админа
