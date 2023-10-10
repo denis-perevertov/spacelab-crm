@@ -192,6 +192,7 @@ public class AdminController {
     @GetMapping("/get-admins-by-role")
     public Map<String, Object> getAdminsByRole(@RequestParam @Parameter(example = "1", name = "Role ID") Long roleID,
                                                @RequestParam @Parameter(example = "1") Integer page) {
+        System.out.println("Admin list for select");
         FilterForm form = FilterForm.with()
                                     .role(roleID)
                                     .build();
@@ -207,7 +208,7 @@ public class AdminController {
         Map<String, Object> selectMap = new HashMap<>();
         selectMap.put("results", adminList);
         selectMap.put("pagination", Map.of("more", adminPage.getNumber() < adminPage.getTotalPages()));
-
+        System.out.println("selectMap by role num"+roleID+" " + selectMap.values());
         return selectMap;
     }
 

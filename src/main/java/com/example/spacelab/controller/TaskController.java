@@ -7,11 +7,14 @@ import com.example.spacelab.exception.ObjectValidationException;
 import com.example.spacelab.mapper.TaskMapper;
 import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.model.course.Course;
+import com.example.spacelab.model.lesson.LessonStatus;
 import com.example.spacelab.model.role.PermissionType;
 import com.example.spacelab.model.task.Task;
 import com.example.spacelab.dto.task.TaskInfoDTO;
 import com.example.spacelab.dto.task.TaskSaveDTO;
 import com.example.spacelab.dto.task.TaskListDTO;
+import com.example.spacelab.model.task.TaskLevel;
+import com.example.spacelab.model.task.TaskStatus;
 import com.example.spacelab.service.TaskService;
 import com.example.spacelab.util.AuthUtil;
 import com.example.spacelab.util.FilterForm;
@@ -37,6 +40,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Tag(name="Task", description = "Task controller")
@@ -209,6 +213,18 @@ public class TaskController {
 
         taskService.deleteTaskById(id);
         return ResponseEntity.ok("Task with ID:"+id+" deleted");
+    }
+
+    // Получение списка уровней
+    @GetMapping("/get-level-list")
+    public List<TaskLevel> getLevelList() {
+        return List.of(TaskLevel.values());
+    }
+
+    // Получение списка cтатусов
+    @GetMapping("/get-status-list")
+    public List<TaskStatus> getStatusList() {
+        return List.of(TaskStatus.values());
     }
 
 }

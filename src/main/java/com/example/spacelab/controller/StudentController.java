@@ -71,7 +71,7 @@ public class StudentController {
     public ResponseEntity<Page<StudentDTO>> getStudents(@Parameter(name = "Filter object", description = "Collection of all filters for search results", example = "{}") FilterForm filters,
                                                         @RequestParam(required = false, defaultValue = "0") Integer page,
                                                         @RequestParam(required = false, defaultValue = "10") Integer size) {
-
+        System.out.println("request student");
         Page<StudentDTO> students = new PageImpl<>(new ArrayList<>());
         Page<Student> studentPage;
         Pageable pageable = PageRequest.of(page, size);
