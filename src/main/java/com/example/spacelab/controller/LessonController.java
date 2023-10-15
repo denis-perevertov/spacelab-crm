@@ -33,6 +33,7 @@ import org.apache.coyote.Response;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -75,29 +76,24 @@ public class LessonController {
                                                                  @RequestParam(required = false, defaultValue = "0") Integer page,
                                                                  @RequestParam(required = false, defaultValue = "10") Integer size) {
 
-        System.out.println("Getting lessons...");
-        Page<LessonListDTO> dtoList = new PageImpl<>(new ArrayList<>());
+        Page<LessonListDTO> lessons;
+        Page<Lesson> lessonPage = new PageImpl<>(new ArrayList<>());
+        Pageable pageable = PageRequest.of(page, size);
 
         Admin loggedInAdmin = authUtil.getLoggedInAdmin();
-        PermissionType permissionForLoggedInAdmin = loggedInAdmin.getRole().getPermissions().getReadCourses();
+        PermissionType permissionForLoggedInAdmin = loggedInAdmin.getRole().getPermissions().getReadStudents();
+        List<Course> adminCourses = loggedInAdmin.getCourses();
 
         if(permissionForLoggedInAdmin == PermissionType.FULL) {
-            if(page == null && size == null) dtoList = new PageImpl<>(lessonService.getLesson().stream().map(mapper::fromLessonToLessonListDTO).toList());
-            else if(page != null && size == null) dtoList = new PageImpl<>(lessonService.getLesson(PageRequest.of(page, 10)).stream().map(mapper::fromLessonToLessonListDTO).toList());
-            else dtoList = new PageImpl<>(lessonService.getLesson(filters, PageRequest.of(page, size)).stream().map(mapper::fromLessonToLessonListDTO).toList());
+            lessonPage = lessonService.getLessons(filters, pageable);
         }
         else if(permissionForLoggedInAdmin == PermissionType.PARTIAL) {
-
-            Long[] allowedCoursesIDs = (Long[]) loggedInAdmin.getCourses().stream().map(Course::getId).toArray();
-
-            if(page == null && size == null) dtoList = new PageImpl<>(lessonService.getLessonsByAllowedCourses(allowedCoursesIDs).stream().map(mapper::fromLessonToLessonListDTO).toList());
-            else if(page != null && size == null) dtoList = new PageImpl<>(lessonService.getLessonsByAllowedCourses(PageRequest.of(page, 10), allowedCoursesIDs).stream().map(mapper::fromLessonToLessonListDTO).toList());
-            else dtoList = new PageImpl<>(lessonService.getLessonsByAllowedCourses(filters, PageRequest.of(page, size), allowedCoursesIDs).stream().map(mapper::fromLessonToLessonListDTO).toList());
-
+            Long[] allowedCoursesIDs = adminCourses.stream().map(Course::getId).toList().toArray(new Long[adminCourses.size()]);
+            lessonPage = lessonService.getLessonsByAllowedCourses(filters, pageable, allowedCoursesIDs);
         }
-        System.out.println("finish!");
-        System.out.println("dtoList !" + dtoList.getContent());
-        return new ResponseEntity<>(dtoList, HttpStatus.OK);
+        lessons = new PageImpl<>(lessonPage.getContent().stream().map(mapper::fromLessonToLessonListDTO).toList(), pageable, lessonPage.getTotalElements());
+
+        return new ResponseEntity<>(lessons, HttpStatus.OK);
     }
 
     //Получение урока по id

@@ -16,7 +16,6 @@ public class ContactInfo {
 
     private String name;
 
-    @ToString.Exclude
     @ManyToOne
     private Admin admin;
 

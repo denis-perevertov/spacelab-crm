@@ -6,6 +6,7 @@ import com.example.spacelab.model.UserEntity;
 import jakarta.persistence.*;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import lombok.Data;
+import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -33,12 +34,15 @@ public class Admin extends UserEntity implements UserDetails {
     private String password;
     @Transient private String confirmPassword;
 
+    @ToString.Exclude
     @ManyToMany
     private List<Course> courses = new ArrayList<>();
 
+    @ToString.Exclude
     @OneToMany
     private List<Lesson> lessons = new ArrayList<>();
 
+    @ToString.Exclude
     @OneToMany(mappedBy="admin", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ContactInfo> contacts = new ArrayList<>();
 

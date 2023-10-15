@@ -72,28 +72,24 @@ public class LiteratureController {
                                                                  @RequestParam(required = false, defaultValue = "0") Integer page,
                                                                  @RequestParam(required = false, defaultValue = "10") Integer size) {
 
-        System.out.println("request!!!");
-        Page<LiteratureListDTO> dtoList = new PageImpl<>(new ArrayList<>());
+        Page<LiteratureListDTO> literatures;
+        Page<Literature> litPage = new PageImpl<>(new ArrayList<>());
+        Pageable pageable = PageRequest.of(page, size);
 
         Admin loggedInAdmin = authUtil.getLoggedInAdmin();
         PermissionType permissionForLoggedInAdmin = loggedInAdmin.getRole().getPermissions().getReadStudents();
+        List<Course> adminCourses = loggedInAdmin.getCourses();
 
         if(permissionForLoggedInAdmin == PermissionType.FULL) {
-            System.out.println("PermissionType.FULL!!!");
-            if(page == null && size == null) dtoList = new PageImpl<>(literatureService.getLiterature().stream().map(mapper::fromLiteratureToListDTO).toList());
-            else if(page != null && size == null) dtoList = new PageImpl<>(literatureService.getLiterature(filters, PageRequest.of(page, 10)).stream().map(mapper::fromLiteratureToListDTO).toList());
-            else dtoList = new PageImpl<>(literatureService.getLiterature(filters, PageRequest.of(page, size)).stream().map(mapper::fromLiteratureToListDTO).toList());
+            litPage = literatureService.getLiterature(filters, pageable);
         }
         else if(permissionForLoggedInAdmin == PermissionType.PARTIAL) {
-            System.out.println("PermissionType.PARTIAL!!!");
-            Long[] allowedCoursesIDs = (Long[]) loggedInAdmin.getCourses().stream().map(Course::getId).toArray();
-
-            if(page == null && size == null) dtoList = new PageImpl<>(literatureService.getLiteratureByAllowedCourses(allowedCoursesIDs).stream().map(mapper::fromLiteratureToListDTO).toList());
-            else if(page != null && size == null) dtoList = new PageImpl<>(literatureService.getLiteratureByAllowedCourses(filters, PageRequest.of(page, 10),allowedCoursesIDs).stream().map(mapper::fromLiteratureToListDTO).toList());
-            else dtoList = new PageImpl<>(literatureService.getLiteratureByAllowedCourses(filters, PageRequest.of(page, size), allowedCoursesIDs).stream().map(mapper::fromLiteratureToListDTO).toList());
+            Long[] allowedCoursesIDs = (Long[]) adminCourses.stream().map(Course::getId).toArray();
+            litPage = literatureService.getLiteratureByAllowedCourses(filters, pageable, allowedCoursesIDs);
         }
-        System.out.println("dtoList!!! " +dtoList.getContent());
-        return new ResponseEntity<>(dtoList, HttpStatus.OK);
+        literatures = new PageImpl<>(litPage.getContent().stream().map(mapper::fromLiteratureToListDTO).toList(), pageable, litPage.getTotalElements());
+
+        return new ResponseEntity<>(literatures, HttpStatus.OK);
     }
 
 

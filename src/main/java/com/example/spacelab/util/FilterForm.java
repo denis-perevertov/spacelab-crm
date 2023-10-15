@@ -19,6 +19,7 @@ public class FilterForm {
     private Integer rating;
     @Schema(defaultValue = "TEST")
     private String status;
+    private String level;
     @Schema(defaultValue = "Test")
     private String type;
     @Schema(defaultValue = "Test")

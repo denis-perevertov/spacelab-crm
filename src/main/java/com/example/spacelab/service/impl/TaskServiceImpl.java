@@ -2,9 +2,16 @@ package com.example.spacelab.service.impl;
 
 import com.example.spacelab.exception.ResourceNotFoundException;
 import com.example.spacelab.mapper.TaskMapper;
+import com.example.spacelab.model.course.Course;
+import com.example.spacelab.model.student.Student;
+import com.example.spacelab.model.student.StudentAccountStatus;
 import com.example.spacelab.model.task.Task;
+import com.example.spacelab.model.task.TaskLevel;
+import com.example.spacelab.model.task.TaskStatus;
+import com.example.spacelab.repository.CourseRepository;
 import com.example.spacelab.repository.TaskRepository;
 import com.example.spacelab.service.TaskService;
+import com.example.spacelab.service.specification.StudentSpecifications;
 import com.example.spacelab.service.specification.TaskSpecifications;
 import com.example.spacelab.util.FilterForm;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +29,7 @@ import java.util.List;
 public class TaskServiceImpl implements TaskService {
 
     private final TaskRepository taskRepository;
+    private final CourseRepository courseRepository;
     private final TaskMapper mapper;
 
     @Override
@@ -81,7 +89,23 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public Specification<Task> buildSpecificationFromFilters(FilterForm filters) {
-        return null;
+        log.info("Building specification from filters: " + filters);
+
+        String name = filters.getName();
+        Long courseID = filters.getCourse();
+        String levelInput = filters.getLevel();
+        String statusInput = filters.getStatus();
+
+        Course course = (courseID == null) ? null : courseRepository.getReferenceById(courseID);
+        TaskStatus status = (statusInput == null) ? null : TaskStatus.valueOf(statusInput);
+        TaskLevel level = (levelInput == null) ? null : TaskLevel.valueOf(levelInput);
+
+        Specification<Task> spec = Specification.where(TaskSpecifications.hasNameLike(name))
+                                    .and(TaskSpecifications.hasCourse(course))
+                                    .and(TaskSpecifications.hasLevel(level))
+                                    .and(TaskSpecifications.hasStatus(status));
+
+        return spec;
     }
 
 

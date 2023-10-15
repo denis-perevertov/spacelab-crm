@@ -3,6 +3,7 @@ package com.example.spacelab.model.student;
 import com.example.spacelab.model.task.Task;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
@@ -24,6 +25,7 @@ public class StudentTask {
     @ManyToOne
     private Task task;
 
+    @ToString.Exclude
     @OneToMany
     private List<StudentTask> subtasks;
 

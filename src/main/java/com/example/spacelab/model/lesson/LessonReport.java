@@ -2,6 +2,7 @@ package com.example.spacelab.model.lesson;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 
 import java.util.List;
 
@@ -18,6 +19,7 @@ public class LessonReport {
     @JoinColumn(name = "lesson_id")
     private Lesson lesson;
 
+    @ToString.Exclude
     @OneToMany
     private List<LessonReportRow> rows;
 }

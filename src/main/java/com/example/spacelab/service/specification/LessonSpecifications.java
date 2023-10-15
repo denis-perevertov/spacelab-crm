@@ -15,7 +15,7 @@ public class LessonSpecifications {
 
     public static Specification<Lesson> hasDatesBetween(LocalDate from, LocalDate to) {
         if(from == null || to == null) return (root, query, cb) -> null;
-        return (root, query, cb) -> cb.between(root.get("date"), from, to);
+        return (root, query, cb) -> cb.between(root.get("datetime"), from, to);
     }
 
     public static Specification<Lesson> hasBeginDateInFuture() {

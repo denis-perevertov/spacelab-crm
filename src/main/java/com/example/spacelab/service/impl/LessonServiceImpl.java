@@ -3,11 +3,19 @@ package com.example.spacelab.service.impl;
 import com.example.spacelab.exception.LessonException;
 import com.example.spacelab.exception.ResourceNotFoundException;
 import com.example.spacelab.job.LessonMonitor;
+import com.example.spacelab.model.admin.Admin;
+import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.lesson.Lesson;
 import com.example.spacelab.model.lesson.LessonStatus;
+import com.example.spacelab.model.task.Task;
+import com.example.spacelab.model.task.TaskLevel;
+import com.example.spacelab.model.task.TaskStatus;
+import com.example.spacelab.repository.AdminRepository;
+import com.example.spacelab.repository.CourseRepository;
 import com.example.spacelab.repository.LessonRepository;
 import com.example.spacelab.service.LessonService;
 import com.example.spacelab.service.specification.LessonSpecifications;
+import com.example.spacelab.service.specification.TaskSpecifications;
 import com.example.spacelab.util.FilterForm;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
@@ -18,34 +26,42 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
 @Log
 public class LessonServiceImpl implements LessonService {
+    private final CourseRepository courseRepository;
+    private final AdminRepository adminRepository;
 
     private final LessonRepository lessonRepository;
     private final LessonMonitor monitor;
 
     public LessonServiceImpl(@Autowired LessonRepository lessonRepository,
-                             @Autowired @Lazy LessonMonitor monitor) {
+                             @Autowired @Lazy LessonMonitor monitor,
+                             AdminRepository adminRepository,
+                             CourseRepository courseRepository) {
         this.lessonRepository = lessonRepository;
         this.monitor = monitor;
+        this.adminRepository = adminRepository;
+        this.courseRepository = courseRepository;
     }
 
     @Override
-    public List<Lesson> getLesson() {
+    public List<Lesson> getLessons() {
         return lessonRepository.findAll();
     }
 
     @Override
-    public Page<Lesson> getLesson(Pageable pageable) {
+    public Page<Lesson> getLessons(Pageable pageable) {
         return lessonRepository.findAll(pageable);
     }
 
     @Override
-    public Page<Lesson> getLesson(FilterForm filters, Pageable pageable) {
+    public Page<Lesson> getLessons(FilterForm filters, Pageable pageable) {
         Specification<Lesson> spec = buildSpecificationFromFilters(filters);
         return lessonRepository.findAll(spec, pageable);
     }
@@ -118,21 +134,34 @@ public class LessonServiceImpl implements LessonService {
 
     @Override
     public Specification<Lesson> buildSpecificationFromFilters(FilterForm filters) {
-//        String nameAuthorInput = filters.getName();
-//        Long courseID = filters.getCourse();
-//        String typeString = filters.getType();
-//        String keywords = filters.getKeywords();
-//
-//        Course course = (courseID == null) ? null : courseRepository.getReferenceById(courseID);
-//        LiteratureType type = (typeString == null) ? null : LiteratureType.valueOf(typeString);
-//
-//        Specification<Lesson> spec = Specification.where(
-//                LiteratureSpecifications.hasNameOrAuthorLike(nameAuthorInput)
-//                        .and(LiteratureSpecifications.hasCourse(course))
-//                        .and(LiteratureSpecifications.hasType(type))
-//                        .and(LiteratureSpecifications.hasKeywordsLike(keywords))
-//        );
-        Specification<Lesson> spec = Specification.where(null);
+
+        log.info("Building specification from filters: " + filters);
+
+        String begin = filters.getBegin();
+        String end = filters.getEnd();
+        Long courseID = filters.getCourse();
+        String statusInput = filters.getStatus();
+        Long mentorID = filters.getMentor();
+        Long managerID = filters.getManager();
+
+        LocalDate beginDate = null, endDate = null;
+
+        if(begin != null && !begin.isEmpty() && end != null && !end.isEmpty()) {
+            beginDate = LocalDate.parse(begin, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            endDate = LocalDate.parse(end, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        }
+
+        Course course = (courseID == null) ? null : courseRepository.getReferenceById(courseID);
+        LessonStatus status = (statusInput == null) ? null : LessonStatus.valueOf(statusInput);
+        Admin mentor = (mentorID == null) ? null : adminRepository.findById(mentorID).orElseThrow();
+        Admin manager = (managerID == null) ? null : adminRepository.findById(managerID).orElseThrow();
+
+        Specification<Lesson> spec = LessonSpecifications.hasDatesBetween(beginDate, endDate)
+                                    .and(LessonSpecifications.hasCourse(course))
+                                    .and(LessonSpecifications.hasStatus(status))
+                                    .and(LessonSpecifications.hasManager(manager))
+                                    .and(LessonSpecifications.hasMentor(mentor));
+
         return spec;
     }
 }

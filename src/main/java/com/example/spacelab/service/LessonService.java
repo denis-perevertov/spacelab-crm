@@ -9,9 +9,9 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface LessonService extends EntityFilterService<Lesson>{
-    List<Lesson> getLesson();
-    Page<Lesson> getLesson(Pageable pageable);
-    Page<Lesson> getLesson(FilterForm filters, Pageable pageable);
+    List<Lesson> getLessons();
+    Page<Lesson> getLessons(Pageable pageable);
+    Page<Lesson> getLessons(FilterForm filters, Pageable pageable);
 
     List<Lesson> getLessonsByAllowedCourses(Long... ids);
     Page<Lesson> getLessonsByAllowedCourses(Pageable pageable, Long... ids);

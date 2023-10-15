@@ -32,6 +32,7 @@ import lombok.extern.java.Log;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -71,27 +72,25 @@ public class TaskController {
                                                       @RequestParam(required = false, defaultValue = "0") Integer page,
                                                       @RequestParam(required = false, defaultValue = "10") Integer size) {
 
-        Page<TaskListDTO> taskListDTO = new PageImpl<>(new ArrayList<>());
+        Page<TaskListDTO> tasks = new PageImpl<>(new ArrayList<>());
+        Page<Task> taskPage;
+        Pageable pageable = PageRequest.of(page, size);
 
         Admin loggedInAdmin = authUtil.getLoggedInAdmin();
-        PermissionType permissionForLoggedInAdmin = loggedInAdmin.getRole().getPermissions().getReadTasks();
+        PermissionType permissionForLoggedInAdmin = loggedInAdmin.getRole().getPermissions().getReadStudents();
+        List<Course> adminCourses = loggedInAdmin.getCourses();
 
         if(permissionForLoggedInAdmin == PermissionType.FULL) {
-            if(page == null && size == null) taskListDTO = new PageImpl<>(taskService.getTasks().stream().map(mapper::fromTaskToListDTO).toList());
-            else if(page != null && size == null) taskListDTO = new PageImpl<>(taskService.getTasks(PageRequest.of(page, 10)).stream().map(mapper::fromTaskToListDTO).toList());
-            else taskListDTO = new PageImpl<>(taskService.getTasks(PageRequest.of(page, size)).stream().map(mapper::fromTaskToListDTO).toList());
+            taskPage = taskService.getTasks(filters, pageable);
+            tasks = new PageImpl<>(taskPage.getContent().stream().map(mapper::fromTaskToListDTO).toList(), pageable, taskPage.getTotalElements());
         }
         else if(permissionForLoggedInAdmin == PermissionType.PARTIAL) {
-
-            Long[] allowedCoursesIDs = (Long[]) loggedInAdmin.getCourses().stream().map(Course::getId).toArray();
-
-            if(page == null && size == null) taskListDTO = new PageImpl<>(taskService.getTasksByAllowedCourses(allowedCoursesIDs).stream().map(mapper::fromTaskToListDTO).toList());
-            else if(page != null && size == null) taskListDTO = new PageImpl<>(taskService.getTasksByAllowedCourses(PageRequest.of(page, 10), allowedCoursesIDs).stream().map(mapper::fromTaskToListDTO).toList());
-            else taskListDTO = new PageImpl<>(taskService.getTasksByAllowedCourses(filters, PageRequest.of(page, size), allowedCoursesIDs).stream().map(mapper::fromTaskToListDTO).toList());
-
+            Long[] allowedCoursesIDs = (Long[]) adminCourses.stream().map(Course::getId).toArray();
+            taskPage = taskService.getTasksByAllowedCourses(filters, pageable, allowedCoursesIDs);
+            tasks = new PageImpl<>(taskPage.getContent().stream().map(mapper::fromTaskToListDTO).toList(), pageable, taskPage.getTotalElements());
         }
 
-        return new ResponseEntity<>(taskListDTO, HttpStatus.OK);
+        return new ResponseEntity<>(tasks, HttpStatus.OK);
     }
 
 

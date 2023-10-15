@@ -5,6 +5,7 @@ import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.lesson.LessonReportRow;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,9 +26,11 @@ public class Student extends UserEntity {
     @JoinColumn(name = "course_id")
     private Course course;
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "student")
     private List<StudentTask> tasks = new ArrayList<>();
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "student")
     private List<LessonReportRow> lessonData = new ArrayList<>();
 

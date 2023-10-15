@@ -40,12 +40,17 @@ public class Course {
     @JoinColumn(name = "manager_id")
     private Admin manager;
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "course")
     private List<Student> students = new ArrayList<>();
 
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Task> tasks = new ArrayList<>();
+
+    @ToString.Exclude
+    @OneToMany(mappedBy = "course")
+    private List<Literature> literature = new ArrayList<>();
 
     @Embedded
     private CourseInfo courseInfo = new CourseInfo();
@@ -53,8 +58,6 @@ public class Course {
     @Enumerated(value = EnumType.STRING)
     private CourseStatus status;
 
-    @OneToMany(mappedBy = "course")
-    private List<Literature> literature = new ArrayList<>();
 
     public Course(Long id, String name) {
         this.id = id;

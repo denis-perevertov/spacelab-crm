@@ -7,6 +7,7 @@ import com.example.spacelab.model.literature.Literature;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,15 +48,19 @@ public class Task {
     @Column(columnDefinition = "TEXT")
     private String taskDescription;
 
+    @ToString.Exclude
     @OneToMany
     private List<Task> subtasks = new ArrayList<>();
 
+    @ToString.Exclude
     @ManyToMany
     private List<Literature> recommendedLiterature = new ArrayList<>();
 
+    @ToString.Exclude
     @ManyToMany
     private List<Student> activeStudents = new ArrayList<>();
 
+    @ToString.Exclude
     @ManyToMany
     private List<LessonReportRow> lessonReportRows = new ArrayList<>();
 
