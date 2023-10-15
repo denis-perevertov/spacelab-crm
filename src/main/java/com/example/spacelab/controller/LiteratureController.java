@@ -10,7 +10,9 @@ import com.example.spacelab.mapper.LiteratureMapper;
 import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.literature.Literature;
+import com.example.spacelab.model.literature.LiteratureType;
 import com.example.spacelab.model.role.PermissionType;
+import com.example.spacelab.model.student.StudentAccountStatus;
 import com.example.spacelab.service.LiteratureService;
 import com.example.spacelab.util.AuthUtil;
 import com.example.spacelab.util.FilterForm;
@@ -38,6 +40,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Tag(name="Literature", description = "Literature controller")
@@ -69,25 +72,27 @@ public class LiteratureController {
                                                                  @RequestParam(required = false, defaultValue = "0") Integer page,
                                                                  @RequestParam(required = false, defaultValue = "10") Integer size) {
 
+        System.out.println("request!!!");
         Page<LiteratureListDTO> dtoList = new PageImpl<>(new ArrayList<>());
 
         Admin loggedInAdmin = authUtil.getLoggedInAdmin();
         PermissionType permissionForLoggedInAdmin = loggedInAdmin.getRole().getPermissions().getReadStudents();
 
         if(permissionForLoggedInAdmin == PermissionType.FULL) {
+            System.out.println("PermissionType.FULL!!!");
             if(page == null && size == null) dtoList = new PageImpl<>(literatureService.getLiterature().stream().map(mapper::fromLiteratureToListDTO).toList());
             else if(page != null && size == null) dtoList = new PageImpl<>(literatureService.getLiterature(filters, PageRequest.of(page, 10)).stream().map(mapper::fromLiteratureToListDTO).toList());
             else dtoList = new PageImpl<>(literatureService.getLiterature(filters, PageRequest.of(page, size)).stream().map(mapper::fromLiteratureToListDTO).toList());
         }
         else if(permissionForLoggedInAdmin == PermissionType.PARTIAL) {
-
+            System.out.println("PermissionType.PARTIAL!!!");
             Long[] allowedCoursesIDs = (Long[]) loggedInAdmin.getCourses().stream().map(Course::getId).toArray();
 
             if(page == null && size == null) dtoList = new PageImpl<>(literatureService.getLiteratureByAllowedCourses(allowedCoursesIDs).stream().map(mapper::fromLiteratureToListDTO).toList());
             else if(page != null && size == null) dtoList = new PageImpl<>(literatureService.getLiteratureByAllowedCourses(filters, PageRequest.of(page, 10),allowedCoursesIDs).stream().map(mapper::fromLiteratureToListDTO).toList());
             else dtoList = new PageImpl<>(literatureService.getLiteratureByAllowedCourses(filters, PageRequest.of(page, size), allowedCoursesIDs).stream().map(mapper::fromLiteratureToListDTO).toList());
         }
-
+        System.out.println("dtoList!!! " +dtoList.getContent());
         return new ResponseEntity<>(dtoList, HttpStatus.OK);
     }
 
@@ -259,4 +264,11 @@ public class LiteratureController {
         Page<LiteratureSelectDTO> ownerPage = literatures.map(mapper::fromLiteratureToSelectDTO);
         return ownerPage;
     }
+
+    // Получение списка типов литературы
+    @GetMapping("/get-literature-type-list")
+    public List<LiteratureType> getStatusList() {
+        return List.of(LiteratureType.values());
+    }
+
 }

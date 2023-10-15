@@ -12,6 +12,7 @@ import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.lesson.Lesson;
 import com.example.spacelab.model.lesson.LessonStatus;
+import com.example.spacelab.model.literature.LiteratureType;
 import com.example.spacelab.model.role.PermissionType;
 import com.example.spacelab.service.LessonReportRowService;
 import com.example.spacelab.service.LessonService;
@@ -40,6 +41,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Tag(name="Lesson", description = "Lesson controller")
@@ -73,6 +75,7 @@ public class LessonController {
                                                                  @RequestParam(required = false, defaultValue = "0") Integer page,
                                                                  @RequestParam(required = false, defaultValue = "10") Integer size) {
 
+        System.out.println("Getting lessons...");
         Page<LessonListDTO> dtoList = new PageImpl<>(new ArrayList<>());
 
         Admin loggedInAdmin = authUtil.getLoggedInAdmin();
@@ -92,7 +95,8 @@ public class LessonController {
             else dtoList = new PageImpl<>(lessonService.getLessonsByAllowedCourses(filters, PageRequest.of(page, size), allowedCoursesIDs).stream().map(mapper::fromLessonToLessonListDTO).toList());
 
         }
-
+        System.out.println("finish!");
+        System.out.println("dtoList !" + dtoList.getContent());
         return new ResponseEntity<>(dtoList, HttpStatus.OK);
     }
 
@@ -239,6 +243,12 @@ public class LessonController {
     public ResponseEntity<String> completeLesson(@PathVariable @Parameter(example = "1") Long id) {
         lessonService.completeLesson(id);
         return new ResponseEntity<>("Lesson completed", HttpStatus.ACCEPTED);
+    }
+
+    // Получение списка cтатусов
+    @GetMapping("/get-status-list")
+    public List<LessonStatus> getStatusList() {
+        return List.of(LessonStatus.values());
     }
 //
 //    @GetMapping("/start")
