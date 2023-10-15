@@ -47,6 +47,10 @@ public class Admin extends UserEntity implements UserDetails {
         return this.getRole().getAuthorities().stream().map(SimpleGrantedAuthority::new).toList();
     }
 
+    public String getFullName() {
+        return this.firstName + " " + this.lastName;
+    }
+
     @Override
     public String getUsername() {
         return this.email;

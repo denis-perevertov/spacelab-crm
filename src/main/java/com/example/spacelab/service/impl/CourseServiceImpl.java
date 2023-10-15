@@ -18,6 +18,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
@@ -73,25 +75,42 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public Specification<Course> buildSpecificationFromFilters(FilterForm filters) {
 
+        log.info("Building specification from filters: " + filters);
+
         String name = filters.getName();
         String dateString = filters.getDate();
+        String beginDateString = filters.getBegin();
+        String endDateString = filters.getEnd();
         Long mentorID = filters.getMentor();
         Long managerID = filters.getManager();
-        Boolean active = filters.getActive();
+        String status = filters.getStatus();
+
+        CourseStatus courseStatus = (status == null || status.isEmpty()) ? null : CourseStatus.valueOf(status);
 
         Admin mentor = (mentorID == null) ? null : adminRepository.getReferenceById(mentorID);
-        Admin manager = (mentorID == null) ? null : adminRepository.getReferenceById(managerID);
+        Admin manager = (managerID == null) ? null : adminRepository.getReferenceById(managerID);
 
-        /*
-            TODO
-            фильтр по датам
-        */
+        LocalDate beginDate = (beginDateString != null && !beginDateString.isEmpty()) ? LocalDate.parse(beginDateString, DateTimeFormatter.ofPattern("yyyy-MM-dd")) : null;
+        LocalDate endDate = (endDateString != null && !endDateString.isEmpty()) ? LocalDate.parse(endDateString, DateTimeFormatter.ofPattern("yyyy-MM-dd")) : null;
+
+//        LocalDate beginDate = null;
+//        LocalDate endDate = null;
+//        if(dateString != null && !dateString.isEmpty()) {
+//            try {
+//                String[] dates = dateString.split(" - ");
+//                beginDate = LocalDate.parse(dates[0], DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+//                endDate = LocalDate.parse(dates[1], DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+//            } catch (Exception e) {
+//                log.warning("Error during date parsing");
+//            }
+//        }
 
         Specification<Course> spec = Specification.where(
                         CourseSpecifications.hasNameLike(name)
                         .and(CourseSpecifications.hasMentor(mentor))
                         .and(CourseSpecifications.hasManager(manager))
-                        .and(CourseSpecifications.hasActive(active))
+                        .and(CourseSpecifications.hasStatus(courseStatus)
+                        .and(CourseSpecifications.hasDatesBetween(beginDate, endDate)))
         );
         return spec;
     }

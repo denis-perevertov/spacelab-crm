@@ -11,7 +11,7 @@
 //import com.example.spacelab.service.CourseService;
 //import com.example.spacelab.util.AuthUtil;
 //import com.example.spacelab.util.FilterForm;
-//import com.example.spacelab.validator.CourseCreateValidator;
+//import com.example.spacelab.validator.CourseValidator;
 //import com.example.spacelab.validator.CourseUpdateValidator;
 //import com.fasterxml.jackson.databind.ObjectMapper;
 //import org.junit.jupiter.api.Test;
@@ -58,7 +58,7 @@
 //    private CourseMapper courseMapper;
 //
 //    @MockBean
-//    private CourseCreateValidator courseCreateValidator;
+//    private CourseValidator courseCreateValidator;
 //
 //    @MockBean
 //    private CourseUpdateValidator courseUpdateValidator;

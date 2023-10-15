@@ -85,6 +85,12 @@ public class ContactController {
         return new ResponseEntity<>(info, HttpStatus.OK);
     }
 
+    // Получение дто контакта для создания/редактирования
+    @GetMapping("/{id}/edit")
+    public ResponseEntity<ContactInfoEditDTO> getContactForEdit(@PathVariable Long id) {
+        return new ResponseEntity<>(contactMapper.fromContactToEditDTO(contactService.getContact(id)), HttpStatus.OK);
+    }
+
     // Добавление нового контакта
     @Operation(description = "Create new contact card (one for each admin); ID field does not matter in write/edit operations", summary = "Create New Contact", tags = {"Contact"})
     @ApiResponses(value = {

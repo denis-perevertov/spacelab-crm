@@ -14,6 +14,8 @@ public class ContactInfo {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    private String name;
+
     @ToString.Exclude
     @ManyToOne
     private Admin admin;

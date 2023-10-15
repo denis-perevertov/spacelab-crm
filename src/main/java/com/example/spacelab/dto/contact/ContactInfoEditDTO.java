@@ -7,8 +7,11 @@ import lombok.Data;
 public class ContactInfoEditDTO {
 
     private Long id;
+    private String name;
     @Schema(example = "1")
     private Long adminID;
+    private String adminName;
+    private String roleName;
     @Schema(example = "+380123456789")
     private String phone;
     @Schema(example = "testemail@gmail.com")

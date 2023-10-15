@@ -39,6 +39,12 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    public List<Admin> getAdmins(FilterForm filters) {
+        Specification<Admin> spec = buildSpecificationFromFilters(filters);
+        return adminRepository.findAll(spec);
+    }
+
+    @Override
     public Page<Admin> getAdmins(Pageable pageable) {
         log.info("Getting admins with page " + pageable.getPageNumber() + "/ size " + pageable
                 .getPageSize());
@@ -111,6 +117,8 @@ public class AdminServiceImpl implements AdminService {
 
         UserRole role = (roleID == null) ? null : userRoleRepository.getReferenceById(roleID);
         Course course = (courseID == null) ? null : courseRepository.getReferenceById(courseID);
+
+        if(course != null) log.info(course.toString());
 
         Specification<Admin> combinedSpec = AdminSpecifications.hasNameLike(combined)
                                             .or(AdminSpecifications.hasEmailLike(combined));

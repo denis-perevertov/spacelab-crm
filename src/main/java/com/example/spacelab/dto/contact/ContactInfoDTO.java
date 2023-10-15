@@ -9,6 +9,7 @@ public class ContactInfoDTO {
 
     @Schema(example = "10")
     private Long id;
+    private String name;
     private AdminContactDTO admin;
     @Schema(example = "+380123456789")
     private String phone;

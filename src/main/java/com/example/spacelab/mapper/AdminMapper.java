@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -88,10 +89,7 @@ public class AdminMapper {
             dto.setEmail(admin.getEmail());
             dto.setRoleID(admin.getRole().getId());
 
-            /*
-                TODO
-                курсы
-             */
+            dto.setCourseID(admin.getCourses().stream().map(Course::getId).toArray(Long[]::new));
 
         } catch (Exception e) {
             log.severe("Mapping error: " + e.getMessage());
@@ -116,12 +114,12 @@ public class AdminMapper {
                 (dto.getPassword() != null && !dto.getPassword().isEmpty()))
                 admin.setPassword(dto.getPassword());
 
-            if(dto.getCourseID() != null) admin.getCourses().add(courseRepository.getReferenceById(dto.getCourseID()));
-
-            /*
-                TODO
-                курсы
-             */
+            List<Long> courseIDs = Arrays.asList(dto.getCourseID());
+            if(courseIDs.size() > 0) {
+                List<Course> adminCourses = admin.getCourses();
+                adminCourses.clear();
+                adminCourses.addAll(courseIDs.stream().map(courseRepository::getReferenceById).toList());
+            }
 
             if(dto.getRoleID() != null) admin.setRole(userRoleRepository.getReferenceById(dto.getRoleID()));
 

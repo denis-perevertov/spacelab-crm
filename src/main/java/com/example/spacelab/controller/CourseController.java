@@ -6,11 +6,12 @@ import com.example.spacelab.exception.ObjectValidationException;
 import com.example.spacelab.mapper.CourseMapper;
 import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.model.course.Course;
+import com.example.spacelab.model.course.CourseStatus;
 import com.example.spacelab.model.role.PermissionType;
 import com.example.spacelab.service.CourseService;
 import com.example.spacelab.util.AuthUtil;
 import com.example.spacelab.util.FilterForm;
-import com.example.spacelab.validator.CourseCreateValidator;
+import com.example.spacelab.validator.CourseValidator;
 import com.example.spacelab.validator.CourseUpdateValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -19,10 +20,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import lombok.ToString;
 import lombok.extern.java.Log;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -50,7 +49,7 @@ public class CourseController {
 
     private final CourseService courseService;
     private final CourseMapper mapper;
-    private final CourseCreateValidator courseCreateValidator;
+    private final CourseValidator courseValidator;
     private final CourseUpdateValidator courseUpdateValidator;
 
     private final AuthUtil authUtil;
@@ -112,7 +111,6 @@ public class CourseController {
     }
 
 
-
     // Получение курса для редактирования по id
     @Operation(description = "Get course by id for edit", summary = "Get course by id for edit", tags = {"Course"})
     @ApiResponses(value = {
@@ -124,14 +122,23 @@ public class CourseController {
     })
     @PreAuthorize("!hasAuthority('courses.read.NO_ACCESS')")
     @GetMapping("/update/{id}")
-    public ResponseEntity<CourseCardDTO> getCourseForUpdate(@PathVariable @Parameter(example = "1") Long id) {
+    public ResponseEntity<CourseEditDTO> getCourseForUpdate(@PathVariable @Parameter(example = "1") Long id) {
 
         authUtil.checkAccessToCourse(id, "courses.read");
 
-        CourseCardDTO course = mapper.fromCardDTOtoCourse(courseService.getCourseById(id));
+        CourseEditDTO course = mapper.fromCourseToEditDTO(courseService.getCourseById(id));
         return new ResponseEntity<>(course, HttpStatus.OK);
     }
 
+    @PreAuthorize("!hasAuthority('courses.read.NO_ACCESS')")
+    @GetMapping("/info/{id}")
+    public ResponseEntity<CourseInfoPageDTO> getCourseForInfoDisplay(@PathVariable @Parameter(example = "1") Long id) {
+
+        authUtil.checkAccessToCourse(id, "courses.read");
+
+        CourseInfoPageDTO course = mapper.fromCourseToInfoPageDTO(courseService.getCourseById(id));
+        return new ResponseEntity<>(course, HttpStatus.OK);
+    }
 
 
     // Сохранение нового курса
@@ -146,13 +153,14 @@ public class CourseController {
     })
     @PreAuthorize("!hasAuthority('courses.write.NO_ACCESS')")
     @PostMapping
-    public ResponseEntity<String> createNewCourse( @RequestBody CourseSaveCreatedDTO dto, BindingResult bindingResult) {
+    public ResponseEntity<String> createNewCourse( @RequestBody CourseEditDTO dto,
+                                                   BindingResult bindingResult) {
 
         dto.setId(null);
-
+        log.info("DTO to save : " + dto);
         authUtil.checkPermissionToCreateCourse();
 
-        courseCreateValidator.validate(dto, bindingResult);
+        courseValidator.validate(dto, bindingResult);
 
         if (bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
@@ -160,7 +168,7 @@ public class CourseController {
             throw new ObjectValidationException(errors);
         }
 
-        courseService.createNewCourse(mapper.fromSaveCreatedDTOtoCourse(dto));
+        courseService.createNewCourse(mapper.fromEditDTOToCourse(dto));
         return new ResponseEntity<>("Course created", HttpStatus.CREATED);
     }
 
@@ -178,14 +186,16 @@ public class CourseController {
     })
     @PreAuthorize("!hasAuthority('courses.edit.NO_ACCESS')")
     @PutMapping("/{id}")
-    public ResponseEntity<String> updateCourse(@PathVariable @Parameter(example = "1") Long id,  @RequestBody CourseSaveUpdatedDTO dto, BindingResult bindingResult) {
+    public ResponseEntity<String> updateCourse(@PathVariable @Parameter(example = "1") Long id,
+                                               @RequestBody CourseEditDTO dto,
+                                               BindingResult bindingResult) {
 
         dto.setId(id);
-
+        log.info("DTO to save : " + dto);
         authUtil.checkAccessToCourse(dto.getId(), "courses.edit");
         authUtil.checkAccessToCourse(id, "courses.edit");
 
-        courseUpdateValidator.validate(dto, bindingResult);
+        courseValidator.validate(dto, bindingResult);
 
         if (bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
@@ -193,7 +203,9 @@ public class CourseController {
             throw new ObjectValidationException(errors);
         }
 
-        courseService.createNewCourse(mapper.fromSaveUpdatedDTOtoCourse(dto));
+        Course c = mapper.fromEditDTOToCourse(dto);
+        log.info("COURSE TO EDIT: " + c);
+        courseService.editCourse(c);
         return new ResponseEntity<>("Course updated", HttpStatus.OK);
     }
 
@@ -244,5 +256,10 @@ public class CourseController {
     @ResponseBody
     public List<CourseSelectDTO> getCoursesIdAndNames() {
         return courseService.getCourses().stream().map(mapper::fromCourseToSelectDTO).toList();
+    }
+
+    @GetMapping("/get-status-list")
+    public List<CourseStatus> getStatusList() {
+        return List.of(CourseStatus.values());
     }
 }

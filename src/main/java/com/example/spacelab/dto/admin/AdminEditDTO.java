@@ -23,6 +23,6 @@ public class AdminEditDTO {
     @Schema(example = "1")
     private Long roleID;
     @Schema(example = "4")
-    private Long courseID;
+    private Long[] courseID;
 
 }

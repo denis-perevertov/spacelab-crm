@@ -25,6 +25,8 @@ public class FilterForm {
     private String keywords;
     @Schema(defaultValue = "0")
     private Long role;
+    private String begin;
+    private String end;
     private String date;
     @Schema(defaultValue = "0", description = "Mentor's ID")
     private Long mentor;

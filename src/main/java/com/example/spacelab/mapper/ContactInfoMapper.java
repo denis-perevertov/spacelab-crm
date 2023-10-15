@@ -28,6 +28,7 @@ public class ContactInfoMapper {
         try {
 
             dto.setId(info.getId());
+            dto.setName(info.getName());
             dto.setAdmin(adminMapper.fromAdminToContactDTO(info.getAdmin()));
             dto.setPhone(info.getPhone());
             dto.setEmail(info.getEmail());
@@ -77,6 +78,7 @@ public class ContactInfoMapper {
         try {
 
             info.setId(dto.getId());
+            info.setName(dto.getName());
             info.setAdmin(adminRepository.getReferenceById(dto.getAdminID()));
             info.setPhone(dto.getPhone());
             info.setEmail(dto.getEmail());
@@ -93,5 +95,26 @@ public class ContactInfoMapper {
 
         return info;
 
+    }
+
+    public ContactInfoEditDTO fromContactToEditDTO(ContactInfo contactInfo) {
+
+        try {
+            ContactInfoEditDTO dto = new ContactInfoEditDTO();
+
+            dto.setId(contactInfo.getId());
+            dto.setName(contactInfo.getName());
+            dto.setAdminID(contactInfo.getAdmin().getId());
+            dto.setAdminName(contactInfo.getAdmin().getFirstName() + " " + contactInfo.getAdmin().getLastName());
+            dto.setRoleName(contactInfo.getAdmin().getRole().getName());
+            dto.setEmail(contactInfo.getEmail());
+            dto.setPhone(contactInfo.getPhone());
+            dto.setTelegram(contactInfo.getTelegram());
+
+            return dto;
+        } catch (Exception e) {
+            log.severe("Mapping error: " + e.getMessage());
+            throw new MappingException(e.getMessage());
+        }
     }
 }

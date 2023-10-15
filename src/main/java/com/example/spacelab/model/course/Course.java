@@ -40,7 +40,7 @@ public class Course {
     @JoinColumn(name = "manager_id")
     private Admin manager;
 
-    @OneToMany
+    @OneToMany(mappedBy = "course")
     private List<Student> students = new ArrayList<>();
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -53,7 +53,7 @@ public class Course {
     @Enumerated(value = EnumType.STRING)
     private CourseStatus status;
 
-    @OneToMany
+    @OneToMany(mappedBy = "course")
     private List<Literature> literature = new ArrayList<>();
 
     public Course(Long id, String name) {

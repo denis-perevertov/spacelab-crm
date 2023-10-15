@@ -349,7 +349,7 @@ public class StudentController {
     @GetMapping("/get-available-students")
     public List<SelectSearchDTO> getStudentsWithoutCourse() {
         return studentService.getStudents().stream().filter(student -> student.getCourse() == null)
-                .map(student -> new SelectSearchDTO(student.getId(), student.getFullName())).toList();
+                .map(student -> new SelectSearchDTO(student.getId(), student.getFullName(), student.getDetails().getEmail(), "")).toList();
     }
 
     // Получение списка статусов студентов

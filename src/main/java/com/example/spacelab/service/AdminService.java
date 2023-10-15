@@ -10,6 +10,7 @@ import java.util.List;
 
 public interface AdminService extends EntityFilterService<Admin>, UserDetailsService {
     List<Admin> getAdmins();
+    List<Admin> getAdmins(FilterForm filters);
     Page<Admin> getAdmins(Pageable pageable);
     Page<Admin> getAdmins(FilterForm filters, Pageable pageable);
 

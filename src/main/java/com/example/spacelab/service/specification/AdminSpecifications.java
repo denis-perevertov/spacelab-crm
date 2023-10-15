@@ -24,9 +24,8 @@ public class AdminSpecifications {
     }
 
     public static Specification<Admin> hasCourse(Course course) {
-//        if(course == null) return (root, query, cb) -> null;
-//        return (root, query, cb) -> cb.selectCase().in(root.get("courses"));
-        return (root, query, cb) -> null;
+        if(course == null) return (root, query, cb) -> null;
+        return (root, query, cb) -> cb.equal(root.get("courses").get("id"), course.getId());
     }
 
     public static Specification<Admin> hasDatesBetween(LocalDate from, LocalDate to) {

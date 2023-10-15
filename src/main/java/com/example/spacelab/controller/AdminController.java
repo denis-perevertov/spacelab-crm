@@ -1,6 +1,7 @@
 package com.example.spacelab.controller;
 
 import com.example.spacelab.dto.SelectSearchDTO;
+import com.example.spacelab.dto.admin.AdminContactDTO;
 import com.example.spacelab.exception.ErrorMessage;
 import com.example.spacelab.exception.ObjectValidationException;
 import com.example.spacelab.exception.ResourceNotFoundException;
@@ -190,8 +191,10 @@ public class AdminController {
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
     @GetMapping("/get-admins-by-role")
-    public Map<String, Object> getAdminsByRole(@RequestParam @Parameter(example = "1", name = "Role ID") Long roleID,
+    public Map<String, Object> getAdminsByRole(@RequestParam(required=false) @Parameter(example = "1", name = "Role ID") Long roleID,
+                                               @RequestParam(required=false) String roleName,
                                                @RequestParam @Parameter(example = "1") Integer page) {
+
         FilterForm form = FilterForm.with()
                                     .role(roleID)
                                     .build();
@@ -209,6 +212,17 @@ public class AdminController {
         selectMap.put("pagination", Map.of("more", adminPage.getNumber() < adminPage.getTotalPages()));
 
         return selectMap;
+    }
+
+    @GetMapping("/get-admins-list-by-role")
+    public ResponseEntity<List<AdminContactDTO>> getAdminsListByRole(@RequestParam Long role) {
+        FilterForm filters = FilterForm.with()
+                .role(role)
+                .build();
+        List<AdminContactDTO> adminList = adminService.getAdmins(filters).stream()
+                                                        .map(adminMapper::fromAdminToContactDTO)
+                                                        .toList();
+        return new ResponseEntity<>(adminList, HttpStatus.OK);
     }
 
     // Получение списка незанятых админов (админов без назначенных курсов)

@@ -1,13 +1,17 @@
 package com.example.spacelab.controller;
 
 import com.example.spacelab.dto.SelectSearchDTO;
+import com.example.spacelab.dto.admin.AdminAvatarDTO;
 import com.example.spacelab.dto.contact.ContactInfoDTO;
+import com.example.spacelab.dto.role.UserRoleAdminListDTO;
 import com.example.spacelab.exception.ErrorMessage;
 import com.example.spacelab.exception.ObjectValidationException;
 import com.example.spacelab.mapper.RoleMapper;
 import com.example.spacelab.dto.role.UserRoleDTO;
 import com.example.spacelab.dto.role.UserRoleEditDTO;
+import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.model.role.UserRole;
+import com.example.spacelab.repository.AdminRepository;
 import com.example.spacelab.service.UserRoleService;
 import com.example.spacelab.validator.RoleValidator;
 import com.example.spacelab.exception.ValidationErrorMessage;
@@ -30,6 +34,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Tag(name="Role", description = "Role controller")
 @RestController
@@ -39,6 +44,7 @@ import java.util.Map;
 public class RoleController {
 
     private final UserRoleService userRoleService;
+    private final AdminRepository adminRepository;
     private final RoleMapper roleMapper;
     private final RoleValidator validator;
 
@@ -151,10 +157,15 @@ public class RoleController {
             @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
     @GetMapping("/get-all-roles")
-    public List<SelectSearchDTO> getAllRoles() {
+    public List<UserRoleAdminListDTO> getAllRoles() {
         return userRoleService.getRoles()
                 .stream()
-                .map(role -> new SelectSearchDTO(role.getId(), role.getName()))
+                .map(role -> new UserRoleAdminListDTO(role.getId(),
+                        role.getName(),
+                        role.getUserList().stream().map(user -> {
+                            Admin admin = adminRepository.findById(user.getId()).orElse(new Admin());
+                            return new AdminAvatarDTO(admin.getId(), admin.getFullName(), admin.getRole().getName());
+                        }).toList()))
                 .toList();
     }
 
