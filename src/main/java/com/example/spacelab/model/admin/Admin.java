@@ -25,6 +25,7 @@ import java.util.List;
 @Table(name="admins")
 public class Admin extends UserEntity implements UserDetails {
 
+    @Column(name = "first_name")
     private String firstName;
     private String lastName;
 
