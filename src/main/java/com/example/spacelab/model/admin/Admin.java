@@ -3,6 +3,8 @@ package com.example.spacelab.model.admin;
 import com.example.spacelab.model.contact.ContactInfo;
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.UserEntity;
+import com.example.spacelab.model.settings.Settings;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import lombok.Data;
@@ -46,6 +48,11 @@ public class Admin extends UserEntity implements UserDetails {
     @ToString.Exclude
     @OneToMany(mappedBy="admin", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ContactInfo> contacts = new ArrayList<>();
+
+    @ToString.Exclude
+    @JsonIgnore
+    @OneToOne(mappedBy = "admin")
+    private Settings settings;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

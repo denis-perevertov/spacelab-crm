@@ -167,17 +167,22 @@ public class LiteratureMapper {
             Course course = courseService.getCourseById(dto.getCourseID());
             entity.setCourse(course);
 
-            entity.setType(LiteratureType.valueOf(dto.getType()));
-            entity.setAuthor((dto.getAuthor_name() != null && !dto.getAuthor_name().isEmpty()) ? dto.getAuthor_name() : "Unknown Author");
+            entity.setType(dto.getType());
+            entity.setAuthor((dto.getAuthor() != null && !dto.getAuthor().isEmpty()) ? dto.getAuthor() : "Unknown Author");
             entity.setKeywords(dto.getKeywords());
             entity.setDescription(dto.getDescription());
-            entity.setResource_link(dto.getResource_link());
+
+            if(dto.getType() == LiteratureType.BOOK) {
+                entity.setResource_link(dto.getResource_file().getOriginalFilename());
+            }
+            else if(dto.getType() == LiteratureType.LINK) {
+                entity.setResource_link(dto.getResource_link());
+            }
         } catch (Exception e) {
             log.severe("Mapping error: " + e.getMessage());
             log.warning("Entity: " + entity);
             throw new MappingException(e.getMessage());
         }
-
 
         return entity;
     }

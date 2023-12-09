@@ -1,6 +1,8 @@
 package com.example.spacelab.model.student;
 
 import com.example.spacelab.model.task.Task;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.ToString;
@@ -19,18 +21,23 @@ public class StudentTask {
     private Long id;
 
     @ManyToOne
+    @JoinColumn(nullable = false)
+    private Task taskReference;
+
+    @JsonBackReference
+    @ManyToOne
+    @JoinColumn(nullable = false)
+    private Student student;
+
+    @JsonIgnore
+    @ManyToOne
     @JoinColumn(name = "parent_task_id")
     private StudentTask parentTask;
 
-    @ManyToOne
-    private Task task;
-
+    @JsonIgnore
     @ToString.Exclude
     @OneToMany
     private List<StudentTask> subtasks;
-
-    @ManyToOne
-    private Student student;
 
     @DateTimeFormat(pattern = "MM/dd/yyyy")
     private LocalDate beginDate;
@@ -41,7 +48,6 @@ public class StudentTask {
     @Enumerated(value = EnumType.STRING)
     private StudentTaskStatus status;
 
-    private Long percentOfCompletion;
-
+    private Integer percentOfCompletion;
 
 }

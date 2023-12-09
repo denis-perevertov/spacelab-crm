@@ -95,7 +95,7 @@ public class LessonMapper {
 
                 List<String> taskNames = new ArrayList<>();
                 for (StudentTask currentTask : lessonReportRow.getStudent().getTasks()) {
-                    String taskName = currentTask.getTask().getName();
+                    String taskName = currentTask.getTaskReference().getName();
                     String taskPercent = "";
                     if (currentTask.getPercentOfCompletion() != null ) {
                         taskPercent = " ("+currentTask.getPercentOfCompletion()+"%)";

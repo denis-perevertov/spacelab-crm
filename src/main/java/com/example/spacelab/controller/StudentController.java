@@ -111,50 +111,6 @@ public class StudentController {
         return new ResponseEntity<>(studentMapper.fromStudentToDTO(student), HttpStatus.OK);
     }
 
-    // Получение заданий одного студента
-    @Operation(description = "Get student tasks DTO list by student's ID", summary = "Get Student Tasks List", tags = {"Student Task"})
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful Operation"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
-            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Student not found in DB", content = @Content),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
-    })
-    @PreAuthorize("!hasAuthority('students.read.NO_ACCESS')")
-    @GetMapping("/{studentID}/tasks")
-    public ResponseEntity<List<StudentTaskDTO>> getStudentTasks(@PathVariable @Parameter(example = "1") Long studentID,
-                                                                @RequestParam(required = false) StudentTaskStatus status) {
-
-        authUtil.checkAccessToCourse(studentService.getStudentCourseID(studentID), "students.read");
-
-        List<StudentTaskDTO> taskList;
-        if(status == null) taskList = studentService.getStudentTasks(studentID).stream().map(taskMapper::fromStudentTaskToDTO).toList();
-        else taskList = studentService.getStudentTasks(studentID, status).stream().map(taskMapper::fromStudentTaskToDTO).toList();
-
-        return new ResponseEntity<>(taskList, HttpStatus.OK);
-    }
-
-
-    // Получение одного задания одного студента
-    @Operation(description = "Get single student task DTO by student's ID", summary = "Get Student Task", tags = {"Student Task"})
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful Operation", content = @Content(mediaType = "application/json", schema = @Schema(implementation = StudentTaskDTO.class))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
-            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Student/task not found in DB", content = @Content),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
-    })
-    @PreAuthorize("!hasAuthority('students.read.NO_ACCESS')")
-    @GetMapping("/{studentID}/tasks/{taskID}")
-    public ResponseEntity<StudentTaskDTO> getStudentTask(@PathVariable @Parameter(example = "1") Long studentID,
-                                                         @PathVariable @Parameter(example = "1") Long taskID) {
-
-        authUtil.checkAccessToCourse(studentService.getStudentCourseID(studentID), "students.read");
-
-        StudentTaskDTO task = taskMapper.fromStudentTaskToDTO(studentService.getStudentTask(taskID));
-
-        return new ResponseEntity<>(task, HttpStatus.OK);
-    }
 
     // Получение карточки информации о студенте
     @Operation(description = "Get student card DTO by his ID", summary = "Get Student Info Card", tags = {"Student"})

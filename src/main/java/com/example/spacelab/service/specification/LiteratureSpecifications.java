@@ -41,4 +41,9 @@ public class LiteratureSpecifications {
         return (root, query, cb) -> cb.like(root.get("keywords"), "%"+input+"%");
     }
 
+    public static Specification<Literature> isVerified(Boolean verified) {
+        if(verified == null) return (root, query, cb) -> cb.equal(root.get("is_verified"), true);
+        return (root, query, cb) -> cb.equal(root.get("is_verified"), verified);
+    }
+
 }

@@ -1,9 +1,11 @@
 package com.example.spacelab.dto.literature;
 
+import com.example.spacelab.model.literature.LiteratureType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 @Data
 @NoArgsConstructor
@@ -19,10 +21,10 @@ public class LiteratureSaveDTO {
     private Long courseID;
 
     @Schema(example = "BOOK")
-    private String type;
+    private LiteratureType type;
 
     @Schema(example = "AuthorName")
-    private String author_name;
+    private String author;
 
     @Schema(example = "keyword1, keyword2")
     private String keywords;
@@ -32,6 +34,8 @@ public class LiteratureSaveDTO {
 
     @Schema(example = "book.pdf")
     private String resource_link;
+
+    private MultipartFile resource_file;
 
     public LiteratureSaveDTO(Long id, String name) {
         this.id = id;

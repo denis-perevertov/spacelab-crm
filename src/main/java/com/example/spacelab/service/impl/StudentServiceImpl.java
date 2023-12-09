@@ -157,10 +157,20 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
+    public Page<StudentTask> getStudentTasks(Specification<StudentTask> spec, Pageable pageable) {
+        return studentTaskRepository.findAll(spec, pageable);
+    }
+
+    @Override
     public StudentTask getStudentTask(Long taskID) {
         log.info("Getting student task with taskID: " + taskID);
         StudentTask task = studentTaskRepository.findById(taskID).orElseThrow(() -> new ResourceNotFoundException("Student task not found", StudentTask.class));
         return task;
+    }
+
+    @Override
+    public void completeStudentTask(Long taskID) {
+
     }
 
     @Override

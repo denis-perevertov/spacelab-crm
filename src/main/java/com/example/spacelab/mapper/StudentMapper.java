@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -72,6 +73,10 @@ public class StudentMapper {
             throw new MappingException(e.getMessage());
         }
         return dto;
+    }
+
+    public List<StudentAvatarDTO> fromStudentListToAvatarListDTO(List<Student> students) {
+        return students.stream().map(this::fromStudentToAvatarDTO).toList();
     }
 
     public StudentCardDTO fromStudentToCardDTO(Student student) {

@@ -36,5 +36,8 @@ public class FilterForm {
     private String combined;
     private Boolean active;
 
+    private String nameAndAuthor;
+    private Boolean verified;
+
     public static FilterBuilder with() { return new FilterBuilder(); }
 }

@@ -24,20 +24,29 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -45,7 +54,7 @@ import java.util.Map;
 
 @Tag(name="Literature", description = "Literature controller")
 @RestController
-@Log
+@Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/api/literature")
 public class LiteratureController {
@@ -69,12 +78,14 @@ public class LiteratureController {
     @PreAuthorize("!hasAuthority('literatures.read.NO_ACCESS')")
     @GetMapping
     public ResponseEntity<Page<LiteratureListDTO>> getLiterature(@Parameter(name = "Filter object", description = "Collection of all filters for search results", example = "{}") FilterForm filters,
+                                                                 @RequestParam(required = false, defaultValue = "true") Boolean verified,
                                                                  @RequestParam(required = false, defaultValue = "0") Integer page,
                                                                  @RequestParam(required = false, defaultValue = "10") Integer size) {
 
         Page<LiteratureListDTO> literatures;
         Page<Literature> litPage = new PageImpl<>(new ArrayList<>());
         Pageable pageable = PageRequest.of(page, size);
+        filters.setVerified(verified);
 
         Admin loggedInAdmin = authUtil.getLoggedInAdmin();
         PermissionType permissionForLoggedInAdmin = loggedInAdmin.getRole().getPermissions().getReadStudents();
@@ -147,24 +158,42 @@ public class LiteratureController {
     })
     @PreAuthorize("!hasAuthority('literatures.write.NO_ACCESS')")
     @PostMapping
-    public ResponseEntity<String> createNewLiterature( @RequestBody LiteratureSaveDTO literature, BindingResult bindingResult) {
+    public ResponseEntity<?> createNewLiterature( @ModelAttribute LiteratureSaveDTO dto, BindingResult bindingResult) {
 
-        authUtil.checkAccessToCourse(literature.getCourseID(), "literatures.write");
+        authUtil.checkAccessToCourse(dto.getCourseID(), "literatures.write");
 
-        literature.setId(null);
+        dto.setId(null);
 
-        validator.validate(literature, bindingResult);
+        validator.validate(dto, bindingResult);
         if (bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
             bindingResult.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
             throw new ObjectValidationException(errors);
         }
 
-        literatureService.createNewLiterature(mapper.fromLiteratureSaveDTOtoLiterature(literature));
-        return new ResponseEntity<>("Successful save", HttpStatus.CREATED);
+        try {
+            Literature createdLiterature = literatureService.createNewLiterature(dto);
+            return new ResponseEntity<>(mapper.fromLiteratureToListDTO(createdLiterature), HttpStatus.CREATED);
+        } catch (IOException e) {
+            log.error("Exception with saving lit file: " + e.getMessage());
+            return ResponseEntity.badRequest().body("Exception with saving file!");
+        } catch (Exception e) {
+            log.error("Unknown exception during lit creation: " + e.getMessage());
+            return ResponseEntity.badRequest().body("Could not save literature!");
+        }
     }
 
-
+    @GetMapping("/{id}/download")
+    public ResponseEntity<?> downloadLiteratureResource(@PathVariable Long id,
+                                           HttpServletResponse response) throws IOException {
+        File file = literatureService.getLiteratureFileById(id);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData(file.getName(), file.getName());
+        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+        log.info("Finished with response");
+        return new ResponseEntity<>(new InputStreamResource(new FileInputStream(file)), headers, HttpStatus.OK);
+    }
 
     // Получение литературы для редактирования по id
     @Operation(description = "Get Literature by id for edit", summary = "Get Literature by id for edit", tags = {"Literature"})
@@ -184,7 +213,6 @@ public class LiteratureController {
         LiteratureCardDTO literatureCardDTO = mapper.fromLiteratureToCardDTO(literatureService.getLiteratureById(id));
         return new ResponseEntity<>(literatureCardDTO, HttpStatus.OK);
     }
-
 
 
     // Редактирование литературы

@@ -1,11 +1,8 @@
 package com.example.spacelab.mapper;
 
+import com.example.spacelab.dto.task.*;
 import com.example.spacelab.exception.MappingException;
 import com.example.spacelab.dto.student.StudentTaskDTO;
-import com.example.spacelab.dto.task.TaskCardDTO;
-import com.example.spacelab.dto.task.TaskInfoDTO;
-import com.example.spacelab.dto.task.TaskSaveDTO;
-import com.example.spacelab.dto.task.TaskListDTO;
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.literature.Literature;
 import com.example.spacelab.model.student.Student;
@@ -33,6 +30,8 @@ public class TaskMapper {
     private final TaskRepository taskRepository;
     private final CourseRepository courseRepository;
     private final LiteratureRepository literatureRepository;
+
+    private final StudentMapper studentMapper;
 
 
     public TaskListDTO fromTaskToListDTO(Task task) {
@@ -122,7 +121,7 @@ public class TaskMapper {
 
         try {
             dto.setId(studentTask.getId());
-            dto.setTask(fromTaskToListDTO(studentTask.getTask()));
+            dto.setTask(fromTaskToListDTO(studentTask.getTaskReference()));
             dto.setBeginDate(studentTask.getBeginDate());
             dto.setEndDate(studentTask.getEndDate());
             dto.setStatus(studentTask.getStatus().toString());
@@ -138,39 +137,70 @@ public class TaskMapper {
 
     }
 
+    public TaskLinkDTO fromTaskToTaskLinkDTO(Task task) {
+        TaskLinkDTO dto = new TaskLinkDTO();
+        try {
+            dto.setId(task.getId());
+            dto.setName(task.getName());
+        } catch (Exception e) {
+            log.severe("Mapping error: " + e.getMessage());
+            log.warning("DTO: " + dto);
+            throw new MappingException(e.getMessage());
+        }
+        return dto;
+    }
+
+    public List<TaskLinkDTO> fromTaskListToTaskLinkListDTO(List<Task> tasks) {
+        return tasks.stream().map(this::fromTaskToTaskLinkDTO).toList();
+    }
+
+    public TaskLiteratureDTO fromLiteratureToTaskLiteratureDTO (Literature lit) {
+        TaskLiteratureDTO dto = new TaskLiteratureDTO();
+        try {
+            dto.setId(lit.getId());
+            dto.setName(lit.getName());
+            dto.setType(lit.getType());
+        } catch (Exception e) {
+            log.severe("Mapping error: " + e.getMessage());
+            log.warning("DTO: " + dto);
+            throw new MappingException(e.getMessage());
+        }
+        return dto;
+    }
+
+    public List<TaskLiteratureDTO> fromLiteratureListToTaskLiteratureListDTO(List<Literature> literature) {
+        return literature.stream().map(this::fromLiteratureToTaskLiteratureDTO).toList();
+    }
+
     public TaskInfoDTO fromTaskToInfoDTO(Task task) {
         TaskInfoDTO dto = new TaskInfoDTO();
 
         try {
             dto.setId(task.getId());
             dto.setName(task.getName());
-            if (task.getParentTask() != null) {
-                dto.setParentTaskId(task.getParentTask().getId());
-                dto.setParentTaskName(task.getParentTask().getName());
+
+            if(task.getParentTask() != null) {
+                TaskLinkDTO parentTaskDTO = new TaskLinkDTO();
+                parentTaskDTO.setId(task.getParentTask().getId());
+                parentTaskDTO.setName(task.getParentTask().getName());
+
+                dto.setParentTask(parentTaskDTO);
             }
+
             dto.setLevel(task.getLevel());
             dto.setCompletionTime(task.getCompletionTime());
             dto.setSkillsDescription(task.getSkillsDescription());
             dto.setTaskDescription(task.getTaskDescription());
+            dto.setSubtasks(fromTaskListToTaskLinkListDTO(task.getSubtasks()));
+            dto.setRecommendedLiterature(fromLiteratureListToTaskLiteratureListDTO(task.getRecommendedLiterature()));
 
-            Map<Long, String> subtaskMap = new HashMap<>();
-            for (Task subtask : task.getSubtasks()) {
-                subtaskMap.put(subtask.getId(), subtask.getName());
-            }
-            dto.setSubtasks(subtaskMap);
-
-            Map<Long, String> literatureMap = new HashMap<>();
-            for (Literature literature : task.getRecommendedLiterature()) {
-                literatureMap.put(literature.getId(), literature.getName());
-            }
-            dto.setRecommendedLiterature(literatureMap);
+            dto.setStudents(studentMapper.fromStudentListToAvatarListDTO(task.getActiveStudents()));
 
         } catch (Exception e) {
             log.severe("Mapping error: " + e.getMessage());
             log.warning("DTO: " + dto);
             throw new MappingException(e.getMessage());
         }
-
 
         return dto;
     }

@@ -1,4 +1,7 @@
 spring:
+  http:
+    encoding:
+      force: false
   datasource:
     url: jdbc:mysql://localhost:3306/spacelab2?createDatabaseIfNotExist=true
     driver-class-name: com.mysql.cj.jdbc.Driver

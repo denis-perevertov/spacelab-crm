@@ -1,11 +1,13 @@
 package com.example.spacelab.service.impl;
 
+import com.example.spacelab.dto.literature.LiteratureSaveDTO;
 import com.example.spacelab.exception.ResourceNotFoundException;
 import com.example.spacelab.mapper.LiteratureMapper;
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.literature.Literature;
 import com.example.spacelab.repository.CourseRepository;
 import com.example.spacelab.repository.LiteratureRepository;
+import com.example.spacelab.service.FileService;
 import com.example.spacelab.service.LiteratureService;
 import com.example.spacelab.service.specification.LiteratureSpecifications;
 import com.example.spacelab.util.FilterForm;
@@ -16,7 +18,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -28,6 +33,7 @@ public class LiteratureServiceImpl implements LiteratureService{
     private final LiteratureRepository literatureRepository;
 
     private final LiteratureMapper literatureMapper;
+    private final FileService fileService;
 
     @Override
     public List<Literature> getLiterature() {
@@ -85,7 +91,21 @@ public class LiteratureServiceImpl implements LiteratureService{
     @Override
     public Literature createNewLiterature(Literature literature) {
         literature.setIs_verified(false);
+        log.info("logging lit before save");
+        log.info(literature.toString());
         return literatureRepository.save(literature);
+    }
+
+    @Override
+    public Literature createNewLiterature(LiteratureSaveDTO saveRequest) throws IOException {
+
+        MultipartFile file = saveRequest.getResource_file();
+        if(file != null && file.getSize() > 0) {
+            fileService.saveFile(file, "literature", "books");
+        }
+        Literature lit = literatureMapper.fromLiteratureSaveDTOtoLiterature(saveRequest);
+        log.info(lit.toString());
+        return literatureRepository.save(lit);
     }
 
 
@@ -95,16 +115,27 @@ public class LiteratureServiceImpl implements LiteratureService{
     }
 
     @Override
+    public File getLiteratureFileById(Long id) throws IOException {
+        String fileName = getLiteratureById(id).getResource_link();
+        return fileService.getFile(fileName, "literature", "books");
+    }
+
+    @Override
     public void deleteLiteratureById(Long id) {
         literatureRepository.deleteById(id);
     }
 
     @Override
     public Specification<Literature> buildSpecificationFromFilters(FilterForm filters) {
-        String nameAuthorInput = filters.getName();
+        String nameAuthorInput = filters.getNameAndAuthor();
         Long courseID = filters.getCourse();
         String typeString = filters.getType();
         String keywords = filters.getKeywords();
+
+        Boolean verified = filters.getVerified();
+
+        System.out.println(nameAuthorInput);
+        System.out.println(filters);
 
         Course course = (courseID == null) ? null : courseRepository.getReferenceById(courseID);
         LiteratureType type = (typeString == null) ? null : LiteratureType.valueOf(typeString);
@@ -114,6 +145,7 @@ public class LiteratureServiceImpl implements LiteratureService{
                         .and(LiteratureSpecifications.hasCourse(course))
                         .and(LiteratureSpecifications.hasType(type))
                         .and(LiteratureSpecifications.hasKeywordsLike(keywords))
+                        .and(LiteratureSpecifications.isVerified(verified))
         );
 
         return spec;

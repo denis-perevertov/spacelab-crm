@@ -3,6 +3,7 @@ package com.example.spacelab.model.student;
 import com.example.spacelab.model.UserEntity;
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.lesson.LessonReportRow;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.ToString;
@@ -27,6 +28,7 @@ public class Student extends UserEntity {
     private Course course;
 
     @ToString.Exclude
+    @JsonManagedReference
     @OneToMany(mappedBy = "student")
     private List<StudentTask> tasks = new ArrayList<>();
 

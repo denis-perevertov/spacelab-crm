@@ -33,10 +33,10 @@ public class LiteratureValidator implements Validator {
         else if(dto.getName().length() < 2 || dto.getName().length() > 100)
             e.rejectValue("name", "name.length", "Name length: 2-100");
 
-        if(dto.getType() == null || dto.getType().isEmpty())
+        if(dto.getType() == null)
             e.rejectValue("type", "type.empty", "Select type of Literature!");
 
-        if(dto.getCourseID() == null || dto.getCourseID() == 0) {
+        if(dto.getCourseID() == null || dto.getCourseID() <= 0) {
             e.rejectValue("courseID", "courseID.empty", "Select course!");
         }
         else if(!courseRepository.existsById(dto.getCourseID())) {
@@ -52,11 +52,14 @@ public class LiteratureValidator implements Validator {
         else if(dto.getDescription().length() < 2 || dto.getDescription().length() > 200)
             e.rejectValue("description", "description.length", "Description length: 2-200");
 
-        if(dto.getResource_link() == null || dto.getResource_link().isEmpty())
-            e.rejectValue("resource_link", "resource_link.empty", "Enter resource link!");
-        else if(dto.getResource_link().length() < 10 || dto.getResource_link().length() > 200)
-            e.rejectValue("resource_link", "resource_link.length", "Resource link length: 10-200");
+        if(dto.getType() == LiteratureType.LINK) {
+            if(dto.getResource_link() == null || dto.getResource_link().isEmpty())
+                e.rejectValue("resource_link", "resource_link.empty", "Enter resource link!");
+            else if(dto.getResource_link().length() < 10 || dto.getResource_link().length() > 200)
+                e.rejectValue("resource_link", "resource_link.length", "Resource link length: 10-200");
+        }
+        else if(dto.getType() == LiteratureType.BOOK) {
 
-
+        }
     }
 }

@@ -4,6 +4,7 @@ package com.example.spacelab.controller;
 import com.example.spacelab.dto.task.TaskCardDTO;
 import com.example.spacelab.exception.ErrorMessage;
 import com.example.spacelab.exception.ObjectValidationException;
+import com.example.spacelab.mapper.StudentMapper;
 import com.example.spacelab.mapper.TaskMapper;
 import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.model.course.Course;
@@ -34,6 +35,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
@@ -53,6 +55,7 @@ public class TaskController {
 
     private final TaskService taskService;
     private final TaskMapper mapper;
+    private final StudentMapper studentMapper;
     private final TaskValidator taskValidator;
 
     private final AuthUtil authUtil;
@@ -111,6 +114,14 @@ public class TaskController {
 
         TaskInfoDTO task = mapper.fromTaskToInfoDTO(taskService.getTaskById(id));
         return new ResponseEntity<>(task, HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/students")
+    public ResponseEntity<?> getTaskStudentsById(@PathVariable Long id) {
+
+        authUtil.checkAccessToCourse(taskService.getTaskById(id).getCourse().getId(), "tasks.read");
+
+        return ResponseEntity.ok(studentMapper.fromStudentListToAvatarListDTO(taskService.getTaskStudents(id)));
     }
 
 

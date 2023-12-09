@@ -1,11 +1,16 @@
 package com.example.spacelab.validator;
 
+import com.example.spacelab.dto.student.StudentTaskUnlockRequest;
 import com.example.spacelab.model.student.Student;
 import com.example.spacelab.dto.student.StudentEditDTO;
+import com.example.spacelab.model.task.Task;
 import com.example.spacelab.repository.StudentRepository;
+import com.example.spacelab.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
+import org.springframework.validation.FieldError;
 import org.springframework.validation.Validator;
 
 import java.util.Objects;
@@ -18,6 +23,7 @@ public class StudentValidator implements Validator {
     private final static String EMAIL_PATTERN = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$";
     private final static String TELEGRAM_PATTERN = "^@[A-Za-z0-9_.]{3,}$";
 
+    private final TaskRepository taskRepository;
     private final StudentRepository studentRepository;
 
     @Override
@@ -65,5 +71,21 @@ public class StudentValidator implements Validator {
         else if(!dto.telegram().matches(TELEGRAM_PATTERN))
             e.rejectValue("telegram", "telegram.no-match", "Incorrect telegram format!");
 
+    }
+
+    public void validateNewTaskForStudent(StudentTaskUnlockRequest request, BindingResult bindingResult) {
+        Task task = taskRepository.findById(request.taskID()).orElse(null);
+        if(task != null) {
+            Student student = studentRepository.findById(request.studentID()).orElse(null);
+            if(student != null) {
+                if(task.getActiveStudents().contains(student)) {
+                    bindingResult.addError(new FieldError("StudentTaskUnlockRequest", "taskID", "student already has this task"));
+                }
+            } else {
+                bindingResult.addError(new FieldError("StudentTaskUnlockRequest", "studentID", "this student doesn't exist"));
+            }
+        } else {
+            bindingResult.addError(new FieldError("StudentTaskUnlockRequest", "taskID", "this task doesn't exist"));
+        }
     }
 }

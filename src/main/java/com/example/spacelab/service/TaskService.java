@@ -1,6 +1,7 @@
 package com.example.spacelab.service;
 
 import com.example.spacelab.model.student.Student;
+import com.example.spacelab.model.student.StudentTask;
 import com.example.spacelab.model.task.Task;
 import com.example.spacelab.util.FilterForm;
 import org.springframework.data.domain.Page;
@@ -8,7 +9,8 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
-public interface TaskService extends EntityFilterService<Task>{
+public interface TaskService extends StudentTaskService,
+                                    EntityFilterService<Task>{
 
     List<Task> getTasks();
     Page<Task> getTasks(Pageable pageable);
@@ -23,6 +25,9 @@ public interface TaskService extends EntityFilterService<Task>{
     Task editTask(Task task);
     void deleteTaskById(Long id);
 
+    List<Student> getTaskStudents(Long taskId);
+
+    StudentTask unlockTaskForStudent(Long taskID, Long studentID);
 
 //    List<TaskListDTO> getTasks();
 //    List<TaskListDTO> getTasks(Pageable pageable);

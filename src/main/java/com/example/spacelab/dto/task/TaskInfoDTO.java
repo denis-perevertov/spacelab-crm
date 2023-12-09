@@ -7,9 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Data
 @NoArgsConstructor
@@ -21,10 +19,7 @@ public class TaskInfoDTO {
     @Schema(example = "TaskName")
     private String name;
 
-    @Schema(example = "2")
-    private Long parentTaskId;
-    @Schema(example = "TaskName")
-    private String parentTaskName;
+    private TaskLinkDTO parentTask;
 
     @Schema(example = "ADVANCED")
     private TaskLevel level;
@@ -35,9 +30,9 @@ public class TaskInfoDTO {
     @Schema(example = "Task Description")
     private String taskDescription;
 
-    private Map<Long, String> subtasks = new HashMap<>();
+    private List<TaskLinkDTO> subtasks = new ArrayList<>();
 
-    private Map<Long, String> recommendedLiterature = new HashMap<>();
+    private List<TaskLiteratureDTO> recommendedLiterature = new ArrayList<>();
 
     // для показа выполняющих задание студентов - ID, имя и аватарка
     private List<StudentAvatarDTO> students = new ArrayList<>();
