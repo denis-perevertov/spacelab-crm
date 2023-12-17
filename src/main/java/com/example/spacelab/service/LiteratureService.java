@@ -23,7 +23,7 @@ public interface LiteratureService extends EntityFilterService<Literature>{
     Literature getLiteratureById(Long id);
     Literature createNewLiterature(Literature literature);
     Literature createNewLiterature(LiteratureSaveDTO saveRequest) throws IOException;
-    Literature editLiterature(Literature literature);
+    Literature editLiterature(LiteratureSaveDTO saveRequest) throws IOException;
 
     File getLiteratureFileById(Long id) throws IOException;
 

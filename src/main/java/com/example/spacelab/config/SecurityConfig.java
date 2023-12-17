@@ -62,11 +62,12 @@ public class SecurityConfig {
                                     .requestMatchers("/api/students/register","/*/api/students/register").permitAll()
                                     .requestMatchers("/swagger-ui", "/swagger-ui/**", "/api-docs/**").permitAll()
                                     .requestMatchers("/*/swagger-ui", "/*/swagger-ui/**", "/*/api-docs/**").permitAll()
+                                    .requestMatchers("/error", "/error/*", "/*/error/*").permitAll()
                                     .anyRequest().authenticated()
                 )
                 .requiresChannel(customizer -> customizer
-                                                    .requestMatchers("/*/api/**", "/*/swagger-ui", "/*/swagger-ui/**", "/*/api-docs/**").requiresSecure()
-                                                    .anyRequest().requiresInsecure()
+                                    .requestMatchers("/*/api/**", "/*/swagger-ui", "/*/swagger-ui/**", "/*/api-docs/**").requiresSecure()
+                                    .anyRequest().requiresInsecure()
                 )
                 .sessionManagement(customizer -> customizer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(filterChainExceptionHandler, LogoutFilter.class)
@@ -74,7 +75,6 @@ public class SecurityConfig {
 
         return http.build();
     }
-
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -91,15 +91,6 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-
-//
-//    @Bean
-//    public AuthenticationProvider authenticationProvider() {
-//        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-//        authenticationProvider.setUserDetailsService(userDetailsService());
-//        authenticationProvider.setPasswordEncoder(passwordEncoder());
-//        return authenticationProvider;
-//    }
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {

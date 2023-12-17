@@ -269,8 +269,6 @@ public class CourseMapper {
     public CourseEditDTO fromCourseToEditDTO(Course course) {
         CourseEditDTO dto = new CourseEditDTO();
 
-        System.out.println("Course to map: " + course);
-
         try {
             dto.setId(course.getId());
             dto.setName(course.getName());
@@ -309,8 +307,6 @@ public class CourseMapper {
             dto.setStructure(new CourseTaskStructureDTO(course.getTasks().stream().map(this::fromTaskToCourseDTO).toList()));
 
         } catch (Exception e) {
-            System.out.println("MAPPING ERROR");
-            System.out.println("dto: " + dto);
             throw new MappingException(e.getMessage());
         }
 
@@ -357,8 +353,6 @@ public class CourseMapper {
             dto.setStructure(new CourseTaskStructureDTO(course.getTasks().stream().map(this::fromTaskToCourseDTO).toList()));
 
         } catch (Exception e) {
-            System.out.println("MAPPING ERROR");
-            System.out.println("dto: " + dto);
             throw new MappingException(e.getMessage());
         }
 
@@ -385,13 +379,9 @@ public class CourseMapper {
             course.getStudents().clear();
             course.getStudents().addAll(dto.getMembers().getStudents().stream().map(st -> studentRepository.getReferenceById(st.getId())).toList());
 
-            System.out.println(dto.getStructure().getTasks());
-
             course.getTasks().clear();
             course.getTasks().addAll(dto.getStructure().getTasks().stream().map( t ->taskRepository.getReferenceById(t.getId())).toList());
         } catch (Exception e) {
-            System.out.println("MAPPING ERROR");
-            System.out.println(course);
             throw new MappingException(e.getMessage());
         }
 

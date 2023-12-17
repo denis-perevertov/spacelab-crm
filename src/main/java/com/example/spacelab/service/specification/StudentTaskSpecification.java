@@ -29,9 +29,6 @@ public class StudentTaskSpecification implements Specification<StudentTask> {
     @Override
     public Predicate toPredicate(Root<StudentTask> studentTask, CriteriaQuery<?> q, CriteriaBuilder cb) {
 
-        System.out.println("BEGIN DATE: " + beginDate);
-        System.out.println("END DATE: " + endDate);
-
         List<Predicate> predicates = new ArrayList<>();
         if(studentID != null)
             predicates.add(cb.equal(studentTask.get("student").get("id"), studentID));

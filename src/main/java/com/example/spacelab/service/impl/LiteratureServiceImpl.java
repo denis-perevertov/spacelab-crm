@@ -14,6 +14,7 @@ import com.example.spacelab.util.FilterForm;
 import com.example.spacelab.model.literature.LiteratureType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -25,7 +26,7 @@ import java.io.IOException;
 import java.util.List;
 
 @Service
-@Log
+@Slf4j
 @RequiredArgsConstructor
 public class LiteratureServiceImpl implements LiteratureService{
 
@@ -37,22 +38,26 @@ public class LiteratureServiceImpl implements LiteratureService{
 
     @Override
     public List<Literature> getLiterature() {
+        log.info("Getting the list of all literature entities");
         return literatureRepository.findAll();
     }
 
     @Override
     public Page<Literature> getLiterature(Pageable pageable) {
+        log.info("Getting the page of all lit.entities w/ pageable: {}", pageable);
         return literatureRepository.findAll(pageable);
     }
 
     @Override
     public Page<Literature> getLiterature(FilterForm filters, Pageable pageable) {
+        log.info("Getting the page of all literature entities with pageable and filters: {}", filters);
         Specification<Literature> spec = buildSpecificationFromFilters(filters);
         return literatureRepository.findAll(spec, pageable);
     }
 
     @Override
     public List<Literature> getLiteratureByAllowedCourses(Long... ids) {
+        log.info("Getting the list of all literature entities by allowed IDs: {}", (Object) ids);
         return literatureRepository.findAllByAllowedCourse(ids);
     }
 
@@ -110,8 +115,14 @@ public class LiteratureServiceImpl implements LiteratureService{
 
 
     @Override
-    public Literature editLiterature(Literature literature) {
-        return literatureRepository.save(literature);
+    public Literature editLiterature(LiteratureSaveDTO saveRequest) throws IOException {
+        MultipartFile file = saveRequest.getResource_file();
+        if(file != null && file.getSize() > 0) {
+            fileService.saveFile(file, "literature", "books");
+        }
+        Literature lit = literatureMapper.fromLiteratureSaveDTOtoLiterature(saveRequest);
+        log.info(lit.toString());
+        return literatureRepository.save(lit);
     }
 
     @Override
@@ -133,9 +144,6 @@ public class LiteratureServiceImpl implements LiteratureService{
         String keywords = filters.getKeywords();
 
         Boolean verified = filters.getVerified();
-
-        System.out.println(nameAuthorInput);
-        System.out.println(filters);
 
         Course course = (courseID == null) ? null : courseRepository.getReferenceById(courseID);
         LiteratureType type = (typeString == null) ? null : LiteratureType.valueOf(typeString);

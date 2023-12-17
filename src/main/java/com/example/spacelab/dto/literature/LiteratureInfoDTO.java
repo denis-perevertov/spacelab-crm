@@ -16,7 +16,8 @@ public class LiteratureInfoDTO {
     private String name;
 
     @Schema(example = "3")
-    private Long courseId;
+    private Long courseID;
+
     @Schema(example = "CourseName")
     private String courseName;
 
@@ -24,7 +25,7 @@ public class LiteratureInfoDTO {
     private LiteratureType type;
 
     @Schema(example = "AuthorName")
-    private String author_name;
+    private String author;
 
     @Schema(example = "keyword1, keyword2")
     private String keywords;
@@ -37,6 +38,8 @@ public class LiteratureInfoDTO {
 
     @Schema(example = "book_thumbnail.png")
     private String img;
+
+    private boolean verified;
 
     public LiteratureInfoDTO(Long id, String name) {
         this.id = id;

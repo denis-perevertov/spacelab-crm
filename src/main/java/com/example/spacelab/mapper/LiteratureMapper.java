@@ -4,6 +4,7 @@ import com.example.spacelab.dto.literature.*;
 import com.example.spacelab.exception.MappingException;
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.literature.Literature;
+import com.example.spacelab.repository.LiteratureRepository;
 import com.example.spacelab.service.CourseService;
 import com.example.spacelab.model.literature.LiteratureType;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ import java.util.Map;
 @Log
 @RequiredArgsConstructor
 public class LiteratureMapper {
+    private final LiteratureRepository literatureRepository;
     private final CourseService courseService;
 
 
@@ -116,14 +118,15 @@ public class LiteratureMapper {
         try {
             dto.setId(literature.getId());
             dto.setName(literature.getName());
-            dto.setCourseId(literature.getCourse().getId());
+            dto.setCourseID(literature.getCourse().getId());
             dto.setCourseName(literature.getCourse().getName());
             dto.setType(literature.getType());
-            dto.setAuthor_name(literature.getAuthor());
+            dto.setAuthor(literature.getAuthor());
             dto.setKeywords(literature.getKeywords());
             dto.setResource_link(literature.getResource_link());
             dto.setDescription(literature.getDescription());
             dto.setImg(literature.getImg());
+            dto.setVerified(literature.getIs_verified());
         } catch (Exception e) {
             log.severe("Mapping error: " + e.getMessage());
             log.warning("DTO: " + dto);
@@ -158,7 +161,7 @@ public class LiteratureMapper {
     }
 
     public Literature fromLiteratureSaveDTOtoLiterature (LiteratureSaveDTO dto) {
-        Literature entity = new Literature();
+        Literature entity = (dto.getId() == null) ? new Literature() : literatureRepository.findById(dto.getId()).orElse(new Literature());
 
         try {
             entity.setId(dto.getId());
@@ -171,6 +174,8 @@ public class LiteratureMapper {
             entity.setAuthor((dto.getAuthor() != null && !dto.getAuthor().isEmpty()) ? dto.getAuthor() : "Unknown Author");
             entity.setKeywords(dto.getKeywords());
             entity.setDescription(dto.getDescription());
+
+            entity.setIs_verified(!dto.isNeeds_verification());
 
             if(dto.getType() == LiteratureType.BOOK) {
                 entity.setResource_link(dto.getResource_file().getOriginalFilename());

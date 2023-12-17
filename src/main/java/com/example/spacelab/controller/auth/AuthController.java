@@ -61,13 +61,6 @@ public class AuthController {
         try {
             Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.username(), authRequest.password()));
             SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            System.out.println("attempt to get me data from login method now");
-            System.out.println(SecurityContextHolder.getContext().getAuthentication().getDetails());
-            System.out.println(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
-            System.out.println(SecurityContextHolder.getContext().getAuthentication().getCredentials());
-            System.out.println(SecurityContextHolder.getContext().getAuthentication().getAuthorities().toString());
-
             if(authentication.isAuthenticated()) {
                 String access_token = jwtService.generateToken(authRequest.username());
                 RefreshToken refreshToken = refreshTokenService.createRefreshToken(authRequest.username());
@@ -95,7 +88,6 @@ public class AuthController {
     })
     @PostMapping("/refresh")
     public AuthResponse refreshToken(@RequestBody RefreshTokenRequest refresh_token) {
-        System.out.println(refresh_token.refresh_token());
         RefreshToken refreshToken = refreshTokenService.findByToken(refresh_token.refresh_token());
         if(refreshToken.getExpiryDate().isAfter(Instant.now())) {
             String newAccessToken = jwtService.generateToken(refreshToken.getAdmin().getEmail());
@@ -107,7 +99,6 @@ public class AuthController {
     @GetMapping("/me")
     public AdminLoginInfoDTO getAuthData(HttpServletRequest request) {
         String token = request.getHeader("Authorization");
-        System.out.println("attempt to get me data w/ token : " + token);
         String adminEmail = jwtService.extractUsername(token);
         return adminMapper.fromAdminToLoginInfoDTO(adminService.getAdminByEmail(adminEmail));
     }
@@ -116,9 +107,6 @@ public class AuthController {
     @ResponseBody
     public boolean confirmPassword(@RequestBody String password) {
         Admin loggedInAdmin = (Admin) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        System.out.println(loggedInAdmin.getPassword());
-        System.out.println(password.substring(1, password.length()-1));
-        System.out.println(encoder.matches(loggedInAdmin.getPassword(), password));
         return encoder.matches(password.substring(1, password.length()-1), loggedInAdmin.getPassword());
     }
 

@@ -235,12 +235,10 @@ public class TaskMapper {
         task.setSubtasks(subtasks);
 
         List<Literature> recommendedLiterature = new ArrayList<>();
-        if (taskSaveDTO.getRecommendedLiteratureIDs() != null) {
-            for (Long literatureId : taskSaveDTO.getRecommendedLiteratureIDs()) {
-                Literature literature = literatureRepository.findById(literatureId).orElseThrow();
-                recommendedLiterature.add(literature);
-            }
-        }
+        taskSaveDTO.getLiteratureList().forEach(dto -> {
+            Literature literature = literatureRepository.findById(dto.getId()).orElseThrow();
+            recommendedLiterature.add(literature);
+        });
         task.setRecommendedLiterature(recommendedLiterature);
 
         task.setStatus(taskSaveDTO.getStatus());

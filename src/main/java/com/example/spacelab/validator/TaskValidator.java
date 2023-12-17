@@ -7,10 +7,12 @@ import com.example.spacelab.model.task.Task;
 import com.example.spacelab.repository.AdminRepository;
 import com.example.spacelab.repository.CourseRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class TaskValidator implements Validator {
@@ -26,7 +28,7 @@ public class TaskValidator implements Validator {
     @Override
     public void validate(Object target, Errors e) {
         TaskSaveDTO dto = (TaskSaveDTO) target;
-
+        log.info("dto to validate: {}", dto);
 
         if (dto.getName() == null || dto.getName().isEmpty())
             e.rejectValue("name", "name.empty", "Enter name!");
@@ -48,17 +50,20 @@ public class TaskValidator implements Validator {
             e.rejectValue("status", "status.empty", "Select status of task!");
 
 
-        if (dto.getCompletionTime() == null || dto.getCompletionTime().isEmpty())
-            e.rejectValue("completionTime", "completionTime.empty", "Enter completion time!");
-        else if (dto.getCompletionTime().length() < 2 || dto.getCompletionTime().length() > 100)
+        if (dto.getCompletionTime() == null || dto.getCompletionTime().isEmpty()) {
+//            e.rejectValue("completionTime", "completionTime.empty", "Enter completion time!");
+        }
+        else if (dto.getCompletionTime().length() < 2 || dto.getCompletionTime().length() > 100) {
             e.rejectValue("completionTime", "completionTime.length", "Completion time length: 2-100");
+        }
 
 
-        if (dto.getSkillsDescription() == null || dto.getSkillsDescription().isEmpty())
-            e.rejectValue("skillsDescription", "skillsDescription.empty", "Enter skills description!");
-        else if (dto.getSkillsDescription().length() < 3 || dto.getSkillsDescription().length() > 400)
+        if (dto.getSkillsDescription() == null || dto.getSkillsDescription().isEmpty()) {
+//            e.rejectValue("skillsDescription", "skillsDescription.empty", "Enter skills description!");
+        }
+        else if (dto.getSkillsDescription().length() < 3 || dto.getSkillsDescription().length() > 400) {
             e.rejectValue("skillsDescription", "skillsDescription.length", "Skills description length: 3-400");
-
+        }
 
         if (dto.getTaskDescription() == null || dto.getTaskDescription().isEmpty())
             e.rejectValue("taskDescription", "taskDescription.empty", "Enter task description!");

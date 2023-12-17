@@ -42,9 +42,7 @@ public class TaskSaveDTO {
     @Schema(example = "[1,2,3,4,5]")
     private List<Long> subtasksIDs;
 
-    @Schema(example = "[1,2,3,4,5]")
-    private List<Long> recommendedLiteratureIDs;
-
+    private List<TaskLiteratureDTO> literatureList;
 
     public TaskSaveDTO(Long id, String name) {
         this.id = id;

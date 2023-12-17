@@ -71,7 +71,7 @@ public class TaskController {
     })
     @PreAuthorize("!hasAuthority('tasks.read.NO_ACCESS')")
     @GetMapping
-    public ResponseEntity<Page<TaskListDTO>> getTasks(@Parameter(name = "Filter object", description = "Collection of all filters for search results", example = "{}") FilterForm filters,
+    public ResponseEntity<?> getTasks(@Parameter(name = "Filter object", description = "Collection of all filters for search results", example = "{}") FilterForm filters,
                                                       @RequestParam(required = false, defaultValue = "0") Integer page,
                                                       @RequestParam(required = false, defaultValue = "10") Integer size) {
 
@@ -108,7 +108,7 @@ public class TaskController {
     })
     @PreAuthorize("!hasAuthority('tasks.read.NO_ACCESS')")
     @GetMapping("/{id}")
-    public ResponseEntity<TaskInfoDTO> getTaskById(@PathVariable @Parameter(example = "1") Long id) {
+    public ResponseEntity<?> getTaskById(@PathVariable @Parameter(example = "1") Long id) {
 
         authUtil.checkAccessToCourse(taskService.getTaskById(id).getCourse().getId(), "tasks.read");
 
@@ -124,8 +124,6 @@ public class TaskController {
         return ResponseEntity.ok(studentMapper.fromStudentListToAvatarListDTO(taskService.getTaskStudents(id)));
     }
 
-
-
     // Создание новой задачи
     @Operation(description = "Create new task; ID field does not matter in write/edit operations", summary = "Create new task", tags = {"Task"})
     @ApiResponses(value = {
@@ -137,7 +135,7 @@ public class TaskController {
     })
     @PreAuthorize("!hasAuthority('tasks.write.NO_ACCESS')")
     @PostMapping
-    public ResponseEntity<String> createNewTask( @RequestBody TaskSaveDTO task, BindingResult bindingResult) {
+    public ResponseEntity<?> createNewTask( @RequestBody TaskSaveDTO task, BindingResult bindingResult) {
 
         task.setId(null);
 
@@ -150,7 +148,7 @@ public class TaskController {
             throw new ObjectValidationException(errors);
         }
         Task newTask = taskService.createNewTask(mapper.fromTaskSaveDTOToTask(task));
-        return ResponseEntity.ok("Task with ID:"+newTask.getId()+" created");
+        return ResponseEntity.ok(mapper.fromTaskToListDTO(newTask));
     }
 
     // Получение задачи для редактирования по id
@@ -164,15 +162,13 @@ public class TaskController {
     })
     @PreAuthorize("!hasAuthority('tasks.read.NO_ACCESS')")
     @GetMapping("/edit/{id}")
-    public ResponseEntity<TaskCardDTO> getTaskByIdForEdit(@PathVariable @Parameter(example = "1") Long id) {
+    public ResponseEntity<?> getTaskByIdForEdit(@PathVariable @Parameter(example = "1") Long id) {
 
         authUtil.checkAccessToCourse(taskService.getTaskById(id).getCourse().getId(), "tasks.read");
 
         TaskCardDTO task = mapper.fromTaskToCardDTO(taskService.getTaskById(id));
         return new ResponseEntity<>(task, HttpStatus.OK);
     }
-
-
 
     // Редактирование задачи
     @Operation(description = "Edit task; ID field does not matter in write/edit operations", summary = "Edit task", tags = {"Task"})
@@ -186,7 +182,7 @@ public class TaskController {
     })
     @PreAuthorize("!hasAuthority('tasks.edit.NO_ACCESS')")
     @PutMapping("/{id}")
-    public ResponseEntity<String> editTask(@PathVariable @Parameter(example = "1") Long id,  @RequestBody TaskSaveDTO task, BindingResult bindingResult) {
+    public ResponseEntity<?> editTask(@PathVariable @Parameter(example = "1") Long id,  @RequestBody TaskSaveDTO task, BindingResult bindingResult) {
 
         task.setId(id);
 
@@ -199,8 +195,8 @@ public class TaskController {
             bindingResult.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
             throw new ObjectValidationException(errors);
         }
-        Task newTask = taskService.createNewTask(mapper.fromTaskSaveDTOToTask(task));
-        return ResponseEntity.ok("Task with ID:"+newTask.getId()+" updated");
+        Task editedTask = taskService.editTask(mapper.fromTaskSaveDTOToTask(task));
+        return ResponseEntity.ok(mapper.fromTaskToListDTO(editedTask));
 
     }
 
@@ -217,7 +213,7 @@ public class TaskController {
     })
     @PreAuthorize("!hasAuthority('tasks.delete.NO_ACCESS')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteTask(@PathVariable @Parameter(example = "1") Long id) {
+    public ResponseEntity<?> deleteTask(@PathVariable @Parameter(example = "1") Long id) {
 
         authUtil.checkAccessToCourse(taskService.getTaskById(id).getCourse().getId(), "tasks.delete");
 

@@ -22,9 +22,7 @@ public class SpacelabApplication {
 	public static void main(String[] args) {
 		ApplicationContext ctx = SpringApplication.run(SpacelabApplication.class, args);
 		CourseController cc = ctx.getBean(CourseController.class);
-		System.out.println(cc);
 		AdminController ac = ctx.getBean(AdminController.class);
-		System.out.println(ac);
 	}
 
 }

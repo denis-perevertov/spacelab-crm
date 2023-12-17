@@ -37,6 +37,8 @@ public class LiteratureSaveDTO {
 
     private MultipartFile resource_file;
 
+    private boolean needs_verification;
+
     public LiteratureSaveDTO(Long id, String name) {
         this.id = id;
         this.name = name;

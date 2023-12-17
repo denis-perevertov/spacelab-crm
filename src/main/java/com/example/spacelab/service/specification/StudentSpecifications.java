@@ -32,8 +32,6 @@ public class StudentSpecifications {
         if(ids == null) return (root, query, cb) -> null;
         return (root, query, cb) -> {
             Join<Course, Student> csj = root.join(Student_.COURSE);
-            System.out.println(root.get(Student_.COURSE).get("id").toString());
-            System.out.println(csj.get(Course_.ID));
             return root.get(Student_.COURSE).get("id").in(ids);
         };
     }

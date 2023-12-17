@@ -24,7 +24,6 @@ public class AuthUtil {
     public Admin getLoggedInAdmin() {
         Admin admin = (Admin) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         admin = adminRepository.findById(admin.getId()).orElseThrow();
-        System.out.println(admin.getCourses().toString());
         return admin;
     }
 
