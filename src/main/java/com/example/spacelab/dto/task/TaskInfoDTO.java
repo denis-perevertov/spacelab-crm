@@ -1,7 +1,9 @@
 package com.example.spacelab.dto.task;
 
+import com.example.spacelab.dto.course.CourseLinkDTO;
 import com.example.spacelab.dto.student.StudentAvatarDTO;
 import com.example.spacelab.model.task.TaskLevel;
+import com.example.spacelab.util.TimeUnit;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,10 +23,13 @@ public class TaskInfoDTO {
 
     private TaskLinkDTO parentTask;
 
+    private CourseLinkDTO course;
+
     @Schema(example = "ADVANCED")
     private TaskLevel level;
     @Schema(example = "6-8 days")
     private String completionTime;
+    private TimeUnit completionTimeUnit;
     @Schema(example = "Skills description")
     private String skillsDescription;
     @Schema(example = "Task Description")

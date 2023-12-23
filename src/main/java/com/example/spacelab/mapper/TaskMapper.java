@@ -1,5 +1,6 @@
 package com.example.spacelab.mapper;
 
+import com.example.spacelab.dto.course.CourseLinkDTO;
 import com.example.spacelab.dto.task.*;
 import com.example.spacelab.exception.MappingException;
 import com.example.spacelab.dto.student.StudentTaskDTO;
@@ -7,20 +8,19 @@ import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.literature.Literature;
 import com.example.spacelab.model.student.Student;
 import com.example.spacelab.model.student.StudentTask;
+import com.example.spacelab.model.task.CompletionTime;
 import com.example.spacelab.model.task.Task;
 import com.example.spacelab.repository.CourseRepository;
 import com.example.spacelab.repository.LiteratureRepository;
 import com.example.spacelab.repository.TaskRepository;
+import com.example.spacelab.util.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 @Log
@@ -31,6 +31,7 @@ public class TaskMapper {
     private final CourseRepository courseRepository;
     private final LiteratureRepository literatureRepository;
 
+    private final LiteratureMapper literatureMapper;
     private final StudentMapper studentMapper;
 
 
@@ -42,8 +43,10 @@ public class TaskMapper {
             dto.setName(task.getName());
             dto.setLevel(task.getLevel());
             dto.setStatus(task.getStatus());
-            dto.setCourseID(task.getCourse().getId());
-            dto.setCourseName(task.getCourse().getName());
+            if(Objects.nonNull(task.getCourse())) {
+                dto.setCourseID(task.getCourse().getId());
+                dto.setCourseName(task.getCourse().getName());
+            }
 
         } catch (Exception e) {
             log.severe("Mapping error: " + e.getMessage());
@@ -67,7 +70,6 @@ public class TaskMapper {
             log.warning("DTO: " + dtoList);
             throw new MappingException(e.getMessage());
         }
-
 
         return dtoList;
     }
@@ -178,6 +180,9 @@ public class TaskMapper {
         try {
             dto.setId(task.getId());
             dto.setName(task.getName());
+            if(Objects.nonNull(task.getCourse())) {
+                dto.setCourse(new CourseLinkDTO().setId(task.getCourse().getId()).setName(task.getCourse().getName()));
+            }
 
             if(task.getParentTask() != null) {
                 TaskLinkDTO parentTaskDTO = new TaskLinkDTO();
@@ -188,10 +193,13 @@ public class TaskMapper {
             }
 
             dto.setLevel(task.getLevel());
-            dto.setCompletionTime(task.getCompletionTime());
+            if(task.getCompletionTime() != null) {
+                dto.setCompletionTime(task.getCompletionTime().getValue());
+                dto.setCompletionTimeUnit(task.getCompletionTime().getTimeUnit());
+            }
             dto.setSkillsDescription(task.getSkillsDescription());
             dto.setTaskDescription(task.getTaskDescription());
-            dto.setSubtasks(fromTaskListToTaskLinkListDTO(task.getSubtasks()));
+            dto.setSubtasks(fromTaskListToTaskLinkListDTO(taskRepository.findTaskSubtasks(task.getId())));
             dto.setRecommendedLiterature(fromLiteratureListToTaskLiteratureListDTO(task.getRecommendedLiterature()));
 
             dto.setStudents(studentMapper.fromStudentListToAvatarListDTO(task.getActiveStudents()));
@@ -216,23 +224,30 @@ public class TaskMapper {
         }
 
         if (taskSaveDTO.getCourseID() != null) {
-            Course course = courseRepository.findById(taskSaveDTO.getCourseID()).orElseThrow();
-            task.setCourse(course);
+            if(taskSaveDTO.getCourseID() == -1) {
+                task.setCourse(null);
+            }
+            else {
+                Course course = courseRepository.findById(taskSaveDTO.getCourseID()).orElseThrow();
+                task.setCourse(course);
+            }
         }
 
         task.setLevel(taskSaveDTO.getLevel());
-        task.setCompletionTime(taskSaveDTO.getCompletionTime());
+        task.setCompletionTime(new CompletionTime()
+                .setTimeUnit(taskSaveDTO.getCompletionTimeUnit())
+                .setValue(taskSaveDTO.getCompletionTime()));
         task.setSkillsDescription(taskSaveDTO.getSkillsDescription());
         task.setTaskDescription(taskSaveDTO.getTaskDescription());
 
-        List<Task> subtasks = new ArrayList<>();
-        if (taskSaveDTO.getSubtasksIDs() != null) {
-            for (Long subtaskId : taskSaveDTO.getSubtasksIDs()) {
-                Task subtask = taskRepository.findById(subtaskId).orElseThrow();
-                subtasks.add(subtask);
-            }
-        }
-        task.setSubtasks(subtasks);
+//        List<Task> subtasks = new ArrayList<>();
+//        if (taskSaveDTO.getSubtasksIDs() != null) {
+//            for (Long subtaskId : taskSaveDTO.getSubtasksIDs()) {
+//                Task subtask = taskRepository.findById(subtaskId).orElseThrow();
+//                subtasks.add(subtask);
+//            }
+//        }
+//        task.setSubtasks(subtasks);
 
         List<Literature> recommendedLiterature = new ArrayList<>();
         taskSaveDTO.getLiteratureList().forEach(dto -> {
@@ -263,7 +278,10 @@ public class TaskMapper {
             }
 
             dto.setLevel(task.getLevel());
-            dto.setCompletionTime(task.getCompletionTime());
+            if(task.getCompletionTime() != null) {
+                dto.setCompletionTime(task.getCompletionTime().getValue());
+                dto.setCompletionTimeUnit(task.getCompletionTime().getTimeUnit());
+            }
             dto.setSkillsDescription(task.getSkillsDescription());
             dto.setTaskDescription(task.getTaskDescription());
 
@@ -300,4 +318,45 @@ public class TaskMapper {
     }
 
 
+    public TaskSaveDTO fromTaskToSaveDTO(Task task) {
+        TaskSaveDTO dto = new TaskSaveDTO();
+
+        try {
+            dto.setId(task.getId());
+            dto.setName(task.getName());
+            if(task.getParentTask() != null) dto.setParentTaskID(task.getParentTask().getId());
+            if(task.getCourse() != null) dto.setCourseID(task.getCourse().getId());
+            dto.setLevel(task.getLevel());
+            dto.setStatus(task.getStatus());
+            if(task.getCompletionTime() != null) {
+                dto.setCompletionTime(task.getCompletionTime().getValue());
+                dto.setCompletionTimeUnit(task.getCompletionTime().getTimeUnit());
+            }
+            dto.setSkillsDescription(task.getSkillsDescription());
+            dto.setTaskDescription(task.getTaskDescription());
+            dto.setSubtasksIDs(taskRepository.findTaskSubtasks(task.getId()).stream().map(Task::getId).toList());
+            dto.setLiteratureList(task.getRecommendedLiterature().stream().map(this::fromLiteratureToTaskLiteratureDTO).toList());
+
+        } catch (Exception e) {
+            log.severe("Mapping error: " + e.getMessage());
+            log.warning("DTO: " + dto);
+            throw new MappingException(e.getMessage());
+        }
+
+        return dto;
+    }
+
+    public List<SubtaskDTO> fromSubtaskToDTOList(List<Task> subtasks) {
+        return subtasks.stream()
+                .map(subtask -> new SubtaskDTO(subtask.getId(), subtask.getName(), subtask.getStatus()))
+                .toList();
+    }
+
+    public TaskModalDTO fromTaskToModalDTO(Task task) {
+        return new TaskModalDTO()
+                .setId(task.getId())
+                .setName(task.getName())
+                .setLevel(task.getLevel())
+                .setStatus(task.getStatus());
+    }
 }

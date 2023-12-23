@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 public class SelectDTO {
 
     @Schema(example = "10")
-    private Long id;
+    private String id;
 
     @Schema(example = "CourseName")
     private String name;

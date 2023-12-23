@@ -63,7 +63,7 @@ public class StudentTaskController {
                                                           @RequestParam(required = false, defaultValue = "0") int page,
                                                           @RequestParam(required = false, defaultValue = "10") int size) {
 
-        if(status == null) status = StudentTaskStatus.IN_WORK;
+        if(status == null) status = StudentTaskStatus.UNLOCKED;
 
         Pageable pageable = PageRequest.of(page, size);
         Specification<StudentTask> spec = new StudentTaskSpecification(
@@ -76,7 +76,7 @@ public class StudentTaskController {
                 endDate
         );
 
-        Page<StudentTaskDTO> taskPage = studentService
+        Page<StudentTaskDTO> taskPage = taskService
                 .getStudentTasks(spec, pageable)
                 .map(taskMapper::fromStudentTaskToDTO);
 
@@ -88,14 +88,14 @@ public class StudentTaskController {
     public ResponseEntity<Object> getSingleTaskOfSingleStudent(@PathVariable Long taskID) {
 
         // todo check course access
-        return ResponseEntity.ok().body(taskMapper.fromStudentTaskToDTO(studentService.getStudentTask(taskID)));
+        return ResponseEntity.ok().body(taskMapper.fromStudentTaskToDTO(taskService.getStudentTask(taskID)));
     }
 
     // Получение информации задания
     @GetMapping("/{taskID}/info")
     public ResponseEntity<?> getStudentTaskInfo(@PathVariable Long taskID) {
 
-        TaskInfoDTO info = taskMapper.fromTaskToInfoDTO(studentService.getStudentTask(taskID).getTaskReference());
+        TaskInfoDTO info = taskMapper.fromTaskToInfoDTO(taskService.getStudentTask(taskID).getTaskReference());
         return ResponseEntity.ok(info);
     }
 

@@ -9,8 +9,8 @@ import java.util.Locale;
 @AllArgsConstructor
 public class ProgramDuration {
 
-    String value;
-    TimeUnit unit;
+    private final String value;
+    private final TimeUnit unit;
     
     public ProgramDuration(String completionTime) {
         this.value = completionTime.split(" ")[0];

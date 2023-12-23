@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Repository
@@ -21,4 +22,27 @@ public interface TaskRepository extends JpaRepository<Task, Long>, JpaSpecificat
     @Query("SELECT t FROM Task t WHERE t.course.id IN :ids")
     Page<Task> findAllByAllowedCoursePage(Pageable pageable, @Param("ids") Long... ids);
 
+    @Query("""
+           SELECT t
+           FROM Task t
+           WHERE t.parentTask.id = :id
+           """)
+    List<Task> findTaskSubtasks(Long id);
+
+    @Query("""
+           SELECT t
+           FROM Task t
+           WHERE t.course.id = :id
+           """)
+    List<Task> getCourseTasks(Long id);
+
+    @Query("""
+           SELECT t
+           FROM Task t
+           WHERE t.course IS NULL
+           AND t.parentTask IS NULL
+           """)
+    Page<Task> findAvailableParentTasks(Pageable pageable);
+
+    List<Task> findTasksByParentTask(Task parentTask);
 }

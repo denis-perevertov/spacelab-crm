@@ -30,10 +30,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.apache.coyote.Response;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -78,7 +75,7 @@ public class LessonController {
 
         Page<LessonListDTO> lessons;
         Page<Lesson> lessonPage = new PageImpl<>(new ArrayList<>());
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "id");
 
         Admin loggedInAdmin = authUtil.getLoggedInAdmin();
         PermissionType permissionForLoggedInAdmin = loggedInAdmin.getRole().getPermissions().getReadStudents();
@@ -115,7 +112,11 @@ public class LessonController {
         return new ResponseEntity<>(less, HttpStatus.OK);
     }
 
-
+    @GetMapping("/{id}/update")
+    public ResponseEntity<?> getLessonInfoForUpdate(@PathVariable Long id) {
+        authUtil.checkAccessToCourse(lessonService.getLessonById(id).getCourse().getId(), "lessons.edit");
+        return ResponseEntity.ok(mapper.fromLessonToSaveDTO(lessonService.getLessonById(id)));
+    }
 
     //Создание урока
     @Operation(description = "Create new lesson w/ PLANNED status; ID field does not matter in write/edit operations", summary = "Create new lesson", tags = {"Lesson"})
@@ -128,7 +129,8 @@ public class LessonController {
     })
     @PreAuthorize("!hasAuthority('lessons.write.NO_ACCESS')")
     @PostMapping
-    public ResponseEntity<String> createNewLessonBeforeStart(@RequestBody LessonSaveBeforeStartDTO lesson, BindingResult bindingResult) {
+    public ResponseEntity<?> createNewLessonBeforeStart(@RequestBody LessonSaveBeforeStartDTO lesson,
+                                                             BindingResult bindingResult) {
 
         authUtil.checkAccessToCourse(lesson.getCourseID(), "lessons.write");
 
@@ -141,8 +143,8 @@ public class LessonController {
             bindingResult.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
             throw new ObjectValidationException(errors);
         }
-        lessonService.createNewLesson(mapper.BeforeStartDTOtoLesson(lesson));
-        return new ResponseEntity<>("Successful save", HttpStatus.CREATED);
+        Lesson l = lessonService.createNewLesson(mapper.BeforeStartDTOtoLesson(lesson));
+        return new ResponseEntity<>(l.getId(), HttpStatus.CREATED);
     }
 
 
@@ -158,7 +160,7 @@ public class LessonController {
     })
     @PreAuthorize("!hasAuthority('lessons.edit.NO_ACCESS')")
     @PutMapping("/{id}")
-    public ResponseEntity<String> editLessonBeforeStart(@PathVariable @Parameter(example = "1") Long id,
+    public ResponseEntity<?> editLessonBeforeStart(@PathVariable @Parameter(example = "1") Long id,
                                                         @RequestBody LessonSaveBeforeStartDTO lesson, BindingResult bindingResult) {
 
         authUtil.checkAccessToCourse(lessonService.getLessonById(id).getCourse().getId(), "lessons.edit");
@@ -172,8 +174,8 @@ public class LessonController {
             bindingResult.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
             throw new ObjectValidationException(errors);
         }
-        lessonService.editLesson(mapper.BeforeStartDTOtoLesson(lesson));
-        return new ResponseEntity<>("Successful update", HttpStatus.OK);
+        Lesson l = lessonService.editLesson(mapper.BeforeStartDTOtoLesson(lesson));
+        return new ResponseEntity<>(l.getId(), HttpStatus.OK);
     }
 
     //Удаление урока

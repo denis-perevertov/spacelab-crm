@@ -9,6 +9,11 @@ import java.time.LocalDate;
 
 public class AdminSpecifications {
 
+    public static Specification<Admin> hasId(Long id) {
+        if(id == null) return (root, query, cb) -> null;
+        return (root, query, cb) -> cb.equal(root.get("id"), id);
+    }
+
     public static Specification<Admin> hasNameLike(String input) {
         if(input == null) return (root, query, cb) -> null;
         return (root, query, cb) ->

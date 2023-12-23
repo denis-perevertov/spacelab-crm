@@ -9,14 +9,21 @@ import com.example.spacelab.model.student.StudentInviteRequest;
 import com.example.spacelab.model.student.Student;
 import com.example.spacelab.model.student.StudentTask;
 import com.example.spacelab.dto.student.StudentCardDTO;
+import com.example.spacelab.model.task.Task;
 import com.example.spacelab.repository.*;
 import com.example.spacelab.service.StudentService;
+import com.example.spacelab.service.TaskService;
 import com.example.spacelab.service.specification.StudentSpecifications;
 import com.example.spacelab.util.FilterForm;
 import com.example.spacelab.model.student.StudentAccountStatus;
 import com.example.spacelab.model.student.StudentTaskStatus;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -27,7 +34,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-@Log
+@Slf4j
 @RequiredArgsConstructor
 public class StudentServiceImpl implements StudentService {
 
@@ -36,6 +43,8 @@ public class StudentServiceImpl implements StudentService {
     private final InviteStudentRequestRepository inviteRepository;
     private final StudentTaskRepository studentTaskRepository;
     private final UserRoleRepository userRoleRepository;
+
+    private final TaskService taskService;
 
     private final StudentMapper studentMapper;
     private final TaskMapper taskMapper;
@@ -58,6 +67,17 @@ public class StudentServiceImpl implements StudentService {
                 " / size " + pageable.getPageSize() + " and filters: " + filters);
         Specification<Student> spec = buildSpecificationFromFilters(filters);
         return studentRepository.findAll(spec, pageable);
+    }
+
+    @Override
+    public Page<Student> getStudentsWithoutCourses(FilterForm filters, Pageable pageable) {
+        log.info("Getting all students without courses with page {} / size {} and filters: {}",
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                filters);
+        Specification<Student> noCourseSpec = (root, query, criteriaBuilder) -> criteriaBuilder.isNull(root.get("course"));
+        Specification<Student> generalSpec = buildSpecificationFromFilters(filters).and(noCourseSpec);
+        return studentRepository.findAll(generalSpec, pageable);
     }
 
     public List<Student> getStudentsByAllowedCourses(Long... ids) {
@@ -136,42 +156,58 @@ public class StudentServiceImpl implements StudentService {
      */
 
 
-    @Override
-    public List<StudentTask> getStudentTasks(Long studentID) {
-        log.info("Getting tasks of student w/ ID: " + studentID);
-        return studentTaskRepository.findStudentTasks(studentID);
-    }
-
-    @Override
-    public List<StudentTask> getStudentTasks(Long studentID, StudentTaskStatus status) {
-        log.info("Getting tasks(STATUS:"+status.toString()+") of student w/ ID: " + studentID);
-        return studentTaskRepository.findStudentTasksWithStatus(studentID, status);
-    }
-
-    @Override
-    public Page<StudentTask> getStudentTasks(Long studentID, StudentTaskStatus status, Pageable pageable) {
-        log.info("Getting "+pageable.getPageSize()+" tasks(STATUS:"+status.toString()+")" +
-                " of student w/ ID: " + studentID +
-                " || page " + pageable.getPageNumber());
-        return studentTaskRepository.findStudentTasksWithStatusAndPage(studentID, status, pageable);
-    }
-
-    @Override
-    public Page<StudentTask> getStudentTasks(Specification<StudentTask> spec, Pageable pageable) {
-        return studentTaskRepository.findAll(spec, pageable);
-    }
-
-    @Override
-    public StudentTask getStudentTask(Long taskID) {
-        log.info("Getting student task with taskID: " + taskID);
-        StudentTask task = studentTaskRepository.findById(taskID).orElseThrow(() -> new ResourceNotFoundException("Student task not found", StudentTask.class));
-        return task;
-    }
-
-    @Override
-    public void completeStudentTask(Long taskID) {
-
-    }
+//    @Override
+//    public List<StudentTask> getStudentTasks(Long studentID) {
+//        log.info("Getting tasks of student w/ ID: " + studentID);
+//        return studentTaskRepository.findStudentTasks(studentID);
+//    }
+//
+//    @Override
+//    public List<StudentTask> getStudentTasks(Long studentID, StudentTaskStatus status) {
+//        log.info("Getting tasks(STATUS:"+status.toString()+") of student w/ ID: " + studentID);
+//        return studentTaskRepository.findStudentTasksWithStatus(studentID, status);
+//    }
+//
+//    @Override
+//    public Page<StudentTask> getStudentTasks(Long studentID, StudentTaskStatus status, Pageable pageable) {
+//        log.info("Getting "+pageable.getPageSize()+" tasks(STATUS:"+status.toString()+")" +
+//                " of student w/ ID: " + studentID +
+//                " || page " + pageable.getPageNumber());
+//        return studentTaskRepository.findStudentTasksWithStatusAndPage(studentID, status, pageable);
+//    }
+//
+//    @Override
+//    public Page<StudentTask> getStudentTasks(Specification<StudentTask> spec, Pageable pageable) {
+//        return studentTaskRepository.findAll(spec, pageable);
+//    }
+//
+//    @Override
+//    public StudentTask getStudentTask(Long taskID) {
+//        log.info("Getting student task with taskID: " + taskID);
+//        StudentTask task = studentTaskRepository.findById(taskID).orElseThrow(() -> new ResourceNotFoundException("Student task not found", StudentTask.class));
+//        return task;
+//    }
+//
+//    @Override
+//    public void createStudentTasksOnCourseTransfer(Student student, Course course) {
+//
+//        List<Task> courseTaskList = course.getTasks();
+//
+//        // clear student tasks which were not completed
+//        List<StudentTask> oldStudentTasks = student.getTasks();
+//        oldStudentTasks.stream()
+//                .filter(studentTask -> studentTask.getStatus() != StudentTaskStatus.COMPLETED)
+//                .forEach(studentTaskRepository::delete);
+//
+//        // create new task snapshots for student
+//
+//
+//    }
+//
+//    @Override
+//    public void completeStudentTask(Long taskID) {
+//
+//    }
 
     @Override
     public String createInviteStudentToken(StudentInviteRequest request) {
@@ -181,6 +217,12 @@ public class StudentServiceImpl implements StudentService {
         log.info("Created token: " + id + ", saving token with set parameters in DB");
         request = inviteRepository.save(request);
         return request.getId();
+    }
+
+    @Override
+    public void transferStudentToCourse(Student student, Course course) {
+        student.setCourse(course);
+        taskService.createStudentTasksOnCourseTransfer(student, course);
     }
 
     @Override
@@ -199,6 +241,7 @@ public class StudentServiceImpl implements StudentService {
 
         log.info("Building specification from filters: " + filters);
 
+        Long studentId = filters.getId();
         String combined = filters.getCombined();
         String nameEmailInput = filters.getName();
         Long courseID = filters.getCourse();
@@ -213,6 +256,7 @@ public class StudentServiceImpl implements StudentService {
         Specification<Student> combinedSpec = Specification.where(StudentSpecifications.hasNameOrEmailLike(combined).or(StudentSpecifications.hasTelegramLike(combined)));
 
         Specification<Student> spec = Specification.where(combinedSpec
+                                                    .and(StudentSpecifications.hasId(studentId))
                                                     .and(StudentSpecifications.hasCourse(course))
                                                     .and(StudentSpecifications.hasPhoneLike(phoneInput))
                                                     .and(StudentSpecifications.hasRatingOrHigher(ratingInput))

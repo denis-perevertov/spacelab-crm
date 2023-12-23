@@ -1,7 +1,8 @@
 package com.example.spacelab.controller;
 
 
-import com.example.spacelab.dto.task.TaskCardDTO;
+import com.example.spacelab.dto.course.CourseSelectDTO;
+import com.example.spacelab.dto.task.*;
 import com.example.spacelab.exception.ErrorMessage;
 import com.example.spacelab.exception.ObjectValidationException;
 import com.example.spacelab.mapper.StudentMapper;
@@ -11,9 +12,6 @@ import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.lesson.LessonStatus;
 import com.example.spacelab.model.role.PermissionType;
 import com.example.spacelab.model.task.Task;
-import com.example.spacelab.dto.task.TaskInfoDTO;
-import com.example.spacelab.dto.task.TaskSaveDTO;
-import com.example.spacelab.dto.task.TaskListDTO;
 import com.example.spacelab.model.task.TaskLevel;
 import com.example.spacelab.model.task.TaskStatus;
 import com.example.spacelab.service.TaskService;
@@ -30,10 +28,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -77,7 +72,7 @@ public class TaskController {
 
         Page<TaskListDTO> tasks = new PageImpl<>(new ArrayList<>());
         Page<Task> taskPage;
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "id");
 
         Admin loggedInAdmin = authUtil.getLoggedInAdmin();
         PermissionType permissionForLoggedInAdmin = loggedInAdmin.getRole().getPermissions().getReadStudents();
@@ -110,7 +105,10 @@ public class TaskController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getTaskById(@PathVariable @Parameter(example = "1") Long id) {
 
-        authUtil.checkAccessToCourse(taskService.getTaskById(id).getCourse().getId(), "tasks.read");
+        Task t = taskService.getTaskById(id);
+        if(t.getCourse() != null) {
+            authUtil.checkAccessToCourse(t.getCourse().getId(), "tasks.read");
+        }
 
         TaskInfoDTO task = mapper.fromTaskToInfoDTO(taskService.getTaskById(id));
         return new ResponseEntity<>(task, HttpStatus.OK);
@@ -119,9 +117,22 @@ public class TaskController {
     @GetMapping("/{id}/students")
     public ResponseEntity<?> getTaskStudentsById(@PathVariable Long id) {
 
-        authUtil.checkAccessToCourse(taskService.getTaskById(id).getCourse().getId(), "tasks.read");
+        Task t = taskService.getTaskById(id);
+        if(t.getCourse() != null) {
+            authUtil.checkAccessToCourse(t.getCourse().getId(), "tasks.read");
+        }
 
         return ResponseEntity.ok(studentMapper.fromStudentListToAvatarListDTO(taskService.getTaskStudents(id)));
+    }
+
+    @GetMapping("/{id}/course")
+    public ResponseEntity<?> getTaskCourseById(@PathVariable Long id) {
+        Task t = taskService.getTaskById(id);
+        if(t.getCourse() != null) {
+            authUtil.checkAccessToCourse(t.getCourse().getId(), "tasks.read");
+            return ResponseEntity.ok(new CourseSelectDTO(t.getCourse().getId(), t.getCourse().getName()));
+        }
+        else return ResponseEntity.notFound().build();
     }
 
     // Создание новой задачи
@@ -139,7 +150,9 @@ public class TaskController {
 
         task.setId(null);
 
-        authUtil.checkAccessToCourse(task.getCourseID(), "tasks.write");
+        if(task.getCourseID() != null) {
+            authUtil.checkAccessToCourse(task.getCourseID(), "tasks.write");
+        }
 
         taskValidator.validate(task, bindingResult);
         if (bindingResult.hasErrors()) {
@@ -164,9 +177,12 @@ public class TaskController {
     @GetMapping("/edit/{id}")
     public ResponseEntity<?> getTaskByIdForEdit(@PathVariable @Parameter(example = "1") Long id) {
 
-        authUtil.checkAccessToCourse(taskService.getTaskById(id).getCourse().getId(), "tasks.read");
+        Task t = taskService.getTaskById(id);
+        if(t.getCourse() != null) {
+            authUtil.checkAccessToCourse(t.getCourse().getId(), "tasks.read");
+        }
 
-        TaskCardDTO task = mapper.fromTaskToCardDTO(taskService.getTaskById(id));
+        TaskSaveDTO task = mapper.fromTaskToSaveDTO(taskService.getTaskById(id));
         return new ResponseEntity<>(task, HttpStatus.OK);
     }
 
@@ -185,9 +201,15 @@ public class TaskController {
     public ResponseEntity<?> editTask(@PathVariable @Parameter(example = "1") Long id,  @RequestBody TaskSaveDTO task, BindingResult bindingResult) {
 
         task.setId(id);
-
-        authUtil.checkAccessToCourse(taskService.getTaskById(id).getCourse().getId(), "tasks.edit");
-        authUtil.checkAccessToCourse(task.getCourseID(), "tasks.edit");
+        Task t = taskService.getTaskById(id);
+        // check access to editing tasks of current course
+        if(t.getCourse() != null) {
+            authUtil.checkAccessToCourse(t.getCourse().getId(), "tasks.edit");
+        }
+        // check access to editing tasks of new course
+        if(t.getCourse() != null && !t.getCourse().getId().equals(task.getCourseID())) {
+            authUtil.checkAccessToCourse(task.getCourseID(), "tasks.edit");
+        }
 
         taskValidator.validate(task, bindingResult);
         if (bindingResult.hasErrors()) {
@@ -199,8 +221,6 @@ public class TaskController {
         return ResponseEntity.ok(mapper.fromTaskToListDTO(editedTask));
 
     }
-
-
 
     // Удаление задачи
     @Operation(description = "Delete task", summary = "Delete task", tags = {"Task"})
@@ -215,10 +235,35 @@ public class TaskController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteTask(@PathVariable @Parameter(example = "1") Long id) {
 
-        authUtil.checkAccessToCourse(taskService.getTaskById(id).getCourse().getId(), "tasks.delete");
+        Task task = taskService.getTaskById(id);
+        if(task.getCourse() != null) {
+            authUtil.checkAccessToCourse(task.getCourse().getId(), "tasks.delete");
+        }
 
         taskService.deleteTaskById(id);
         return ResponseEntity.ok("Task with ID:"+id+" deleted");
+    }
+
+    // Получение подзадач для какой-то 1 задачи
+    @GetMapping("/{id}/get-subtasks")
+    public ResponseEntity<?> getSubtasks(@PathVariable Long id) {
+
+        Task task = taskService.getTaskById(id);
+        if(task.getCourse() != null) {
+            authUtil.checkAccessToCourse(task.getCourse().getId(), "tasks.read");
+        }
+
+        List<Task> subtasks = taskService.getTaskSubtasks(id);
+        return ResponseEntity.ok(mapper.fromSubtaskToDTOList(subtasks));
+    }
+
+    // Получение задач(родительских) без курса
+    @GetMapping("/available")
+    public ResponseEntity<?> getAvailableTasks(@RequestParam(defaultValue = "0") int page,
+                                               @RequestParam(defaultValue = "5") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Task> availableTasks = taskService.getAvailableTasks(pageable);
+        return ResponseEntity.ok(new PageImpl<>(availableTasks.stream().map(mapper::fromTaskToModalDTO).toList(), pageable, availableTasks.getTotalElements()));
     }
 
     // Получение списка уровней

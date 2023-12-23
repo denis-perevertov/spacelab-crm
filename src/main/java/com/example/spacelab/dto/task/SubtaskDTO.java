@@ -1,19 +1,17 @@
 package com.example.spacelab.dto.task;
 
+import com.example.spacelab.model.task.TaskStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
+import lombok.experimental.Accessors;
 
 @Data
-@NoArgsConstructor
+@Accessors(chain = true)
 @AllArgsConstructor
-public class TaskCourseDTO {
-
+@NoArgsConstructor
+public class SubtaskDTO {
     private Long id;
-    private int taskIndex;
     private String name;
-    private List<TaskCourseDTO> subtasks;
-
+    private TaskStatus status;
 }

@@ -36,25 +36,34 @@ public class LessonMapper {
         if (course != null) {
             dto.setCourseId(course.getId());
             dto.setCourseName(course.getName());
+
+            if(course.getMentor() != null) {
+                dto.setMentorId(course.getMentor().getId());
+                dto.setMentorName(course.getMentor().getFullName());
+            }
+
+            if(course.getManager() != null) {
+                dto.setManagerId(course.getManager().getId());
+                dto.setManagerName(course.getManager().getFullName());
+            }
         }
 
         dto.setLink(lesson.getLink());
         dto.setStatus(lesson.getStatus().toString());
 
-        Admin mentor = lesson.getMentor();
-        if (mentor != null) {
-            dto.setMentorId(mentor.getId());
-            dto.setMentorName(mentor.getFirstName()+" "+mentor.getLastName());
+        if(lesson.getLessonReport() != null) {
+            dto.setPresentStudentsQuantity(
+                    lesson.getLessonReport()
+                            .getRows()
+                            .stream()
+                            .filter(LessonReportRow::getWasPresent)
+                            .count()
+                            +
+                            " / "
+                            +
+                            lesson.getLessonReport().getRows().size()
+            );
         }
-
-        Admin manager = lesson.getManager();
-        if (manager != null) {
-            dto.setManagerId(manager.getId());
-            dto.setManagerName(manager.getFirstName()+" "+manager.getLastName());
-        }
-
-        if(lesson.getLessonReport() != null) dto.setPresentStudentsQuantity(lesson.getLessonReport().getRows().stream().filter(row -> row.getWasPresent()).count()+
-                "/ "+lesson.getLessonReport().getRows().size());
 
         return dto;
     }
@@ -120,26 +129,26 @@ public class LessonMapper {
         Lesson lesson = new Lesson();
 
         if(dto.getId() != null && dto.getId()>0) lesson.setId(dto.getId());
-
-        lesson.setDatetime(LocalDateTime.of(dto.getDate(), dto.getTime()));
-
+        lesson.setDatetime(dto.getLessonStartTime());
         Course course = courseService.getCourseById(dto.getCourseID());
         lesson.setCourse(course);
-
-        Admin mentor = adminService.getAdminById(dto.getMentorID());
-        lesson.setMentor(mentor);
-
-        Admin manager = adminService.getAdminById(dto.getManagerID());
-        lesson.setManager(manager);
-
         lesson.setStatus(dto.getStatus());
-
         lesson.setLink(dto.getLink());
-
         lesson.setStartsAutomatically(dto.getStartsAutomatically());
 
-//        lesson.setLessonReport(new LessonReport());
-
         return lesson;
+    }
+
+    public LessonSaveBeforeStartDTO fromLessonToSaveDTO(Lesson lesson) {
+        LessonSaveBeforeStartDTO dto = new LessonSaveBeforeStartDTO();
+
+        dto.setId(lesson.getId());
+        dto.setLessonStartTime(lesson.getDatetime());
+        dto.setCourseID(lesson.getCourse().getId());
+        dto.setLink(lesson.getLink());
+        dto.setStatus(lesson.getStatus());
+        dto.setStartsAutomatically(lesson.getStartsAutomatically());
+
+        return dto;
     }
 }

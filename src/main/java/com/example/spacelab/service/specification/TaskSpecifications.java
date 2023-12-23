@@ -6,13 +6,17 @@ import com.example.spacelab.model.task.Task;
 import com.example.spacelab.model.task.TaskLevel;
 import com.example.spacelab.model.task.TaskStatus;
 import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Order;
 import org.springframework.data.jpa.domain.Specification;
 
 public class TaskSpecifications {
 
     public static Specification<Task> hasCourse(Course course) {
         if(course == null) return (root, query, cb) -> null;
-        return (root, query, cb) -> cb.equal(root.get("course"), course);
+        return (root, query, cb) -> {
+            query.orderBy(cb.asc(root.get("id")));
+            return cb.equal(root.get("course"), course);
+        };
     }
 
     public static Specification<Task> hasCourseIDs(Long... ids) {
@@ -37,4 +41,5 @@ public class TaskSpecifications {
         if(status == null) return (root, query, cb) -> null;
         return (root, query, cb) -> cb.equal(root.get("status"), status);
     }
+
 }

@@ -27,6 +27,8 @@ public class Course {
 
     private String name;
 
+    private byte[] icon;
+
     @DateTimeFormat(pattern = "MM/dd/yyyy")
     private LocalDate beginningDate;
     @DateTimeFormat(pattern = "MM/dd/yyyy")
@@ -45,7 +47,7 @@ public class Course {
     private List<Student> students = new ArrayList<>();
 
     @ToString.Exclude
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
     private List<Task> tasks = new ArrayList<>();
 
     @ToString.Exclude

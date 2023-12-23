@@ -8,7 +8,10 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,11 +20,6 @@ import java.util.List;
 @Table(name="tasks")
 @NoArgsConstructor
 public class Task {
-
-    /*
-    TODO
-    - время выполнения
-     */
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -35,12 +33,15 @@ public class Task {
     @JoinColumn(name = "course_id")
     private Course course;
 
+    private int taskIndex;  // это просто дикая хрень, я хз
+
     private String name;
 
     @Enumerated(value = EnumType.STRING)
     private TaskLevel level;
 
-    private String completionTime;
+    @Embedded
+    private CompletionTime completionTime;
 
     @Column(columnDefinition = "TEXT")
     private String skillsDescription;
@@ -66,6 +67,12 @@ public class Task {
 
     @Enumerated(value = EnumType.STRING)
     private TaskStatus status;
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 
     public Task(Long id, String name) {
         this.id = id;

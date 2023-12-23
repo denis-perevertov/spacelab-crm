@@ -1,6 +1,7 @@
 package com.example.spacelab.controller;
 
 import com.example.spacelab.dto.course.*;
+import com.example.spacelab.dto.task.TaskCourseDTO;
 import com.example.spacelab.exception.ErrorMessage;
 import com.example.spacelab.exception.ObjectValidationException;
 import com.example.spacelab.mapper.CourseMapper;
@@ -23,21 +24,22 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
 @Tag(name = "Course", description = "Course controller")
 @RestController
@@ -71,7 +73,7 @@ public class CourseController {
 
         Page<CourseListDTO> courseListDTO = new PageImpl<>(new ArrayList<>());
         Page<Course> coursePage;
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "id");
 
         PermissionType permissionForLoggedInAdmin = loggedInAdmin.getRole().getPermissions().getReadCourses();
         List<Course> adminCourses = loggedInAdmin.getCourses();
@@ -108,6 +110,17 @@ public class CourseController {
 
         CourseInfoDTO course = mapper.fromCourseToInfoDTO(courseService.getCourseById(id));
         return new ResponseEntity<>(course, HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/tasks")
+    public ResponseEntity<?> getCourseTasks(@PathVariable Long id) {
+        authUtil.checkAccessToCourse(id, "courses.read");
+        List<TaskCourseDTO> courseTasks =
+                courseService.getCourseTasks(id)
+                        .stream()
+                        .map(mapper::fromTaskToCourseDTO)
+                        .toList();
+        return ResponseEntity.ok(courseTasks);
     }
 
 
@@ -153,7 +166,7 @@ public class CourseController {
     })
     @PreAuthorize("!hasAuthority('courses.write.NO_ACCESS')")
     @PostMapping
-    public ResponseEntity<String> createNewCourse( @RequestBody CourseEditDTO dto,
+    public ResponseEntity<?> createNewCourse( @RequestBody CourseEditDTO dto,
                                                    BindingResult bindingResult) {
 
         dto.setId(null);
@@ -168,8 +181,9 @@ public class CourseController {
             throw new ObjectValidationException(errors);
         }
 
-        courseService.createNewCourse(mapper.fromEditDTOToCourse(dto));
-        return new ResponseEntity<>("Course created", HttpStatus.CREATED);
+//        Course course = courseService.createNewCourse(mapper.fromEditDTOToCourse(dto));
+        Course course = courseService.createNewCourse(dto);
+        return new ResponseEntity<>(course.getId(), HttpStatus.CREATED);
     }
 
 
@@ -186,8 +200,8 @@ public class CourseController {
     })
     @PreAuthorize("!hasAuthority('courses.edit.NO_ACCESS')")
     @PutMapping("/{id}")
-    public ResponseEntity<String> updateCourse(@PathVariable @Parameter(example = "1") Long id,
-                                               @RequestBody CourseEditDTO dto,
+    public ResponseEntity<?> updateCourse(@PathVariable @Parameter(example = "1") Long id,
+                                           @RequestBody CourseEditDTO dto,
                                                BindingResult bindingResult) {
 
         dto.setId(id);
@@ -205,11 +219,9 @@ public class CourseController {
 
         Course c = mapper.fromEditDTOToCourse(dto);
         log.info("COURSE TO EDIT: " + c);
-        courseService.editCourse(c);
-        return new ResponseEntity<>("Course updated", HttpStatus.OK);
+        Course course = courseService.editCourse(dto);
+        return new ResponseEntity<>(course.getId(), HttpStatus.OK);
     }
-
-
 
     // Удаление по id
     @Operation(description = "Delete course", summary = "Delete course", tags = {"Course"})
@@ -230,7 +242,15 @@ public class CourseController {
         return new ResponseEntity<>("Course deleted", HttpStatus.OK);
     }
 
-
+    // Загрузка иконки
+    @PostMapping(value = "/{id}/icon")
+    @ResponseBody
+    public ResponseEntity<?> uploadIcon(@PathVariable Long id, @ModelAttribute CourseIconDTO dto) throws IOException {
+        log.info(dto.icon().toString());
+        log.info(dto.icon().getOriginalFilename());
+        courseService.saveIcon(id, dto);
+        return ResponseEntity.ok("Created");
+    }
 
     // Select2
     @Operation(description = "Get courses for select2", summary = "Get courses for select2", tags = {"Course"})

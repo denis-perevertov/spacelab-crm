@@ -1,5 +1,6 @@
 package com.example.spacelab.service;
 
+import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.lesson.LessonReportRow;
 import com.example.spacelab.model.student.StudentInviteRequest;
 import com.example.spacelab.model.student.Student;
@@ -9,13 +10,13 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
-public interface StudentService extends StudentTaskService,
-                                        StudentCardService,
+public interface StudentService extends StudentCardService,
                                         EntityFilterService<Student> {
 
     List<Student> getStudents();
     Page<Student> getStudents(Pageable pageable);
     Page<Student> getStudents(FilterForm filters, Pageable pageable);
+    Page<Student> getStudentsWithoutCourses(FilterForm filters, Pageable pageable);
 
     // filter by allowed courses
     List<Student> getStudentsByAllowedCourses(Long... ids);
@@ -30,6 +31,8 @@ public interface StudentService extends StudentTaskService,
     void deleteStudentById(Long id);
 
     String createInviteStudentToken(StudentInviteRequest request);
+
+    void transferStudentToCourse(Student student, Course course);
 
 
     List<LessonReportRow> getStudentLessonData(Long studentID);

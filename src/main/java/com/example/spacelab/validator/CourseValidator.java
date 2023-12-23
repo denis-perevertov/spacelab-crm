@@ -28,8 +28,8 @@ public class CourseValidator implements Validator {
 
         if(dto.getName() == null || dto.getName().isEmpty())
             e.rejectValue("name", "name.empty", "Enter name!");
-        else if(dto.getName().length() < 2 || dto.getName().length() > 100)
-            e.rejectValue("name", "name.length", "Name length: 2-100");
+        else if(dto.getName().length() > 100)
+            e.rejectValue("name", "name.length", "Name length: 1-100");
 
         CourseInfoDTO info = dto.getInfo();
 
@@ -41,24 +41,24 @@ public class CourseValidator implements Validator {
         if(info.getTopics() == null || info.getTopics().size() == 0)
             e.rejectValue("info.topics", "info.topics.empty", "Enter course topics!");
         else for(int i = 0; i < info.getTopics().size(); i++) {
-            if(info.getTopics().get(i).length() < 2 || info.getTopics().get(i).length() > 250)
-                e.rejectValue("info.topics["+i+"]", "info.topics["+i+"].length", "Field length: 2-250");
+            if(info.getTopics().get(i).length() > 250)
+                e.rejectValue("info.topics["+i+"]", "info.topics["+i+"].length", "Field length: 1-250");
         }
 
         CourseSettingsDTO settings = info.getSettings();
-        if(settings.getProgramDuration().getValue() == null || settings.getProgramDuration().getValue().isEmpty())
+        if(settings.programDuration().getValue() == null || settings.programDuration().getValue().isEmpty())
             e.rejectValue("info.settings.programDuration", "info.settings.programDuration.empty", "Enter program duration!");
-        else if(settings.getProgramDuration().getValue().length() < 2 || settings.getProgramDuration().getValue().length() > 10)
-                e.rejectValue("info.settings.programDuration", "info.settings.programDuration.length", "Field length: 2-10");
+        else if(settings.programDuration().getValue().length() > 10)
+                e.rejectValue("info.settings.programDuration", "info.settings.programDuration.length", "Field length: 1-10");
 
-        if(settings.getGroupSize() == null)
+        if(settings.groupSize() == null)
             e.rejectValue("info.settings.groupSize", "info.settings.groupSize.empty", "Enter group size!");
-        else if(settings.getGroupSize() < 3 || settings.getGroupSize() > 30)
+        else if(settings.groupSize() < 3 || settings.groupSize() > 30)
             e.rejectValue("info.settings.groupSize", "info.settings.groupSize.length", "Group size: 3-30!");
 
-        if(settings.getHoursNorm() == null)
+        if(settings.hoursNorm() == null)
             e.rejectValue("info.settings.hoursNorm", "info.settings.hoursNorm.empty", "Enter hours norm!");
-        else if(settings.getHoursNorm() < 10 || settings.getHoursNorm() > 40)
+        else if(settings.hoursNorm() < 10 || settings.hoursNorm() > 40)
             e.rejectValue("info.settings.hoursNorm", "info.settings.hoursNorm.length", "Hours norm: 10-40!");
 
         CourseMembersDTO members = dto.getMembers();

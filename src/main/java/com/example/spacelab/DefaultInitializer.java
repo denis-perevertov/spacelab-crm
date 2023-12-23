@@ -15,12 +15,14 @@ import com.example.spacelab.model.role.PermissionSet;
 import com.example.spacelab.model.role.PermissionType;
 import com.example.spacelab.model.role.UserRole;
 import com.example.spacelab.model.student.*;
+import com.example.spacelab.model.task.CompletionTime;
 import com.example.spacelab.model.task.Task;
 import com.example.spacelab.model.task.TaskLevel;
 import com.example.spacelab.model.task.TaskStatus;
 import com.example.spacelab.repository.*;
 import com.example.spacelab.service.LessonService;
 import com.example.spacelab.service.specification.LessonSpecifications;
+import com.example.spacelab.util.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.boot.CommandLineRunner;
@@ -468,7 +470,7 @@ public class DefaultInitializer implements CommandLineRunner {
             task.setLevel(TaskLevel.ADVANCED);
             task.setSkillsDescription("SkillsDescription");
             task.setTaskDescription("TaskDescription");
-            task.setCompletionTime("6-8 m");
+            task.setCompletionTime(new CompletionTime().setValue("6-8").setTimeUnit(TimeUnit.MONTHS));
             task.setStatus(TaskStatus.ACTIVE);
 
             task = taskRepository.save(task);
@@ -480,7 +482,7 @@ public class DefaultInitializer implements CommandLineRunner {
             task2.setLevel(TaskLevel.ADVANCED);
             task2.setSkillsDescription("SkillsDescription");
             task2.setTaskDescription("TaskDescription");
-            task2.setCompletionTime("6-8 m");
+            task2.setCompletionTime(new CompletionTime().setValue("6-8").setTimeUnit(TimeUnit.MONTHS));
             task2.setStatus(TaskStatus.ACTIVE);
 
             task2 = taskRepository.save(task2);
@@ -493,7 +495,7 @@ public class DefaultInitializer implements CommandLineRunner {
             task3.setLevel(TaskLevel.ADVANCED);
             task3.setSkillsDescription("SkillsDescription");
             task3.setTaskDescription("TaskDescription");
-            task3.setCompletionTime("6-8 m");
+            task3.setCompletionTime(new CompletionTime().setValue("6-8").setTimeUnit(TimeUnit.MONTHS));
             task3.setStatus(TaskStatus.ACTIVE);
 
             taskRepository.save(task3);
@@ -535,8 +537,6 @@ public class DefaultInitializer implements CommandLineRunner {
             lesson.setCourse(courseRepository.findById(1L).orElseThrow());
             lesson.setLink("http://www.test.com");
             lesson.setStatus(LessonStatus.PLANNED);
-            lesson.setMentor(adminRepository.findByEmail("mentor@gmail.com").orElseThrow());
-            lesson.setManager(adminRepository.findByEmail("manager@gmail.com").orElseThrow());
             LessonReport report = new LessonReport();
             report.setLesson(lesson);
             lesson.setLessonReport(report);
@@ -548,8 +548,6 @@ public class DefaultInitializer implements CommandLineRunner {
             lesson2.setCourse(courseRepository.findById(2L).orElseThrow());
             lesson2.setLink("http://www.test.com");
             lesson2.setStatus(LessonStatus.PLANNED);
-            lesson2.setMentor(adminRepository.findByEmail("mentor@gmail.com").orElseThrow());
-            lesson2.setManager(adminRepository.findByEmail("manager@gmail.com").orElseThrow());
             LessonReport report2 = new LessonReport();
             report2.setLesson(lesson2);
             lesson2.setLessonReport(report2);
@@ -561,8 +559,6 @@ public class DefaultInitializer implements CommandLineRunner {
             lesson3.setCourse(courseRepository.findById(3L).orElseThrow());
             lesson3.setLink("http://www.test.com");
             lesson3.setStatus(LessonStatus.PLANNED);
-            lesson3.setMentor(adminRepository.findByEmail("seniormanager@gmail.com").orElseThrow());
-            lesson3.setManager(adminRepository.findByEmail("admin@gmail.com").orElseThrow());
             LessonReport report3 = new LessonReport();
             report3.setLesson(lesson3);
             lesson3.setLessonReport(report3);

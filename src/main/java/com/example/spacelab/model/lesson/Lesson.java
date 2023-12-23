@@ -37,14 +37,6 @@ public class Lesson {
     @JoinColumn(name="lesson_report_id")
     private LessonReport lessonReport;
 
-    @ManyToOne
-    @JoinColumn(name = "mentor_id")
-    private Admin mentor;
-
-    @ManyToOne
-    @JoinColumn(name = "manager_id")
-    private Admin manager;
-
     public Lesson(Long id, LocalDateTime datetime) {
         this.id = id;
         this.datetime = datetime;

@@ -110,6 +110,8 @@ public class AdminServiceImpl implements AdminService {
 
         log.info("Building specification from filters: " + filters);
 
+        Long id = filters.getId();
+
         String combined = filters.getCombined();
 
         Long roleID = filters.getRole();
@@ -125,6 +127,7 @@ public class AdminServiceImpl implements AdminService {
                                             .or(AdminSpecifications.hasEmailLike(combined));
 
         Specification<Admin> spec = Specification.where(combinedSpec)
+                                    .and(AdminSpecifications.hasId(id))
                                     .and(AdminSpecifications.hasRole(role))
                                     .and(AdminSpecifications.hasCourse(course))
                                     .and(AdminSpecifications.hasPhoneLike(phone));

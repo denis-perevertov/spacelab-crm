@@ -36,7 +36,7 @@ public class StudentTask {
 
     @JsonIgnore
     @ToString.Exclude
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     private List<StudentTask> subtasks;
 
     @DateTimeFormat(pattern = "MM/dd/yyyy")

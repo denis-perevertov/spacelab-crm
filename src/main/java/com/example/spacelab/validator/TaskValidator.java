@@ -35,26 +35,22 @@ public class TaskValidator implements Validator {
         else if (dto.getName().length() < 3 || dto.getName().length() > 100)
             e.rejectValue("name", "name.length", "Name length: 3-100");
 
-
         if (dto.getCourseID() == null || dto.getCourseID() == 0)
             e.rejectValue("courseID", "courseID.empty", "Select course!");
-        else if (!courseRepository.existsById(dto.getCourseID()))
+        else if (dto.getCourseID() != -1 && !courseRepository.existsById(dto.getCourseID()))
             e.rejectValue("courseID", "courseID.no-match", "Course with this ID doesn't exist!");
-
 
         if (dto.getLevel() == null)
             e.rejectValue("level", "level.empty", "Select level of task!");
 
-
         if (dto.getStatus() == null)
             e.rejectValue("status", "status.empty", "Select status of task!");
-
 
         if (dto.getCompletionTime() == null || dto.getCompletionTime().isEmpty()) {
 //            e.rejectValue("completionTime", "completionTime.empty", "Enter completion time!");
         }
-        else if (dto.getCompletionTime().length() < 2 || dto.getCompletionTime().length() > 100) {
-            e.rejectValue("completionTime", "completionTime.length", "Completion time length: 2-100");
+        else if (dto.getCompletionTime().length() > 10) {
+            e.rejectValue("completionTime", "completionTime.length", "Completion time length: 0-10");
         }
 
 

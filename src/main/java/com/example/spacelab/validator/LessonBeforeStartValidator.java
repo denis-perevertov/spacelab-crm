@@ -31,60 +31,33 @@ public class LessonBeforeStartValidator implements Validator {
     public void validate(Object target, Errors e) {
         LessonSaveBeforeStartDTO dto = (LessonSaveBeforeStartDTO) target;
 
+        // todo add datetime check
 
-
-        if(dto.getDate() == null) {
-            e.rejectValue("date", "date.empty", "Enter date!");
-        } else {
-            if (dto.getTime() == null) {
-                e.rejectValue("time", "time.empty", "Enter time!");
-            } else {
-                LocalDateTime dateTime = LocalDateTime.of(dto.getDate(), dto.getTime());
-                if (dateTime.isBefore(LocalDateTime.now())) {
-                    e.rejectValue("date", "date.before", "Date and time must be in future!");
-                }
-            }
+        LocalDateTime datetime = dto.getLessonStartTime();
+        if(datetime == null) {
+            e.rejectValue("lessonStartTime", "empty", "Enter datetime!");
         }
-
+        else if(datetime.isBefore(LocalDateTime.now())) {
+            e.rejectValue("lessonStartTime", "past", "datetime is in the past");
+        }
 
         if(dto.getCourseID() == null || dto.getCourseID() == 0)
             e.rejectValue("courseID", "courseID.empty", "Select course!");
         else if(!courseRepository.existsById(dto.getCourseID()))
             e.rejectValue("courseID", "courseID.no-match", "Course with this ID doesn't exist!");
 
-
-        if(dto.getMentorID() == null || dto.getMentorID() == 0)
-            e.rejectValue("mentorID", "mentorID.empty", "Select mentor!");
-        else if(!adminRepository.existsById(dto.getMentorID()))
-            e.rejectValue("mentorID", "mentorID.no-match", "Mentor with this ID doesn't exist!");
-
-
-        if(dto.getManagerID() == null || dto.getManagerID() == 0)
-            e.rejectValue("managerID", "managerID.empty", "Select manager!");
-        else if(!adminRepository.existsById(dto.getManagerID()))
-            e.rejectValue("managerID", "managerID.no-match", "Manager with this ID doesn't exist!");
-
-
         if(dto.getLink() == null || dto.getLink().isEmpty())
             e.rejectValue("link", "link.empty", "Enter link!");
         else if(dto.getLink().length() > 200)
             e.rejectValue("link", "link.length", "Link length: max 200");
 
-        if(dto.getStatus().equals(LessonStatus.ACTIVE) && (dto.getId() != null && dto.getId() != 0)) {
-            e.rejectValue("status", "status.active", "Cannot create/edit an active lesson!");
-        }
+//        if(dto.getStatus().equals(LessonStatus.ACTIVE) && (dto.getId() != null && dto.getId() != 0)) {
+//            e.rejectValue("status", "status.active", "Cannot create/edit an active lesson!");
+//        }
 
-        if(dto.getStatus().equals(LessonStatus.PLANNED) && dto.getDate().isBefore(LocalDate.now())) {
-            e.rejectValue("date", "date.past", "Cannot create a planned lesson in the past!");
-        }
-
-
-
-
-
-
-
-
+//        if(dto.getStatus().equals(LessonStatus.PLANNED) && dto.getDate().isBefore(LocalDate.now())) {
+//            e.rejectValue("date", "date.past", "Cannot create a planned lesson in the past!");
+//        }
 
     }
 }

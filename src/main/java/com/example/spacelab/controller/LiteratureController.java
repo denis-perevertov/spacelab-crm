@@ -1,6 +1,7 @@
 package com.example.spacelab.controller;
 
 import com.example.spacelab.dto.GenericResponseObject;
+import com.example.spacelab.dto.SelectDTO;
 import com.example.spacelab.dto.course.CourseCardDTO;
 import com.example.spacelab.dto.course.CourseSelectDTO;
 import com.example.spacelab.dto.literature.*;
@@ -32,10 +33,7 @@ import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.core.io.InputStreamResource;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -48,10 +46,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Tag(name="Literature", description = "Literature controller")
 @RestController
@@ -78,7 +73,7 @@ public class LiteratureController {
 
         Page<LiteratureListDTO> literatures;
         Page<Literature> litPage = new PageImpl<>(new ArrayList<>());
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "id");
         filters.setVerified(verified);
 
         Admin loggedInAdmin = authUtil.getLoggedInAdmin();
@@ -238,8 +233,8 @@ public class LiteratureController {
 
     // Получение списка типов литературы
     @GetMapping("/get-literature-type-list")
-    public List<LiteratureType> getStatusList() {
-        return List.of(LiteratureType.values());
+    public List<SelectDTO> getStatusList() {
+        return Arrays.stream(LiteratureType.values()).map(type -> new SelectDTO(type.name(), type.name())).toList();
     }
 
 }

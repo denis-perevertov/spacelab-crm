@@ -3,8 +3,10 @@ package com.example.spacelab.controller;
 import com.example.spacelab.dto.SelectSearchDTO;
 import com.example.spacelab.dto.student.StudentTaskDTO;
 import com.example.spacelab.dto.student.*;
+import com.example.spacelab.dto.task.TaskCourseDTO;
 import com.example.spacelab.exception.ErrorMessage;
 import com.example.spacelab.exception.ObjectValidationException;
+import com.example.spacelab.mapper.CourseMapper;
 import com.example.spacelab.mapper.StudentMapper;
 import com.example.spacelab.mapper.TaskMapper;
 import com.example.spacelab.model.admin.Admin;
@@ -15,6 +17,7 @@ import com.example.spacelab.model.student.Student;
 import com.example.spacelab.model.student.StudentAccountStatus;
 import com.example.spacelab.model.student.StudentInviteRequest;
 import com.example.spacelab.model.student.StudentTaskStatus;
+import com.example.spacelab.service.CourseService;
 import com.example.spacelab.service.StudentService;
 import com.example.spacelab.util.AuthUtil;
 import com.example.spacelab.util.FilterForm;
@@ -28,10 +31,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -49,11 +49,12 @@ import java.util.*;
 @RequestMapping("/api/students")
 public class StudentController {
 
-
+    private final CourseService courseService;
     private final StudentService studentService;
     private final StudentMapper studentMapper;
     private final StudentValidator studentValidator;
     private final TaskMapper taskMapper;
+    private final CourseMapper courseMapper;
 
     private final AuthUtil authUtil;
 
@@ -73,7 +74,7 @@ public class StudentController {
                                                         @RequestParam(required = false, defaultValue = "10") Integer size) {
         Page<StudentDTO> students = new PageImpl<>(new ArrayList<>());
         Page<Student> studentPage;
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "id");
 
         Admin loggedInAdmin = authUtil.getLoggedInAdmin();
         PermissionType permissionForLoggedInAdmin = loggedInAdmin.getRole().getPermissions().getReadStudents();
@@ -145,6 +146,17 @@ public class StudentController {
     public ResponseEntity<List<LessonReportRow>> getStudentLessons(@PathVariable @Parameter(example = "1") Long studentID) {
         List<LessonReportRow> studentLessonData = studentService.getStudentLessonData(studentID);
         return new ResponseEntity<>(studentLessonData, HttpStatus.OK);
+    }
+
+    // получить задания текущего курса студента
+    @GetMapping("/{studentID}/course/tasks")
+    public ResponseEntity<?> getStudentCourseTasks(@PathVariable Long studentID) {
+        List<TaskCourseDTO> courseTaskList =
+                courseService.getCourseTasks(studentService.getStudentCourseID(studentID))
+                        .stream()
+                        .map(courseMapper::fromTaskToCourseDTO)
+                        .toList();
+        return ResponseEntity.ok(courseTaskList);
     }
 
     // Создание нового студента (не регистрация)
@@ -296,10 +308,18 @@ public class StudentController {
 
     // Получение списка незанятых студентов (студентов без курса)
     @Operation(description = "Get the list of students who aren't enrolled in any course", summary = "Get Students Without Courses", tags = {"Student"})
-    @GetMapping("/get-available-students")
-    public List<SelectSearchDTO> getStudentsWithoutCourse() {
-        return studentService.getStudents().stream().filter(student -> student.getCourse() == null)
-                .map(student -> new SelectSearchDTO(student.getId(), student.getFullName(), student.getDetails().getEmail(), "")).toList();
+    @GetMapping("/available")
+    public Page<StudentModalDTO> getStudentsWithoutCourse(FilterForm filters,
+                                                          @RequestParam(defaultValue = "0") int page,
+                                                          @RequestParam(defaultValue = "5") int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.Direction.ASC, "course");
+        Page<Student> studentPage = studentService.getStudents(filters, pageable);
+
+        return studentPage.map(student -> new StudentModalDTO(student.getId(),
+                student.getFullName(),
+                student.getDetails().getEmail(),
+                student.getAvatar(),
+                (student.getCourse() != null) ? student.getCourse().getName() : ""));
     }
 
     // Получение списка статусов студентов

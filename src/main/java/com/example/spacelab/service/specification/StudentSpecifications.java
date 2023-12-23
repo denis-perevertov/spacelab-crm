@@ -11,6 +11,11 @@ import org.springframework.data.jpa.domain.Specification;
 
 public class StudentSpecifications {
 
+    public static Specification<Student> hasId(Long id) {
+        if(id == null) return (root,query,cb) -> null;
+        return (root, query, cb) -> cb.equal(root.get("id"), id);
+    }
+
     public static Specification<Student> hasNameOrEmailLike(String input) {
         if(input == null) return (root, query, cb) -> null;
         return (root, query, cb) ->

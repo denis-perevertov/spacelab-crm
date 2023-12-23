@@ -17,13 +17,9 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 @Data
@@ -146,8 +142,9 @@ public class CourseMapper {
         dto.setStudents(students);
 
         Map<Long, String> tasks = new HashMap<>();
-        if (course.getTasks() != null && !course.getTasks().isEmpty()) {
-            for (Task task : course.getTasks()) {
+        List<Task> courseTasks = taskRepository.getCourseTasks(course.getId());
+        if (courseTasks != null && !courseTasks.isEmpty()) {
+            for (Task task : courseTasks) {
                 tasks.put(task.getId(), task.getName());
             }
         }
@@ -234,7 +231,7 @@ public class CourseMapper {
                 tasks.add(taskRepository.findById(taskId).orElse(null));
             }
         }
-        course.setTasks(tasks);
+//        course.setTasks(tasks);
 
         List <Literature > literature = new ArrayList<>();
         if (courseDTO.getLiterature() != null && !courseDTO.getLiterature().isEmpty()) {
@@ -304,7 +301,16 @@ public class CourseMapper {
                         )).toList()
                 )
             );
-            dto.setStructure(new CourseTaskStructureDTO(course.getTasks().stream().map(this::fromTaskToCourseDTO).toList()));
+            dto.setStructure(
+                    new CourseTaskStructureDTO(
+                            taskRepository.getCourseTasks(course.getId())
+                                    .stream()
+                                    .map(this::fromTaskToCourseDTO)
+                                    .sorted(Comparator.comparing(TaskCourseDTO::getTaskIndex))
+                                    .toList()
+                    )
+            );
+
 
         } catch (Exception e) {
             throw new MappingException(e.getMessage());
@@ -350,7 +356,15 @@ public class CourseMapper {
                             )).toList()
                     )
             );
-            dto.setStructure(new CourseTaskStructureDTO(course.getTasks().stream().map(this::fromTaskToCourseDTO).toList()));
+            dto.setStructure(
+                    new CourseTaskStructureDTO(
+                            taskRepository.getCourseTasks(course.getId())
+                                    .stream()
+                                    .map(this::fromTaskToCourseDTO)
+                                    .sorted(Comparator.comparing(TaskCourseDTO::getTaskIndex))
+                                    .toList()
+                    )
+            );
 
         } catch (Exception e) {
             throw new MappingException(e.getMessage());
@@ -360,7 +374,7 @@ public class CourseMapper {
     }
 
     public Course fromEditDTOToCourse(CourseEditDTO dto) {
-        Course course = (dto.getId() != null) ? courseRepository.getReferenceById(dto.getId()) : new Course();
+        Course course = (dto.getId() != null) ? courseRepository.findById(dto.getId()).orElse(new Course()) : new Course();
 
         try {
             course.setName(dto.getName());
@@ -368,19 +382,21 @@ public class CourseMapper {
             course.getCourseInfo().setMain_description(dto.getInfo().getDescription());
             course.getCourseInfo().getTopics().clear();
             course.getCourseInfo().getTopics().addAll(dto.getInfo().getTopics());
-            course.getCourseInfo().setGroupSize(dto.getInfo().getSettings().getGroupSize());
-            course.getCourseInfo().setHoursNorm(dto.getInfo().getSettings().getHoursNorm());
-            course.getCourseInfo().setCompletionTime(dto.getInfo().getSettings().getProgramDuration().getDurationString());
+            course.getCourseInfo().setGroupSize(dto.getInfo().getSettings().groupSize());
+            course.getCourseInfo().setHoursNorm(dto.getInfo().getSettings().hoursNorm());
+            course.getCourseInfo().setCompletionTime(dto.getInfo().getSettings().programDuration().getDurationString());
 
             AdminAvatarDTO mentor = dto.getMembers().getMentor();
             AdminAvatarDTO manager = dto.getMembers().getManager();
             if(mentor != null) course.setMentor(adminRepository.getReferenceById(mentor.getId()));
             if(manager != null) course.setManager(adminRepository.getReferenceById(manager.getId()));
-            course.getStudents().clear();
-            course.getStudents().addAll(dto.getMembers().getStudents().stream().map(st -> studentRepository.getReferenceById(st.getId())).toList());
+//            course.getStudents().clear();
+//            course.getStudents().addAll(dto.getMembers().getStudents().stream().map(st -> studentRepository.getReferenceById(st.getId())).toList());
 
-            course.getTasks().clear();
-            course.getTasks().addAll(dto.getStructure().getTasks().stream().map( t ->taskRepository.getReferenceById(t.getId())).toList());
+//            System.out.println(dto.getStructure().getTasks());
+
+//            course.getTasks().clear();
+//            course.getTasks().addAll(dto.getStructure().getTasks().stream().map( t ->taskRepository.getReferenceById(t.getId())).toList());
         } catch (Exception e) {
             throw new MappingException(e.getMessage());
         }
@@ -391,6 +407,7 @@ public class CourseMapper {
     public TaskCourseDTO fromTaskToCourseDTO(Task task) {
         return new TaskCourseDTO(
                 task.getId(),
+                task.getTaskIndex(),
                 task.getName(),
                 task.getSubtasks().stream().map(this::fromTaskToCourseDTO).toList()
         );

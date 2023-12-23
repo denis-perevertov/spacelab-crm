@@ -25,6 +25,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -97,7 +98,14 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    @Transactional
     public void deleteTaskById(Long id) {
+        Task task = taskRepository.findById(id).orElseThrow();
+        taskRepository.findTasksByParentTask(task).forEach(subtask -> {
+            subtask.setParentTask(null);
+            subtask.setStatus(TaskStatus.INACTIVE);
+            taskRepository.save(subtask);
+        });
         taskRepository.deleteById(id);
     }
 
@@ -111,13 +119,27 @@ public class TaskServiceImpl implements TaskService {
         studentTask.setTaskReference(originalTask);
         studentTask.setSubtasks(new ArrayList<>());
         studentTask.setBeginDate(LocalDate.now());
-        studentTask.setStatus(StudentTaskStatus.IN_WORK);
+        studentTask.setStatus(StudentTaskStatus.UNLOCKED);
         studentTask.setPercentOfCompletion(0);
         studentTask = studentTaskRepository.save(studentTask);
         originalTask.getActiveStudents().add(student);
         taskRepository.save(originalTask);
         log.info("Created Student Copy of Task (ID: {}): {}", taskID, studentTask);
         return studentTask;
+    }
+
+
+
+    @Override
+    public List<Task> getTaskSubtasks(Long id) {
+        return taskRepository.findTaskSubtasks(id);
+    }
+
+    @Override
+    public Page<Task> getAvailableTasks(Pageable pageable) {
+        Page<Task> page = taskRepository.findAvailableParentTasks(pageable);
+        log.info("found available tasks: {}", page);
+        return page;
     }
 
     @Override
@@ -150,6 +172,49 @@ public class TaskServiceImpl implements TaskService {
         log.info("Getting student task with taskID: " + taskID);
         StudentTask task = studentTaskRepository.findById(taskID).orElseThrow(() -> new ResourceNotFoundException("Student task not found", StudentTask.class));
         return task;
+    }
+
+    @Override
+    public void createStudentTasksOnCourseTransfer(Student student, Course course) {
+
+        // clear student tasks which were not completed
+        List<StudentTask> oldStudentTasks = student.getTasks();
+        oldStudentTasks.stream()
+                .filter(studentTask -> studentTask.getStatus() != StudentTaskStatus.COMPLETED)
+                .forEach(studentTaskRepository::delete);
+
+        List<Task> taskReferences = oldStudentTasks.stream().map(StudentTask::getTaskReference).toList();
+
+        // create new task snapshots for student (not saved in db yet)
+        List<StudentTask> newStudentTasks = createStudentTaskListFromCourse(course);
+        newStudentTasks.forEach(newTask -> {
+            if(!taskReferences.contains(newTask.getTaskReference())) {
+                // save any new student task to db
+                newTask.setStudent(student);
+                newTask = studentTaskRepository.save(newTask);
+                oldStudentTasks.add(newTask);
+            }
+        });
+
+    }
+
+    @Override
+    public List<StudentTask> createStudentTaskListFromCourse(Course course) {
+        return course.getTasks().stream().map(this::fromTaskToStudentTask).toList();
+    }
+
+    public StudentTask fromTaskToStudentTask(Task task) {
+        // base case to exit recursion
+        if(task == null) return null;
+
+        StudentTask st = new StudentTask();
+        st.setTaskReference(task);
+        st.setParentTask(fromTaskToStudentTask(task.getParentTask()));
+        st.setPercentOfCompletion(0);
+        st.setStatus(StudentTaskStatus.LOCKED);
+        task.getSubtasks().forEach(subtask -> st.getSubtasks().add(fromTaskToStudentTask(subtask)));
+
+        return st;
     }
 
     @Override
