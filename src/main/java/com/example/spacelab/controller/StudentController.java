@@ -203,7 +203,7 @@ public class StudentController {
         authUtil.checkAccessToCourse(inviteRequest.getCourseID(), "students.invite");
 
         String token = studentService.createInviteStudentToken(studentMapper.fromDTOToInviteRequest(inviteRequest));
-        String url = "http://" + servletRequest.getServerName() + ":" + servletRequest.getServerPort() + "/register/" + token;
+        String url = "http://" + servletRequest.getServerName() + ":" + servletRequest.getServerPort() + "/register?invite_key=" + token;
         return new ResponseEntity<>(url, HttpStatus.CREATED);
 
     }

@@ -9,6 +9,7 @@ import com.example.spacelab.exception.TokenException;
 import com.example.spacelab.mapper.AdminMapper;
 import com.example.spacelab.model.RefreshToken;
 import com.example.spacelab.model.admin.Admin;
+import com.example.spacelab.repository.InviteStudentRequestRepository;
 import com.example.spacelab.service.AdminService;
 import com.example.spacelab.service.RefreshTokenService;
 import com.example.spacelab.util.AuthRequest;
@@ -21,6 +22,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -48,6 +50,8 @@ public class AuthController {
     private final RefreshTokenService refreshTokenService;
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder encoder;
+
+    private final InviteStudentRequestRepository inviteStudentRequestRepository;
 
     @Operation(description = "Enter username & password to receive access token + refresh token", summary = "Login (JWT)", tags = {"_Auth"})
     @ApiResponses(value = {
@@ -94,6 +98,12 @@ public class AuthController {
             return new AuthResponse(newAccessToken, refreshToken.getToken());
         }
         else throw new TokenException("Refresh token expired!");
+    }
+
+    @PostMapping("/invite-data")
+    public ResponseEntity<?> getDataFromInviteLink(@RequestParam String token) {
+        return ResponseEntity.ok(inviteStudentRequestRepository.findById(token)
+                .orElseThrow(() -> new EntityNotFoundException("Incorrect token!")));
     }
 
     @GetMapping("/me")
