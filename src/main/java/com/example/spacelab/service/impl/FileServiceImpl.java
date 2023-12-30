@@ -67,6 +67,23 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
+    public void deleteFile(String fileName, String... directories) {
+        StringBuilder sb = new StringBuilder(FILE_UPLOAD_DIRECTORY).append('/');
+        for(String directory : directories) {
+            sb.append(directory).append('/');
+        }
+        Path directoryPath = Paths.get(FILE_UPLOAD_DIRECTORY, directories);
+        Path filePath = directoryPath.resolve(fileName);
+
+        File f = new File(filePath.toString());
+        if(f.delete()) {
+            log.info("file deleted");
+        } else {
+            log.info("could not delete file");
+        }
+    }
+
+    @Override
     public boolean fileExists(String... directories) {
         return false;
     }

@@ -12,6 +12,8 @@ public interface FileService {
 
     File getFile(String fileName, String... directiories) throws IOException;
 
+    void deleteFile(String fileName, String... directiories) throws IOException;
+
     boolean fileExists(String... directories);
 
 }
