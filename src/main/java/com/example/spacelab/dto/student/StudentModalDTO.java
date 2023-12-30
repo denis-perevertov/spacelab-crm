@@ -4,7 +4,7 @@ public record StudentModalDTO(
         Long id,
         String name,
         String email,
-        String image,
+        String avatar,
         String courseName
 ) {
 }

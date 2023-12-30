@@ -1,10 +1,7 @@
 package com.example.spacelab.model.student;
 
 import com.example.spacelab.model.course.Course;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 
 @Data
@@ -13,7 +10,10 @@ import lombok.Data;
 public class StudentInviteRequest {
 
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
+    private String token;
 
     private String firstName, lastName, fathersName, email, phone;
 

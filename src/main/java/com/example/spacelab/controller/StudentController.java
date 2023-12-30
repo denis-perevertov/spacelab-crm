@@ -31,6 +31,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -57,6 +58,9 @@ public class StudentController {
     private final CourseMapper courseMapper;
 
     private final AuthUtil authUtil;
+
+    @Value("${application.frontend-personal-cabinet.port}")
+    private String personalCabinetPort;
 
     // Получение студентов (с фильтрами/страницами)
     @Operation(description = "Get list of students paginated by 'page/size' params (default values are 0/10), output depends on permission type(full/partial)", summary = "Get Students", tags = {"Student"})
@@ -203,7 +207,7 @@ public class StudentController {
         authUtil.checkAccessToCourse(inviteRequest.getCourseID(), "students.invite");
 
         String token = studentService.createInviteStudentToken(studentMapper.fromDTOToInviteRequest(inviteRequest));
-        String url = "http://" + servletRequest.getServerName() + ":" + servletRequest.getServerPort() + "/register?invite_key=" + token;
+        String url = "http://" + servletRequest.getServerName() + ":" + personalCabinetPort + "/register?invite_key=" + token;
         return new ResponseEntity<>(url, HttpStatus.CREATED);
 
     }

@@ -24,6 +24,7 @@ import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -48,6 +49,9 @@ public class StudentServiceImpl implements StudentService {
 
     private final StudentMapper studentMapper;
     private final TaskMapper taskMapper;
+
+    @Value("${application.frontend-admin-panel.port}")
+    private String port;
 
     @Override
     public List<Student> getStudents() {
@@ -212,11 +216,11 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public String createInviteStudentToken(StudentInviteRequest request) {
         log.info("Creating token to use in Student invite URL...");
-        UUID id = UUID.randomUUID();
-        request.setId(id.toString());
-        log.info("Created token: " + id + ", saving token with set parameters in DB");
-        request = inviteRepository.save(request);
-        return request.getId();
+        UUID token = UUID.randomUUID();
+        request.setToken(token.toString());
+        log.info("Created token: " + token + ", saving token with set parameters in DB");
+        inviteRepository.save(request);
+        return token.toString();
     }
 
     @Override
