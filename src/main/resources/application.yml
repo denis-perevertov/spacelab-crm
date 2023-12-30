@@ -46,12 +46,18 @@ springdoc:
     filter: true
 
 server:
-  port: 1488
+  port: 1489
   servlet:
     context-path: /spacelab
   error:
     include-message: always
     include-binding-errors: always
+
+application:
+  frontend-admin-panel:
+    port: 3001
+  frontend-personal-cabinet:
+    port: 3000
 
 #logging:
 #  level:

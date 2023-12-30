@@ -63,6 +63,7 @@ public class SecurityConfig {
                                     .requestMatchers("/swagger-ui", "/swagger-ui/**", "/api-docs/**").permitAll()
                                     .requestMatchers("/*/swagger-ui", "/*/swagger-ui/**", "/*/api-docs/**").permitAll()
                                     .requestMatchers("/error", "/error/*", "/*/error/*").permitAll()
+                                    .requestMatchers("/uploads/**", "/*/uploads/**").permitAll()
                                     .anyRequest().authenticated()
                 )
                 .requiresChannel(customizer -> customizer
