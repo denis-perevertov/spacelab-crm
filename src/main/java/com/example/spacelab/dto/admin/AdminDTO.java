@@ -22,6 +22,8 @@ public class AdminDTO {
     private String email;
     @Schema(description = "Name of the role", example = "RoleName")
     private String role;
+
+    private String avatar;
     private List<CourseListDTO> courses = new ArrayList<>();
 
 }

@@ -20,6 +20,8 @@ public class AdminEditDTO {
     @Schema(example = "12345678")
     private String confirmPassword;
 
+    private String avatar;
+
     @Schema(example = "1")
     private Long roleID;
     @Schema(example = "4")

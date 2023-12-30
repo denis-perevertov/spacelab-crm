@@ -44,6 +44,8 @@ public class AdminMapper {
             dto.setPhone(admin.getPhone());
             dto.setEmail(admin.getEmail());
 
+            dto.setAvatar(admin.getAvatar());
+
             if(admin.getRole() != null)
                 dto.setRole(admin.getRole().getName());
 
@@ -88,6 +90,8 @@ public class AdminMapper {
             dto.setPhone(admin.getPhone());
             dto.setEmail(admin.getEmail());
             dto.setRoleID(admin.getRole().getId());
+
+            dto.setAvatar(admin.getAvatar());
 
             dto.setCourseID(admin.getCourses().stream().map(Course::getId).toArray(Long[]::new));
 
@@ -147,34 +151,4 @@ public class AdminMapper {
         return dto;
     }
 
-/*
-    public Admin fromDTOToAdmin(AdminDTO dto) {
-        if(dto.getId() != null) return adminRepository.getReferenceById(dto.getId());
-        else {
-            Admin admin = new Admin();
-
-            try {
-                admin.setFirstName(dto.getFirstName());
-                admin.setLastName(dto.getLastName());
-                admin.setPhone(dto.getPhone());
-                admin.setEmail(dto.getEmail());
-
-                if(dto.getRole() != null) admin.setRole(userRoleRepository.getReferenceByName(dto.getRole()));
-
-            *//*
-                TODO
-                курсы
-             *//*
-
-            } catch (Exception e) {
-                log.severe("Mapping error: " + e.getMessage());
-                log.warning("Entity: " + admin);
-                throw new MappingException(e.getMessage());
-            }
-
-            return admin;
-
-
-        }
-    }*/
 }
