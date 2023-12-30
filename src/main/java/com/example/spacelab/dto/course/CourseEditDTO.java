@@ -12,6 +12,7 @@ public class CourseEditDTO {
 
     private Long id;
     private String name;
+    private String icon;
     private CourseInfoDTO info;
     private CourseMembersDTO members;
     private CourseTaskStructureDTO structure;

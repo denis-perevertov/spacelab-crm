@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.ToString;
+import lombok.experimental.Accessors;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
@@ -14,6 +15,7 @@ import java.util.List;
 @Data
 @Entity
 @Table(name="student_tasks")
+@Accessors(chain = true)
 public class StudentTask {
 
     @Id

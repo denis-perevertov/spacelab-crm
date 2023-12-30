@@ -2,20 +2,22 @@ package com.example.spacelab.service.impl;
 
 import com.example.spacelab.dto.course.CourseEditDTO;
 import com.example.spacelab.dto.course.CourseIconDTO;
+import com.example.spacelab.dto.student.StudentAvatarDTO;
 import com.example.spacelab.dto.task.TaskCourseDTO;
 import com.example.spacelab.exception.ResourceNotFoundException;
 import com.example.spacelab.mapper.CourseMapper;
+import com.example.spacelab.mapper.TaskMapper;
 import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.course.CourseStatus;
 import com.example.spacelab.model.student.Student;
+import com.example.spacelab.model.student.StudentTask;
+import com.example.spacelab.model.student.StudentTaskStatus;
 import com.example.spacelab.model.task.Task;
-import com.example.spacelab.repository.AdminRepository;
-import com.example.spacelab.repository.CourseRepository;
-import com.example.spacelab.repository.StudentRepository;
-import com.example.spacelab.repository.TaskRepository;
+import com.example.spacelab.repository.*;
 import com.example.spacelab.service.CourseService;
 import com.example.spacelab.service.FileService;
+import com.example.spacelab.service.StudentTaskService;
 import com.example.spacelab.service.specification.CourseSpecifications;
 import com.example.spacelab.util.FilterForm;
 import lombok.Data;
@@ -41,13 +43,17 @@ import java.util.List;
 @Transactional
 @RequiredArgsConstructor
 public class CourseServiceImpl implements CourseService {
+    private final StudentTaskRepository studentTaskRepository;
     private final StudentRepository studentRepository;
     private final TaskRepository taskRepository;
+
+    private final StudentTaskService studentTaskService;
 
     private final AdminRepository adminRepository;
     private final CourseRepository courseRepository;
 
     private final CourseMapper mapper;
+    private final TaskMapper taskMapper;
 
     private final FileService fileService;
 
@@ -119,18 +125,6 @@ public class CourseServiceImpl implements CourseService {
         LocalDate beginDate = (beginDateString != null && !beginDateString.isEmpty()) ? LocalDate.parse(beginDateString, DateTimeFormatter.ofPattern("yyyy-MM-dd")) : null;
         LocalDate endDate = (endDateString != null && !endDateString.isEmpty()) ? LocalDate.parse(endDateString, DateTimeFormatter.ofPattern("yyyy-MM-dd")) : null;
 
-//        LocalDate beginDate = null;
-//        LocalDate endDate = null;
-//        if(dateString != null && !dateString.isEmpty()) {
-//            try {
-//                String[] dates = dateString.split(" - ");
-//                beginDate = LocalDate.parse(dates[0], DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-//                endDate = LocalDate.parse(dates[1], DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-//            } catch (Exception e) {
-//                log.warning("Error during date parsing");
-//            }
-//        }
-
         Specification<Course> spec = Specification.where(
                         CourseSpecifications.hasNameLike(name)
                         .and(CourseSpecifications.hasMentor(mentor))
@@ -154,10 +148,11 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public Course createNewCourse(CourseEditDTO dto) {
+        log.info("creating new course");
         Course c = mapper.fromEditDTOToCourse(dto);
         c = courseRepository.save(c);
-        updateCourseStudents(c, dto);
         updateCourseTaskList(c, dto);
+        updateCourseStudents(c, dto);
         return courseRepository.save(c);
     }
 
@@ -168,31 +163,52 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public Course editCourse(CourseEditDTO dto) {
+        log.info("editing course");
         Course c = mapper.fromEditDTOToCourse(dto);
         updateCourseTaskList(c, dto);
         updateCourseStudents(c, dto);
+        updateStudentsCourseTaskList(c);
         return courseRepository.save(c);
     }
 
+    // fixme maybe later
     private void updateCourseStudents(Course c, CourseEditDTO dto) {
-
+        log.info("updating course students");
         List<Student> courseStudents = c.getStudents();
-        courseStudents.forEach(student -> student.setCourse(null));
-        courseStudents.clear();
+//        courseStudents.forEach(student -> student.setCourse(null));
+//        courseStudents.clear();
 
-        dto.getMembers().getStudents().forEach(student -> {
-            studentRepository.findById(student.getId()).ifPresent(foundStudent -> {
-                foundStudent.setCourse(c);
-                Student st = studentRepository.save(foundStudent);
-                courseStudents.add(st);
-            });
-        });
+        List<Long> oldStudentIds = courseStudents.stream().map(Student::getId).toList();
+        List<Long> updatedStudentsIds = dto.getMembers().getStudents().stream().map(StudentAvatarDTO::getId).toList();
+
+        // ids of old students to remove from course
+        courseStudents.stream()
+                .filter(st -> !updatedStudentsIds.contains(st.getId()))
+                .forEach(st -> {st.setCourse(null); studentTaskService.clearStudentTasksOnDeletionFromCourse(st);});
+
+        // ids of new students to add to course
+        updatedStudentsIds.stream()
+                .filter(newId -> !oldStudentIds.contains(newId))
+                .forEach(newId -> {
+                        studentRepository.findById(newId).ifPresent(foundStudent -> {
+                            foundStudent.setCourse(c);
+                            Student st = studentRepository.save(foundStudent);
+                            courseStudents.add(st);
+                            studentTaskService.createStudentTasksOnCourseTransfer(st, c);
+                    });
+                });
+
     }
 
+    // fixme maybe later
     private void updateCourseTaskList(Course c, CourseEditDTO dto) {
-        List<Task> oldTaskList = taskRepository.getCourseTasks(c.getId());
-        log.info("old task list: {}", oldTaskList.stream().map(Task::getId).toList());
-        oldTaskList.forEach(task -> {task.setCourse(null); taskRepository.save(task);});
+        log.info("updating course task list");
+//        List<Task> oldTaskList = taskRepository.getCourseTasks(c.getId());
+//        log.info("old task list: {}", oldTaskList.stream().map(Task::getId).toList());
+//        oldTaskList.forEach(task -> {task.setCourse(null); taskRepository.save(task);});
+
+        c.getTasks().forEach(t -> t.setCourse(null));
+        c.getTasks().clear();
 
         log.info(dto.getStructure().getTasks().toString());
 
@@ -201,15 +217,55 @@ public class CourseServiceImpl implements CourseService {
                 foundTask.setTaskIndex(newCourseTask.getTaskIndex());
                 foundTask.setCourse(c);
                 taskRepository.save(foundTask);
+                c.getTasks().add(foundTask);
             });
         });
         List<Task> newTaskList = taskRepository.getCourseTasks(c.getId());
         log.info("new task list: {}", newTaskList.stream().map(Task::getId).toList());
     }
 
+    // fixme maybe later
+    // tasks which are removed from course structure list -> clear student task copies
+    // tasks which are added to course structure -> create new student tasks for them
+    private void updateStudentsCourseTaskList(Course c) {
+
+        List<Long> courseTasksIds = c.getTasks().stream().map(Task::getId).toList();
+        List<Student> courseStudents = c.getStudents();
+        courseStudents.forEach(student -> {
+
+            student.getTasks().stream()
+                    .filter(studentTask -> (
+                            !courseTasksIds.contains(studentTask.getTaskReference().getId())
+                            && studentTask.getStatus() != StudentTaskStatus.COMPLETED
+                    ))
+                    .forEach(studentTaskRepository::delete);
+
+            List<Long> studentTaskIds = student.getTasks().stream().map(st -> st.getTaskReference().getId()).toList();
+
+            courseTasksIds.stream()
+                    .filter(newId -> !studentTaskIds.contains(newId))
+                    .forEach(newId -> {
+                        taskRepository.findById(newId).ifPresent(foundTask -> {
+                            StudentTask st = studentTaskService.fromTaskToStudentTask(foundTask);
+                            st.setStudent(student);
+                            studentTaskRepository.save(st);
+                        });
+                    });
+        });
+    }
+
     @Override
     public void deleteCourseById(Long id) {
-        courseRepository.deleteById(id);
+        Course c = getCourseById(id);
+        c.getStudents().forEach(st -> {
+            st.setCourse(null);
+        });
+        c.getStudents().clear();
+        c.setManager(null);
+        c.setMentor(null);
+        c.getTasks().forEach(t -> t.setCourse(null));
+        c.getTasks().clear();
+        courseRepository.delete(c);
     }
 
     @Override
@@ -218,9 +274,16 @@ public class CourseServiceImpl implements CourseService {
         if(file.getSize() > 0) {
             fileService.saveFile(file, "courses", "icons");
             Course c = getCourseById(id);
-            c.setIcon(file.getBytes());
+            c.setIcon("/uploads/courses/" + file.getOriginalFilename());
             courseRepository.save(c);
         }
+    }
+
+    @Override
+    public void deleteIcon(Long id) throws IOException {
+        Course c = getCourseById(id);
+        c.setIcon(null);
+        courseRepository.save(c);
     }
 
 }

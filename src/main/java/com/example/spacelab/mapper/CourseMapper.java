@@ -100,16 +100,15 @@ public class CourseMapper {
     }
     public CourseInfoDTO fromCourseToInfoDTO(Course course) {
         CourseInfoDTO dto = new CourseInfoDTO();
-//        dto.setId(course.getId());
-//        dto.setName(course.getName());
-        dto.setDescription(course.getCourseInfo().getMain_description());
-        dto.setTopics(course.getCourseInfo().getTopics());
+        CourseInfo courseInfo = course.getCourseInfo();
+        dto.setDescription(courseInfo.getMain_description());
+        dto.setTopics(courseInfo.getTopics());
         dto.setSettings(new CourseSettingsDTO(
-                new ProgramDuration(course.getCourseInfo().getCompletionTime()),
-                course.getCourseInfo().getGroupSize(),
-                course.getCourseInfo().getHoursNorm()
+                courseInfo.getCompletionTime(),
+                courseInfo.getCompletionTimeUnit(),
+                courseInfo.getGroupSize(),
+                courseInfo.getHoursNorm()
         ));
-//        dto.setStatus(course.getStatus());
         return dto;
     }
 
@@ -267,16 +266,19 @@ public class CourseMapper {
         CourseEditDTO dto = new CourseEditDTO();
 
         try {
+            CourseInfo courseInfo = course.getCourseInfo();
             dto.setId(course.getId());
             dto.setName(course.getName());
+            dto.setIcon(course.getIcon());
             dto.setInfo(
                 new CourseInfoDTO(
                         course.getCourseInfo().getMain_description(),
                         course.getCourseInfo().getTopics(),
                         new CourseSettingsDTO(
-                                new ProgramDuration(course.getCourseInfo().getCompletionTime()),
-                                course.getCourseInfo().getGroupSize(),
-                                course.getCourseInfo().getHoursNorm()
+                                courseInfo.getCompletionTime(),
+                                courseInfo.getCompletionTimeUnit(),
+                                courseInfo.getGroupSize(),
+                                courseInfo.getHoursNorm()
                         )
                 )
             );
@@ -323,15 +325,18 @@ public class CourseMapper {
         CourseInfoPageDTO dto = new CourseInfoPageDTO();
 
         try {
+            CourseInfo courseInfo = course.getCourseInfo();
             dto.setName(course.getName());
+            dto.setIcon(course.getIcon());
             dto.setInfo(
                     new CourseInfoDTO(
-                            course.getCourseInfo().getMain_description(),
-                            course.getCourseInfo().getTopics(),
+                            courseInfo.getMain_description(),
+                            courseInfo.getTopics(),
                             new CourseSettingsDTO(
-                                    new ProgramDuration(course.getCourseInfo().getCompletionTime()),
-                                    course.getCourseInfo().getGroupSize(),
-                                    course.getCourseInfo().getHoursNorm()
+                                    courseInfo.getCompletionTime(),
+                                    courseInfo.getCompletionTimeUnit(),
+                                    courseInfo.getGroupSize(),
+                                    courseInfo.getHoursNorm()
                             )
                     )
             );
@@ -378,25 +383,21 @@ public class CourseMapper {
 
         try {
             course.setName(dto.getName());
+            CourseInfo courseInfo = course.getCourseInfo();
 
-            course.getCourseInfo().setMain_description(dto.getInfo().getDescription());
-            course.getCourseInfo().getTopics().clear();
-            course.getCourseInfo().getTopics().addAll(dto.getInfo().getTopics());
-            course.getCourseInfo().setGroupSize(dto.getInfo().getSettings().groupSize());
-            course.getCourseInfo().setHoursNorm(dto.getInfo().getSettings().hoursNorm());
-            course.getCourseInfo().setCompletionTime(dto.getInfo().getSettings().programDuration().getDurationString());
+            courseInfo.setMain_description(dto.getInfo().getDescription());
+            courseInfo.getTopics().clear();
+            courseInfo.getTopics().addAll(dto.getInfo().getTopics());
+            courseInfo.setGroupSize(dto.getInfo().getSettings().groupSize());
+            courseInfo.setHoursNorm(dto.getInfo().getSettings().hoursNorm());
+            courseInfo.setCompletionTime(dto.getInfo().getSettings().completionTime());
+            courseInfo.setCompletionTimeUnit(dto.getInfo().getSettings().completionTimeUnit());
 
             AdminAvatarDTO mentor = dto.getMembers().getMentor();
             AdminAvatarDTO manager = dto.getMembers().getManager();
             if(mentor != null) course.setMentor(adminRepository.getReferenceById(mentor.getId()));
             if(manager != null) course.setManager(adminRepository.getReferenceById(manager.getId()));
-//            course.getStudents().clear();
-//            course.getStudents().addAll(dto.getMembers().getStudents().stream().map(st -> studentRepository.getReferenceById(st.getId())).toList());
 
-//            System.out.println(dto.getStructure().getTasks());
-
-//            course.getTasks().clear();
-//            course.getTasks().addAll(dto.getStructure().getTasks().stream().map( t ->taskRepository.getReferenceById(t.getId())).toList());
         } catch (Exception e) {
             throw new MappingException(e.getMessage());
         }

@@ -40,7 +40,6 @@ public class TaskServiceImpl implements TaskService {
     private final StudentTaskRepository studentTaskRepository;
     private final StudentRepository studentRepository;
     private final CourseRepository courseRepository;
-    private final TaskMapper mapper;
 
     @Override
     public List<Task> getTasks() {
@@ -176,7 +175,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public void createStudentTasksOnCourseTransfer(Student student, Course course) {
-
+        log.info("creating student tasks at the moment of transfering student(id:{}) to course(id:{})", student.getId(), course.getId());
         // clear student tasks which were not completed
         List<StudentTask> oldStudentTasks = student.getTasks();
         oldStudentTasks.stream()
@@ -199,10 +198,17 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    public void clearStudentTasksOnDeletionFromCourse(Student student) {
+        student.getTasks().stream().filter(task -> task.getStatus() != StudentTaskStatus.COMPLETED)
+                .forEach(studentTaskRepository::delete);
+    }
+
+    @Override
     public List<StudentTask> createStudentTaskListFromCourse(Course course) {
         return course.getTasks().stream().map(this::fromTaskToStudentTask).toList();
     }
 
+    @Override
     public StudentTask fromTaskToStudentTask(Task task) {
         // base case to exit recursion
         if(task == null) return null;

@@ -36,6 +36,7 @@ public interface CourseService extends EntityFilterService<Course> {
     void deleteCourseById(Long id);
 
     void saveIcon(Long id, CourseIconDTO dto) throws IOException;
+    void deleteIcon(Long id) throws IOException;
 
     List<Task> getCourseTasks(Long id);
 }

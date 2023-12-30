@@ -27,7 +27,7 @@ public class Course {
 
     private String name;
 
-    private byte[] icon;
+    private String icon;
 
     @DateTimeFormat(pattern = "MM/dd/yyyy")
     private LocalDate beginningDate;
@@ -47,7 +47,7 @@ public class Course {
     private List<Student> students = new ArrayList<>();
 
     @ToString.Exclude
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "course")
     private List<Task> tasks = new ArrayList<>();
 
     @ToString.Exclude
@@ -59,7 +59,6 @@ public class Course {
 
     @Enumerated(value = EnumType.STRING)
     private CourseStatus status;
-
 
     public Course(Long id, String name) {
         this.id = id;

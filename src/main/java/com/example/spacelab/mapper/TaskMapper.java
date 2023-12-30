@@ -31,7 +31,6 @@ public class TaskMapper {
     private final CourseRepository courseRepository;
     private final LiteratureRepository literatureRepository;
 
-    private final LiteratureMapper literatureMapper;
     private final StudentMapper studentMapper;
 
 

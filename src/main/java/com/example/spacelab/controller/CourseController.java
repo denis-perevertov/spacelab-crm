@@ -181,7 +181,6 @@ public class CourseController {
             throw new ObjectValidationException(errors);
         }
 
-//        Course course = courseService.createNewCourse(mapper.fromEditDTOToCourse(dto));
         Course course = courseService.createNewCourse(dto);
         return new ResponseEntity<>(course.getId(), HttpStatus.CREATED);
     }
@@ -243,13 +242,20 @@ public class CourseController {
     }
 
     // Загрузка иконки
-    @PostMapping(value = "/{id}/icon")
+    @PostMapping("/{id}/icon")
     @ResponseBody
     public ResponseEntity<?> uploadIcon(@PathVariable Long id, @ModelAttribute CourseIconDTO dto) throws IOException {
         log.info(dto.icon().toString());
         log.info(dto.icon().getOriginalFilename());
         courseService.saveIcon(id, dto);
         return ResponseEntity.ok("Created");
+    }
+
+    // Очистка иконки
+    @DeleteMapping("/{id}/icon")
+    public ResponseEntity<?> deleteIcon(@PathVariable Long id) throws IOException {
+        courseService.deleteIcon(id);
+        return ResponseEntity.ok("Deleted");
     }
 
     // Select2

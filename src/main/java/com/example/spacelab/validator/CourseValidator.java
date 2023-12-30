@@ -46,10 +46,10 @@ public class CourseValidator implements Validator {
         }
 
         CourseSettingsDTO settings = info.getSettings();
-        if(settings.programDuration().getValue() == null || settings.programDuration().getValue().isEmpty())
-            e.rejectValue("info.settings.programDuration", "info.settings.programDuration.empty", "Enter program duration!");
-        else if(settings.programDuration().getValue().length() > 10)
-                e.rejectValue("info.settings.programDuration", "info.settings.programDuration.length", "Field length: 1-10");
+//        if(settings.programDuration().getValue() == null || settings.programDuration().getValue().isEmpty())
+//            e.rejectValue("info.settings.programDuration", "info.settings.programDuration.empty", "Enter program duration!");
+//        else if(settings.programDuration().getValue().length() > 10)
+//                e.rejectValue("info.settings.programDuration", "info.settings.programDuration.length", "Field length: 1-10");
 
         if(settings.groupSize() == null)
             e.rejectValue("info.settings.groupSize", "info.settings.groupSize.empty", "Enter group size!");
