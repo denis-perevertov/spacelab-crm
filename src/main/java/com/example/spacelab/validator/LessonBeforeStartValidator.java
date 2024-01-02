@@ -33,13 +33,13 @@ public class LessonBeforeStartValidator implements Validator {
 
         // todo add datetime check
 
-        LocalDateTime datetime = dto.getLessonStartTime();
-        if(datetime == null) {
-            e.rejectValue("lessonStartTime", "empty", "Enter datetime!");
-        }
-        else if(datetime.isBefore(LocalDateTime.now())) {
-            e.rejectValue("lessonStartTime", "past", "datetime is in the past");
-        }
+//        LocalDateTime datetime = dto.getLessonStartTime();
+//        if(datetime == null) {
+//            e.rejectValue("lessonStartTime", "empty", "Enter datetime!");
+//        }
+//        else if(datetime.isBefore(LocalDateTime.now())) {
+//            e.rejectValue("lessonStartTime", "past", "datetime is in the past");
+//        }
 
         if(dto.getCourseID() == null || dto.getCourseID() == 0)
             e.rejectValue("courseID", "courseID.empty", "Select course!");

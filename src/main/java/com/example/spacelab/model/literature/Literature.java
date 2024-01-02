@@ -29,7 +29,7 @@ public class Literature {
     private String description;
     private String resource_link;  // filename for files, URL for links
 
-    private String img;
+    private String thumbnail;
 
     public Literature(Long id, String name) {
         this.id = id;

@@ -1,5 +1,6 @@
 package com.example.spacelab.model.student;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EnumType;
@@ -34,7 +35,7 @@ public class StudentDetails {
     @Schema(example = "http://www.linkedin.com/link")
     private String linkedinLink;
 
-    @DateTimeFormat(pattern = "MM/dd/yyyy")
+    @JsonFormat(pattern = "dd.MM.yyyy")
     private LocalDate birthdate;
 
     @Enumerated(value = EnumType.STRING)

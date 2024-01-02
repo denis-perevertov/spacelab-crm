@@ -123,9 +123,14 @@ public class LiteratureMapper {
             dto.setType(literature.getType());
             dto.setAuthor(literature.getAuthor());
             dto.setKeywords(literature.getKeywords());
-            dto.setResource_link(literature.getResource_link());
+            if(literature.getType().equals(LiteratureType.BOOK)) {
+                dto.setResource_file(literature.getResource_link());
+            }
+            else {
+                dto.setResource_link(literature.getResource_link());
+            }
             dto.setDescription(literature.getDescription());
-            dto.setImg(literature.getImg());
+            dto.setThumbnail(literature.getThumbnail());
             dto.setVerified(literature.getIs_verified());
         } catch (Exception e) {
             log.severe("Mapping error: " + e.getMessage());
@@ -149,7 +154,7 @@ public class LiteratureMapper {
             dto.setKeywords(literature.getKeywords());
             dto.setResource_link(literature.getResource_link());
             dto.setDescription(literature.getDescription());
-            dto.setImg(literature.getImg());
+            dto.setThumbnail(literature.getThumbnail());
         } catch (Exception e) {
             log.severe("Mapping error: " + e.getMessage());
             log.warning("DTO: " + dto);
@@ -176,6 +181,10 @@ public class LiteratureMapper {
             entity.setDescription(dto.getDescription());
 
             entity.setIs_verified(!dto.isNeeds_verification());
+
+            if(!dto.getThumbnail().isEmpty()) {
+                entity.setThumbnail(dto.getThumbnail().getOriginalFilename());
+            }
 
             if(dto.getType() == LiteratureType.BOOK) {
                 entity.setResource_link(dto.getResource_file().getOriginalFilename());

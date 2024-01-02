@@ -1,9 +1,12 @@
 package com.example.spacelab.mapper;
 
+import com.example.spacelab.dto.admin.AdminAvatarDTO;
+import com.example.spacelab.dto.course.CourseLinkIconDTO;
 import com.example.spacelab.dto.lesson.LessonInfoDTO;
 import com.example.spacelab.dto.lesson.LessonListDTO;
 import com.example.spacelab.dto.lesson.LessonReportRowDTO;
 import com.example.spacelab.dto.lesson.LessonSaveBeforeStartDTO;
+import com.example.spacelab.dto.student.StudentAvatarDTO;
 import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.lesson.Lesson;
@@ -14,23 +17,28 @@ import com.example.spacelab.service.AdminService;
 import com.example.spacelab.service.CourseService;
 import com.example.spacelab.model.lesson.LessonStatus;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
 @Component
 @RequiredArgsConstructor
 public class LessonMapper {
+
     private final CourseService courseService;
     private final AdminService adminService;
-    public LessonListDTO  fromLessonToLessonListDTO(Lesson lesson) {
+    private final StudentMapper studentMapper;
+
+    public LessonListDTO fromLessonToLessonListDTO(Lesson lesson) {
         LessonListDTO dto = new LessonListDTO();
         dto.setId(lesson.getId());
-        dto.setDatetime(lesson.getDatetime());
+        dto.setDatetime(lesson.getDatetime().atZone(ZoneId.of("UTC")));
 
         Course course = lesson.getCourse();
         if (course != null) {
@@ -84,10 +92,36 @@ public class LessonMapper {
     }
 
     public LessonInfoDTO fromLessonToLessonInfoDTO(Lesson lesson) {
-        LessonInfoDTO lessonInfoDTO = new LessonInfoDTO();
-        lessonInfoDTO.setId(lesson.getId());
-        lessonInfoDTO.setDatetime(lesson.getDatetime());
-        lessonInfoDTO.setStatus(lesson.getStatus().toString());
+        LessonInfoDTO dto = new LessonInfoDTO();
+        dto.setId(lesson.getId());
+        dto.setDatetime(lesson.getDatetime());
+        dto.setStatus(lesson.getStatus().toString());
+
+        dto.setLink(lesson.getLink());
+        dto.setCourse(
+                new CourseLinkIconDTO(
+                        lesson.getCourse().getId(),
+                        lesson.getCourse().getName(),
+                        lesson.getCourse().getIcon()
+                )
+        );
+
+        dto.setMentor(
+                new AdminAvatarDTO(
+                        lesson.getCourse().getMentor().getId(),
+                        lesson.getCourse().getMentor().getFullName(),
+                        lesson.getCourse().getMentor().getAvatar()
+                )
+        );
+
+        List<StudentAvatarDTO> students = lesson
+                .getCourse()
+                .getStudents()
+                .stream()
+                .map(studentMapper::fromStudentToAvatarDTO)
+                .toList();
+
+        dto.setStudents(students);
 
         List<LessonReportRowDTO> lessonReportRowDTOList = new ArrayList<>();
         if (lesson.getLessonReport() != null && lesson.getLessonReport().getRows() != null) {
@@ -119,9 +153,9 @@ public class LessonMapper {
                 lessonReportRowDTOList.add(lessonReportRowDTO);
             }
         }
-        lessonInfoDTO.setLessonReportRowList(lessonReportRowDTOList);
+        dto.setLessonReportRowList(lessonReportRowDTOList);
 
-        return lessonInfoDTO;
+        return dto;
 
     }
 
@@ -129,7 +163,7 @@ public class LessonMapper {
         Lesson lesson = new Lesson();
 
         if(dto.getId() != null && dto.getId()>0) lesson.setId(dto.getId());
-        lesson.setDatetime(dto.getLessonStartTime());
+        lesson.setDatetime(dto.getLessonStartTime().toLocalDateTime());
         Course course = courseService.getCourseById(dto.getCourseID());
         lesson.setCourse(course);
         lesson.setStatus(dto.getStatus());
@@ -143,7 +177,7 @@ public class LessonMapper {
         LessonSaveBeforeStartDTO dto = new LessonSaveBeforeStartDTO();
 
         dto.setId(lesson.getId());
-        dto.setLessonStartTime(lesson.getDatetime());
+        dto.setLessonStartTime(lesson.getDatetime().atZone(ZoneId.of("UTC")));
         dto.setCourseID(lesson.getCourse().getId());
         dto.setLink(lesson.getLink());
         dto.setStatus(lesson.getStatus());

@@ -103,25 +103,32 @@ public class LiteratureServiceImpl implements LiteratureService{
 
     @Override
     public Literature createNewLiterature(LiteratureSaveDTO saveRequest) throws IOException {
-
+        Literature lit = literatureMapper.fromLiteratureSaveDTOtoLiterature(saveRequest);
         MultipartFile file = saveRequest.getResource_file();
         if(file != null && file.getSize() > 0) {
             fileService.saveFile(file, "literature", "books");
         }
-        Literature lit = literatureMapper.fromLiteratureSaveDTOtoLiterature(saveRequest);
-        log.info(lit.toString());
+        MultipartFile thumbnail = saveRequest.getThumbnail();
+        if(thumbnail != null && thumbnail.getSize() > 0) {
+            fileService.saveFile(thumbnail, "literature", "thumbnails");
+            lit.setThumbnail("/uploads/literature/thumbnails/" + saveRequest.getThumbnail().getOriginalFilename());
+        }
         return literatureRepository.save(lit);
     }
 
 
     @Override
     public Literature editLiterature(LiteratureSaveDTO saveRequest) throws IOException {
+        Literature lit = literatureMapper.fromLiteratureSaveDTOtoLiterature(saveRequest);
         MultipartFile file = saveRequest.getResource_file();
         if(file != null && file.getSize() > 0) {
             fileService.saveFile(file, "literature", "books");
         }
-        Literature lit = literatureMapper.fromLiteratureSaveDTOtoLiterature(saveRequest);
-        log.info(lit.toString());
+        MultipartFile thumbnail = saveRequest.getThumbnail();
+        if(thumbnail != null && thumbnail.getSize() > 0) {
+            fileService.saveFile(thumbnail, "literature", "thumbnails");
+            lit.setThumbnail("/uploads/literature/thumbnails/" + saveRequest.getThumbnail().getOriginalFilename());
+        }
         return literatureRepository.save(lit);
     }
 

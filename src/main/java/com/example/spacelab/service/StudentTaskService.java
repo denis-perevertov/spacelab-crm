@@ -23,7 +23,9 @@ public interface StudentTaskService {
     void createStudentTasksOnCourseTransfer(Student student, Course course);
     void clearStudentTasksOnDeletionFromCourse(Student student);
 
+    void lockStudentTask(Long taskID);
+    void unlockStudentTask(Long taskID);
     void completeStudentTask(Long taskID);
-
+    void resetStudentTask(Long taskID);
 
 }

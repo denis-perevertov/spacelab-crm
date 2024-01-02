@@ -122,7 +122,7 @@ public class TaskMapper {
 
         try {
             dto.setId(studentTask.getId());
-            dto.setTask(fromTaskToListDTO(studentTask.getTaskReference()));
+            dto.setTaskReference(fromTaskToListDTO(studentTask.getTaskReference()));
             dto.setBeginDate(studentTask.getBeginDate());
             dto.setEndDate(studentTask.getEndDate());
             dto.setStatus(studentTask.getStatus().toString());

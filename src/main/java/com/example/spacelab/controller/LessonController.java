@@ -132,6 +132,8 @@ public class LessonController {
     public ResponseEntity<?> createNewLessonBeforeStart(@RequestBody LessonSaveBeforeStartDTO lesson,
                                                              BindingResult bindingResult) {
 
+        log.info("lesson data: " + lesson);
+
         authUtil.checkAccessToCourse(lesson.getCourseID(), "lessons.write");
 
         lesson.setId(null);

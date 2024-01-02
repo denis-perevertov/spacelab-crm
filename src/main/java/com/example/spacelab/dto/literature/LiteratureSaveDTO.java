@@ -37,6 +37,8 @@ public class LiteratureSaveDTO {
 
     private MultipartFile resource_file;
 
+    private MultipartFile thumbnail;
+
     private boolean needs_verification;
 
     public LiteratureSaveDTO(Long id, String name) {

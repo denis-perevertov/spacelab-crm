@@ -37,5 +37,4 @@ public interface TaskService extends StudentTaskService,
     Page<Task> getAvailableTasks(Pageable pageable);
 
 
-
 }

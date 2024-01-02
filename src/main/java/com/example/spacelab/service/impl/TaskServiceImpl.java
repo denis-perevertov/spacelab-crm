@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Log4j2
@@ -203,6 +204,8 @@ public class TaskServiceImpl implements TaskService {
                 .forEach(studentTaskRepository::delete);
     }
 
+
+
     @Override
     public List<StudentTask> createStudentTaskListFromCourse(Course course) {
         return course.getTasks().stream().map(this::fromTaskToStudentTask).toList();
@@ -215,14 +218,39 @@ public class TaskServiceImpl implements TaskService {
 
         StudentTask st = new StudentTask();
         st.setTaskReference(task);
-        st.setParentTask(fromTaskToStudentTask(task.getParentTask()));
+//        st.setParentTask(fromTaskToStudentTask(task.getParentTask()));
         st.setPercentOfCompletion(0);
         st.setStatus(StudentTaskStatus.LOCKED);
-        task.getSubtasks().forEach(subtask -> st.getSubtasks().add(fromTaskToStudentTask(subtask)));
+        task.getSubtasks().forEach(subtask -> Optional.ofNullable(fromTaskToStudentTask(subtask)).ifPresent(studentSubtask -> st.getSubtasks().add(studentSubtask)));
 
         return st;
     }
 
+    // todo check statuses
+    @Override
+    public void lockStudentTask(Long taskID) {
+        StudentTask task = studentTaskRepository.findById(taskID).orElseThrow();
+        task.getTaskReference().getActiveStudents().remove(task.getStudent());
+        task.setStatus(StudentTaskStatus.LOCKED);
+        task.setBeginDate(null);
+        task.setEndDate(null);
+        studentTaskRepository.save(task);
+        log.info("task locked");
+    }
+
+    // todo check statuses
+    @Override
+    public void unlockStudentTask(Long taskID) {
+        StudentTask task = studentTaskRepository.findById(taskID).orElseThrow();
+        task.getTaskReference().getActiveStudents().add(task.getStudent());
+        task.setStatus(StudentTaskStatus.UNLOCKED);
+        task.setBeginDate(LocalDate.now());
+        task.setEndDate(null);
+        studentTaskRepository.save(task);
+        log.info("task unlocked");
+    }
+
+    // todo check statuses
     @Override
     public void completeStudentTask(Long taskID) {
         StudentTask task = studentTaskRepository.findById(taskID).orElseThrow();
@@ -231,6 +259,18 @@ public class TaskServiceImpl implements TaskService {
         task.setEndDate(LocalDate.now());
         studentTaskRepository.save(task);
         log.info("task completed");
+    }
+
+    // todo check statuses
+    @Override
+    public void resetStudentTask(Long taskID) {
+        StudentTask task = studentTaskRepository.findById(taskID).orElseThrow();
+        task.getTaskReference().getActiveStudents().add(task.getStudent());
+        task.setStatus(StudentTaskStatus.UNLOCKED);
+        task.setBeginDate(LocalDate.now());
+        task.setEndDate(null);
+        studentTaskRepository.save(task);
+        log.info("task reset");
     }
 
 

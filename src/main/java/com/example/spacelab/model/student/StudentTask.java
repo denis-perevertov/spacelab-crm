@@ -10,6 +10,7 @@ import lombok.experimental.Accessors;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -39,7 +40,7 @@ public class StudentTask {
     @JsonIgnore
     @ToString.Exclude
     @OneToMany(cascade = CascadeType.ALL)
-    private List<StudentTask> subtasks;
+    private List<StudentTask> subtasks = new ArrayList<>();
 
     @DateTimeFormat(pattern = "MM/dd/yyyy")
     private LocalDate beginDate;

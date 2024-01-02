@@ -1,12 +1,14 @@
 package com.example.spacelab.dto.lesson;
 
 import com.example.spacelab.model.lesson.LessonStatus;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZonedDateTime;
 
 @Data
 public class LessonSaveBeforeStartDTO {
@@ -14,7 +16,8 @@ public class LessonSaveBeforeStartDTO {
     @Schema(example = "10")
     private Long id;
 
-    private LocalDateTime lessonStartTime;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+    private ZonedDateTime lessonStartTime;
 
     @Schema(example = "3")
     private Long courseID;

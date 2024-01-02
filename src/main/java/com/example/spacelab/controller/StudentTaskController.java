@@ -99,24 +99,46 @@ public class StudentTaskController {
         return ResponseEntity.ok(info);
     }
 
-    // Создание копии задания для студента ??
-    @PostMapping("/unlock")
-    public ResponseEntity<Object> createStudentTask(@RequestBody @Valid StudentTaskUnlockRequest request,
-                                                    BindingResult bindingResult) {
-        studentValidator.validateNewTaskForStudent(request, bindingResult);
-        if(bindingResult.hasErrors()) {
-            return ResponseEntity.badRequest().body(ValidationUtils.getErrorMessages(bindingResult));
-        }
-        StudentTask studentTask = taskService.unlockTaskForStudent(request.taskID(), request.studentID());
-        return ResponseEntity.ok("New Student Task created, ID: " + studentTask.getId());
+//    // Создание копии задания для студента ??
+//    @PostMapping("/unlock")
+//    public ResponseEntity<Object> createStudentTask(@RequestBody @Valid StudentTaskUnlockRequest request,
+//                                                    BindingResult bindingResult) {
+//        studentValidator.validateNewTaskForStudent(request, bindingResult);
+//        if(bindingResult.hasErrors()) {
+//            return ResponseEntity.badRequest().body(ValidationUtils.getErrorMessages(bindingResult));
+//        }
+//        StudentTask studentTask = taskService.unlockTaskForStudent(request.taskID(), request.studentID());
+//        return ResponseEntity.ok("New Student Task created, ID: " + studentTask.getId());
+//    }
 
-    }
+    // todo check statuses
 
     @PostMapping("/complete")
     public ResponseEntity<Object> completeStudentTask(@RequestBody Long taskID) {
         log.info("completing task {}", taskID);
         taskService.completeStudentTask(taskID);
         return ResponseEntity.ok("Student Task w/ ID: "+taskID+" completed");
+    }
+
+    @PostMapping("/unlock")
+    public ResponseEntity<?> unlockStudentTask(@RequestBody Long taskID) {
+        log.info("unlocking task {}", taskID);
+        taskService.unlockStudentTask(taskID);
+        return ResponseEntity.ok("Student Task w/ ID: "+taskID+" unlocked");
+    }
+
+    @PostMapping("/lock")
+    public ResponseEntity<?> lockStudentTask(@RequestBody Long taskID) {
+        log.info("locking task {}", taskID);
+        taskService.lockStudentTask(taskID);
+        return ResponseEntity.ok("Student Task w/ ID: "+taskID+" locked");
+    }
+
+    @PostMapping("/reset")
+    public ResponseEntity<?> resetStudentTask(@RequestBody Long taskID) {
+        log.info("resetting task {}", taskID);
+        taskService.resetStudentTask(taskID);
+        return ResponseEntity.ok("Student Task w/ ID: "+taskID+" reset");
     }
 
 

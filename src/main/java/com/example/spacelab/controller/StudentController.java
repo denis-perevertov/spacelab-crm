@@ -1,6 +1,7 @@
 package com.example.spacelab.controller;
 
 import com.example.spacelab.dto.SelectSearchDTO;
+import com.example.spacelab.dto.course.StudentCourseTaskInfoDTO;
 import com.example.spacelab.dto.student.StudentTaskDTO;
 import com.example.spacelab.dto.student.*;
 import com.example.spacelab.dto.task.TaskCourseDTO;
@@ -31,6 +32,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
@@ -153,14 +155,21 @@ public class StudentController {
     }
 
     // получить задания текущего курса студента
-    @GetMapping("/{studentID}/course/tasks")
-    public ResponseEntity<?> getStudentCourseTasks(@PathVariable Long studentID) {
-        List<TaskCourseDTO> courseTaskList =
-                courseService.getCourseTasks(studentService.getStudentCourseID(studentID))
-                        .stream()
-                        .map(courseMapper::fromTaskToCourseDTO)
-                        .toList();
-        return ResponseEntity.ok(courseTaskList);
+//    @GetMapping("/{studentID}/course/tasks")
+//    public ResponseEntity<?> getStudentCourseTasks(@PathVariable Long studentID) {
+//        List<TaskCourseDTO> courseTaskList =
+//                courseService.getCourseTasks(studentService.getStudentCourseID(studentID))
+//                        .stream()
+//                        .map(courseMapper::fromTaskToCourseDTO)
+//                        .toList();
+//        return ResponseEntity.ok(courseTaskList);
+//    }
+
+    // получить имя, иконку и информацию текущего курса студента
+    @GetMapping("/{studentID}/course")
+    public ResponseEntity<?> getStudentCourseInfo(@PathVariable Long studentID) {
+        StudentCourseTaskInfoDTO studentCourseTaskInfo = courseService.getStudentCourseInfo(studentID);
+        return ResponseEntity.ok(studentCourseTaskInfo);
     }
 
     // Создание нового студента (не регистрация)

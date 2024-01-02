@@ -71,8 +71,11 @@ public class LiteratureValidator implements Validator {
                 e.rejectValue("resource_link", "resource_link.length", "Resource link length: 10-200");
         }
         else if(dto.getType() == LiteratureType.BOOK) {
+            String filename = dto.getResource_file().getOriginalFilename();
+            assert filename != null;
+            String extension = filename.substring(filename.lastIndexOf(".")+1);
             System.out.println("Size: " + dto.getResource_file().getSize());
-            System.out.println("FileName: " + dto.getResource_file().getOriginalFilename());
+            System.out.println("FileName: " + filename);
             if(dto.getResource_file().getSize() < 1) {
                 if(
                     dto.getId() == null
@@ -81,9 +84,11 @@ public class LiteratureValidator implements Validator {
                     e.rejectValue("resource_file", "resource_file.empty", "Upload file!");
                 }
             }
-            else if(!dto.getResource_file().getOriginalFilename().split("\\.")[1].equals(ALLOWED_FORMAT)) {
+            else if(!extension.equalsIgnoreCase(ALLOWED_FORMAT)) {
                 e.rejectValue("resource_file", "resource_file.extension", "Wrong file extension!");
             }
         }
+
+        // todo add image thumbnail validation
     }
 }

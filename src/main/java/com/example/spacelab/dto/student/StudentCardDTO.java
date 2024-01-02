@@ -11,8 +11,14 @@ public class StudentCardDTO {
 
     @Schema(example = "RoleName")
     private String roleName;
+
+    private Long courseId;
+
     @Schema(example = "CourseName")
     private String courseName;
 
+    private String courseIcon;
+
+    private String avatar;
 
 }

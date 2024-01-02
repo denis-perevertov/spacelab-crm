@@ -4,6 +4,7 @@ import com.example.spacelab.dto.student.*;
 import com.example.spacelab.exception.MappingException;
 
 import com.example.spacelab.exception.ResourceNotFoundException;
+import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.student.Student;
 import com.example.spacelab.model.student.StudentDetails;
 import com.example.spacelab.model.student.StudentInviteRequest;
@@ -88,8 +89,14 @@ public class StudentMapper {
 
             if(student.getRole() != null)
                 dto.setRoleName(student.getRole().getName());
-            if(student.getCourse() != null)
-                dto.setCourseName(student.getCourse().getName());
+            Course course = student.getCourse();
+            if(course != null) {
+                dto.setCourseId(course.getId());
+                dto.setCourseName(course.getName());
+                dto.setCourseIcon(course.getIcon());
+            }
+
+            dto.setAvatar(student.getAvatar());
 
         } catch (Exception e) {
             log.severe("Mapping error: " + e.getMessage());

@@ -1,10 +1,13 @@
 package com.example.spacelab.dto.lesson;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+
 @Data
 @NoArgsConstructor
 public class LessonListDTO {
@@ -12,7 +15,8 @@ public class LessonListDTO {
     @Schema(example = "10")
     private Long id;
 
-    private LocalDateTime datetime; // or string
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+    private ZonedDateTime datetime; // or string
 
     @Schema(example = "3")
     private Long courseId;
@@ -39,8 +43,4 @@ public class LessonListDTO {
     private String presentStudentsQuantity;
 
 
-    public LessonListDTO(Long id, LocalDateTime datetime) {
-        this.id = id;
-        this.datetime = datetime;
-    }
 }

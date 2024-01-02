@@ -17,6 +17,8 @@ public class CourseListDTO {
     @Schema(example = "CourseName")
     private String name;
 
+    private String icon;
+
     @Schema(example = "20")
     private Long studentsQuantity;
 
@@ -37,8 +39,4 @@ public class CourseListDTO {
     @Schema(example = "ACTIVE")
     private CourseStatus status;
 
-    public CourseListDTO(Long id, String name) {
-        this.id = id;
-        this.name = name;
-    }
 }

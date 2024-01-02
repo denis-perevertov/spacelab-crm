@@ -39,7 +39,7 @@ public class LiteratureCardDTO {
     private String description;
 
     @Schema(example = "book_thumbnail.png")
-    private String img;
+    private String thumbnail;
 
     public LiteratureCardDTO(Long id, String name) {
         this.id = id;

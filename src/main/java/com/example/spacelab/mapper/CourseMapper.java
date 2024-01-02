@@ -38,6 +38,7 @@ public class CourseMapper {
         CourseListDTO dto = new CourseListDTO();
         dto.setId(course.getId());
         dto.setName(course.getName());
+        dto.setIcon(course.getIcon());
         dto.setStudentsQuantity((long) course.getStudents().size());
         dto.setBegin_date(course.getBeginningDate());
         dto.setEnd_date(course.getEndDate());

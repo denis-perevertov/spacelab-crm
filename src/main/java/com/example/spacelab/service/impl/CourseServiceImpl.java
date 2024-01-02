@@ -2,6 +2,7 @@ package com.example.spacelab.service.impl;
 
 import com.example.spacelab.dto.course.CourseEditDTO;
 import com.example.spacelab.dto.course.CourseIconDTO;
+import com.example.spacelab.dto.course.StudentCourseTaskInfoDTO;
 import com.example.spacelab.dto.student.StudentAvatarDTO;
 import com.example.spacelab.dto.task.TaskCourseDTO;
 import com.example.spacelab.exception.ResourceNotFoundException;
@@ -17,6 +18,7 @@ import com.example.spacelab.model.task.Task;
 import com.example.spacelab.repository.*;
 import com.example.spacelab.service.CourseService;
 import com.example.spacelab.service.FileService;
+import com.example.spacelab.service.StudentService;
 import com.example.spacelab.service.StudentTaskService;
 import com.example.spacelab.service.specification.CourseSpecifications;
 import com.example.spacelab.util.FilterForm;
@@ -47,6 +49,7 @@ public class CourseServiceImpl implements CourseService {
     private final StudentRepository studentRepository;
     private final TaskRepository taskRepository;
 
+    private final StudentService studentService;
     private final StudentTaskService studentTaskService;
 
     private final AdminRepository adminRepository;
@@ -102,6 +105,18 @@ public class CourseServiceImpl implements CourseService {
     public List<Task> getCourseTasks(Long id) {
         if(id == null) return new ArrayList<>();
         else return getCourseById(id).getTasks();
+    }
+
+    @Override
+    public StudentCourseTaskInfoDTO getStudentCourseInfo(Long studentID) {
+        Student student = studentService.getStudentById(studentID);
+        Course studentCourse = student.getCourse();
+        return new StudentCourseTaskInfoDTO(
+                studentCourse.getId(),
+                studentCourse.getName(),
+                studentCourse.getIcon(),
+                student.getTasks().stream().map(taskMapper::fromStudentTaskToDTO).toList()
+        );
     }
 
     @Override
@@ -274,7 +289,7 @@ public class CourseServiceImpl implements CourseService {
         if(file.getSize() > 0) {
             fileService.saveFile(file, "courses", "icons");
             Course c = getCourseById(id);
-            c.setIcon("/uploads/courses/" + file.getOriginalFilename());
+            c.setIcon("/uploads/courses/icons/" + file.getOriginalFilename());
             courseRepository.save(c);
         }
     }

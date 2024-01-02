@@ -12,7 +12,7 @@ public class StudentTaskDTO {
 
     @Schema(example = "3")
     private Long id;
-    private TaskListDTO task;
+    private TaskListDTO taskReference;
     @Schema(example = "3")
     private Long taskID;
     private LocalDate beginDate;
