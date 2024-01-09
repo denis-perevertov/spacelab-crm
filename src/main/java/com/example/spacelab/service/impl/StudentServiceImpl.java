@@ -30,6 +30,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -231,7 +232,8 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public List<LessonReportRow> getStudentLessonData(Long studentID) {
-        return getStudentById(studentID).getLessonData();
+//        return getStudentById(studentID).getLessonData();
+        return new ArrayList<>();
     }
 
     @Override

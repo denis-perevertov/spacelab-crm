@@ -539,7 +539,6 @@ public class DefaultInitializer implements CommandLineRunner {
             lesson.setStatus(LessonStatus.PLANNED);
             LessonReport report = new LessonReport();
             report.setLesson(lesson);
-            lesson.setLessonReport(report);
 
             lessonRepository.save(lesson);
 
@@ -550,7 +549,6 @@ public class DefaultInitializer implements CommandLineRunner {
             lesson2.setStatus(LessonStatus.PLANNED);
             LessonReport report2 = new LessonReport();
             report2.setLesson(lesson2);
-            lesson2.setLessonReport(report2);
 
             lessonRepository.save(lesson2);
 
@@ -561,7 +559,6 @@ public class DefaultInitializer implements CommandLineRunner {
             lesson3.setStatus(LessonStatus.PLANNED);
             LessonReport report3 = new LessonReport();
             report3.setLesson(lesson3);
-            lesson3.setLessonReport(report3);
 
             lessonRepository.save(lesson3);
         }

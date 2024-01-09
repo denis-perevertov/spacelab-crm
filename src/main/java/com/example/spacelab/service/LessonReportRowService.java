@@ -7,6 +7,6 @@ public interface LessonReportRowService {
 
     LessonReportRow getLessonReportRowById(Long id);
     LessonReportRow createNewLessonReportRow(LessonReportRow lessonReportRow);
-    void updateLessonReportRowAndCompletedTask(LessonReportRowSaveDTO lessonReportRowSaveDTO);
+    LessonReportRow updateLessonReportRow(LessonReportRowSaveDTO lessonReportRowSaveDTO);
     void deleteLessonReportRowById(Long id);
 }

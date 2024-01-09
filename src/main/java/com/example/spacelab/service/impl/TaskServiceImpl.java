@@ -1,5 +1,6 @@
 package com.example.spacelab.service.impl;
 
+import com.example.spacelab.dto.student.StudentTaskLessonDTO;
 import com.example.spacelab.exception.ResourceNotFoundException;
 import com.example.spacelab.mapper.TaskMapper;
 import com.example.spacelab.model.course.Course;
@@ -224,6 +225,36 @@ public class TaskServiceImpl implements TaskService {
         task.getSubtasks().forEach(subtask -> Optional.ofNullable(fromTaskToStudentTask(subtask)).ifPresent(studentSubtask -> st.getSubtasks().add(studentSubtask)));
 
         return st;
+    }
+
+    @Override
+    public List<StudentTaskLessonDTO> getOpenStudentTasks(Student student) {
+        return student.getTasks().stream()
+                .filter(task -> task.getStatus().equals(StudentTaskStatus.UNLOCKED))
+                .map(task -> new StudentTaskLessonDTO(
+                        task.getId(),
+                        task.getTaskReference().getTaskIndex(),
+                        task.getTaskReference().getName(),
+                        task.getStatus().name(),
+                        task.getPercentOfCompletion()
+                ))
+                .toList();
+    }
+
+    // up to 3 next tasks
+    @Override
+    public List<StudentTaskLessonDTO> getNextStudentTasks(Student student) {
+        return student.getTasks().stream()
+                .filter(task -> task.getStatus().equals(StudentTaskStatus.LOCKED))
+                .map(task -> new StudentTaskLessonDTO(
+                        task.getId(),
+                        task.getTaskReference().getTaskIndex(),
+                        task.getTaskReference().getName(),
+                        task.getStatus().name(),
+                        task.getPercentOfCompletion()
+                ))
+                .limit(3)
+                .toList();
     }
 
     // todo check statuses

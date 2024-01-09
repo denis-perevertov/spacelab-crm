@@ -1,5 +1,6 @@
 package com.example.spacelab.service.impl;
 
+import com.example.spacelab.dto.student.StudentLessonDisplayDTO;
 import com.example.spacelab.exception.LessonException;
 import com.example.spacelab.exception.ResourceNotFoundException;
 import com.example.spacelab.job.LessonMonitor;
@@ -7,6 +8,7 @@ import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.lesson.Lesson;
 import com.example.spacelab.model.lesson.LessonStatus;
+import com.example.spacelab.model.student.Student;
 import com.example.spacelab.model.task.Task;
 import com.example.spacelab.model.task.TaskLevel;
 import com.example.spacelab.model.task.TaskStatus;
@@ -14,6 +16,7 @@ import com.example.spacelab.repository.AdminRepository;
 import com.example.spacelab.repository.CourseRepository;
 import com.example.spacelab.repository.LessonRepository;
 import com.example.spacelab.service.LessonService;
+import com.example.spacelab.service.TaskService;
 import com.example.spacelab.service.specification.LessonSpecifications;
 import com.example.spacelab.service.specification.TaskSpecifications;
 import com.example.spacelab.util.FilterForm;
@@ -25,14 +28,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @Log
+@Transactional
 public class LessonServiceImpl implements LessonService {
     private final CourseRepository courseRepository;
     private final AdminRepository adminRepository;
@@ -40,14 +46,18 @@ public class LessonServiceImpl implements LessonService {
     private final LessonRepository lessonRepository;
     private final LessonMonitor monitor;
 
+    private final TaskService taskService;
+
     public LessonServiceImpl(@Autowired LessonRepository lessonRepository,
                              @Autowired @Lazy LessonMonitor monitor,
                              AdminRepository adminRepository,
-                             CourseRepository courseRepository) {
+                             CourseRepository courseRepository,
+                             TaskService taskService) {
         this.lessonRepository = lessonRepository;
         this.monitor = monitor;
         this.adminRepository = adminRepository;
         this.courseRepository = courseRepository;
+        this.taskService = taskService;
     }
 
     @Override
@@ -102,6 +112,21 @@ public class LessonServiceImpl implements LessonService {
         if(monitor.isMonitored(lesson) && !lesson.getStartsAutomatically()) monitor.removeFromMonitor(lesson);
         if(!monitor.isMonitored(lesson) && lesson.getStartsAutomatically()) monitor.addToMonitor(lesson);
         return lessonRepository.save(lesson);
+    }
+
+    @Override
+    public List<StudentLessonDisplayDTO> getStudentLessonDisplayData(Long id) {
+        Lesson lesson = getLessonById(id);
+        List<Student> courseStudents = lesson.getCourse().getStudents();
+        List<StudentLessonDisplayDTO> lessonDisplayData = new ArrayList<>();
+        courseStudents.forEach(st -> lessonDisplayData.add(new StudentLessonDisplayDTO(
+                st.getId(),
+                st.getFullName(),
+                10.00,
+                taskService.getOpenStudentTasks(st),
+                taskService.getNextStudentTasks(st)
+        )));
+        return lessonDisplayData;
     }
 
     @Override

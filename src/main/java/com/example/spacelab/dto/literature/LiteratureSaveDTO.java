@@ -40,9 +40,4 @@ public class LiteratureSaveDTO {
     private MultipartFile thumbnail;
 
     private boolean needs_verification;
-
-    public LiteratureSaveDTO(Long id, String name) {
-        this.id = id;
-        this.name = name;
-    }
 }

@@ -2,12 +2,16 @@ package com.example.spacelab.model.lesson;
 
 import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.model.course.Course;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Entity
@@ -33,9 +37,9 @@ public class Lesson {
     @Enumerated(value = EnumType.STRING)
     private LessonStatus status;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name="lesson_report_id")
-    private LessonReport lessonReport;
+    @ToString.Exclude
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<LessonReportRow> reportRows = new ArrayList<>();
 
     public Lesson(Long id, LocalDateTime datetime) {
         this.id = id;

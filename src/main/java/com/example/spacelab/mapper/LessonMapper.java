@@ -2,10 +2,7 @@ package com.example.spacelab.mapper;
 
 import com.example.spacelab.dto.admin.AdminAvatarDTO;
 import com.example.spacelab.dto.course.CourseLinkIconDTO;
-import com.example.spacelab.dto.lesson.LessonInfoDTO;
-import com.example.spacelab.dto.lesson.LessonListDTO;
-import com.example.spacelab.dto.lesson.LessonReportRowDTO;
-import com.example.spacelab.dto.lesson.LessonSaveBeforeStartDTO;
+import com.example.spacelab.dto.lesson.*;
 import com.example.spacelab.dto.student.StudentAvatarDTO;
 import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.model.course.Course;
@@ -59,19 +56,19 @@ public class LessonMapper {
         dto.setLink(lesson.getLink());
         dto.setStatus(lesson.getStatus().toString());
 
-        if(lesson.getLessonReport() != null) {
-            dto.setPresentStudentsQuantity(
-                    lesson.getLessonReport()
-                            .getRows()
-                            .stream()
-                            .filter(LessonReportRow::getWasPresent)
-                            .count()
-                            +
-                            " / "
-                            +
-                            lesson.getLessonReport().getRows().size()
-            );
-        }
+//        if(lesson.getLessonReport() != null) {
+//            dto.setPresentStudentsQuantity(
+//                    lesson.getLessonReport()
+//                            .getRows()
+//                            .stream()
+//                            .filter(LessonReportRow::getWasPresent)
+//                            .count()
+//                            +
+//                            " / "
+//                            +
+//                            lesson.getLessonReport().getRows().size()
+//            );
+//        }
 
         return dto;
     }
@@ -123,38 +120,6 @@ public class LessonMapper {
 
         dto.setStudents(students);
 
-        List<LessonReportRowDTO> lessonReportRowDTOList = new ArrayList<>();
-        if (lesson.getLessonReport() != null && lesson.getLessonReport().getRows() != null) {
-            for (LessonReportRow lessonReportRow : lesson.getLessonReport().getRows()) {
-                LessonReportRowDTO lessonReportRowDTO = new LessonReportRowDTO();
-                
-                lessonReportRowDTO.setId(lessonReportRow.getId());
-                
-                lessonReportRowDTO.setStudent(lessonReportRow.getStudent().getDetails().getFirstName()+" "
-                        +lessonReportRow.getStudent().getDetails().getLastName()+" "
-                        +lessonReportRow.getStudent().getDetails().getFathersName());
-                
-                lessonReportRowDTO.setWasPresent(lessonReportRow.getWasPresent());
-
-                List<String> taskNames = new ArrayList<>();
-                for (StudentTask currentTask : lessonReportRow.getStudent().getTasks()) {
-                    String taskName = currentTask.getTaskReference().getName();
-                    String taskPercent = "";
-                    if (currentTask.getPercentOfCompletion() != null ) {
-                        taskPercent = " ("+currentTask.getPercentOfCompletion()+"%)";
-                    }
-                taskNames.add(taskName + taskPercent); }
-                lessonReportRowDTO.setCurrentTasks(taskNames);
-                
-                lessonReportRowDTO.setHours(lessonReportRow.getHours());
-                lessonReportRowDTO.setHoursNote(lessonReportRow.getHoursNote());
-                lessonReportRowDTO.setComment(lessonReportRow.getComment());
-                lessonReportRowDTO.setRating(lessonReportRow.getRating());
-                lessonReportRowDTOList.add(lessonReportRowDTO);
-            }
-        }
-        dto.setLessonReportRowList(lessonReportRowDTOList);
-
         return dto;
 
     }
@@ -173,8 +138,8 @@ public class LessonMapper {
         return lesson;
     }
 
-    public LessonSaveBeforeStartDTO fromLessonToSaveDTO(Lesson lesson) {
-        LessonSaveBeforeStartDTO dto = new LessonSaveBeforeStartDTO();
+    public LessonEditDTO fromLessonToEditDTO(Lesson lesson) {
+        LessonEditDTO dto = new LessonEditDTO();
 
         dto.setId(lesson.getId());
         dto.setLessonStartTime(lesson.getDatetime().atZone(ZoneId.of("UTC")));
@@ -184,5 +149,23 @@ public class LessonMapper {
         dto.setStartsAutomatically(lesson.getStartsAutomatically());
 
         return dto;
+    }
+
+    public LessonReportRowDTO fromReportRowToDTO(LessonReportRow row) {
+        return new LessonReportRowDTO(
+                row.getId(),
+                row.getStudent().getId(),
+                row.getStudent().getFullName(),
+                row.getWasPresent(),
+                row.getCurrentTaskSnapshot(),
+                row.getHours(),
+                row.getHoursNote(),
+                row.getComment(),
+                row.getRating()
+        );
+    }
+
+    public List<LessonReportRowDTO> fromReportRowListToDTOList(List<LessonReportRow> list) {
+        return list.stream().map(this::fromReportRowToDTO).toList();
     }
 }

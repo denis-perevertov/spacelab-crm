@@ -11,6 +11,7 @@ import com.example.spacelab.mapper.LessonMapper;
 import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.lesson.Lesson;
+import com.example.spacelab.model.lesson.LessonReportRow;
 import com.example.spacelab.model.lesson.LessonStatus;
 import com.example.spacelab.model.literature.LiteratureType;
 import com.example.spacelab.model.role.PermissionType;
@@ -115,7 +116,7 @@ public class LessonController {
     @GetMapping("/{id}/update")
     public ResponseEntity<?> getLessonInfoForUpdate(@PathVariable Long id) {
         authUtil.checkAccessToCourse(lessonService.getLessonById(id).getCourse().getId(), "lessons.edit");
-        return ResponseEntity.ok(mapper.fromLessonToSaveDTO(lessonService.getLessonById(id)));
+        return ResponseEntity.ok(mapper.fromLessonToEditDTO(lessonService.getLessonById(id)));
     }
 
     //Создание урока
@@ -199,21 +200,29 @@ public class LessonController {
         return new ResponseEntity<>("Deleted", HttpStatus.OK);
     }
 
-    //Сохранение ответа студента на уроке
-    @Operation(description = "Save student's report to lesson report table", summary = "Save Student Info Into Report Table", tags = {"Lesson"})
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful start"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
-            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Lesson not found in DB", content = @Content),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
-    })
-    @PreAuthorize("!hasAuthority('lessons.edit.NO_ACCESS')")
-    @PostMapping("/update")
-    public ResponseEntity<String> saveLessonReportRowAfterStart(@RequestBody LessonReportRowSaveDTO lessonReportRowSTO) {
+    @GetMapping("/{id}/get-report-rows")
+    public ResponseEntity<?> getLessonReportRows(@PathVariable Long id) {
+        return ResponseEntity.ok(mapper.fromReportRowListToDTOList(lessonService.getLessonById(id).getReportRows()));
+    }
 
-        lessonReportRowService.updateLessonReportRowAndCompletedTask(lessonReportRowSTO);
-        return new ResponseEntity<>("Successful update", HttpStatus.OK);
+    //Сохранение ответа студента на уроке
+//    @Operation(description = "Save student's report to lesson report table", summary = "Save Student Info Into Report Table", tags = {"Lesson"})
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "Successful start"),
+//            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+//            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
+//            @ApiResponse(responseCode = "404", description = "Lesson not found in DB", content = @Content),
+//            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
+//    })
+//    @PreAuthorize("!hasAuthority('lessons.edit.NO_ACCESS')")
+    @PostMapping("/save-report-row")
+    public ResponseEntity<?> saveLessonReportRowAfterStart(@RequestBody @Valid LessonReportRowSaveDTO lessonReportRowSTO,
+                                                           BindingResult bindingResult) {
+        if(bindingResult.hasErrors()) {
+            return ResponseEntity.badRequest().build();
+        }
+        LessonReportRow reportRow = lessonReportRowService.updateLessonReportRow(lessonReportRowSTO);
+        return new ResponseEntity<>(mapper.fromReportRowToDTO(reportRow), HttpStatus.OK);
     }
 
 
@@ -245,23 +254,19 @@ public class LessonController {
         return new ResponseEntity<>("Lesson completed", HttpStatus.ACCEPTED);
     }
 
+    // получение всех страничек данных у студентов курса занятия
+    @GetMapping("/{id}/student-lesson-display-data")
+    public ResponseEntity<?> getStudentLessonDisplayData(@PathVariable Long id) {
+        return ResponseEntity.ok(lessonService.getStudentLessonDisplayData(id));
+    }
+
     // Получение списка cтатусов
     @GetMapping("/get-status-list")
     public List<LessonStatus> getStatusList() {
         return List.of(LessonStatus.values());
     }
-//
-//    @GetMapping("/start")
-//    public ResponseEntity<String> startMonitor() {
-//        monitor.start();
-//        return new ResponseEntity<>("Monitor started", HttpStatus.ACCEPTED);
-//    }
-//
-//    @GetMapping("/stop")
-//    public ResponseEntity<String> stopMonitor() {
-//        monitor.stop();
-//        return new ResponseEntity<>("Monitor stopped", HttpStatus.ACCEPTED);
-//    }
+
+
 
 
 }

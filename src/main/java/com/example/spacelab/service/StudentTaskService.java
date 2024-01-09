@@ -1,5 +1,6 @@
 package com.example.spacelab.service;
 
+import com.example.spacelab.dto.student.StudentTaskLessonDTO;
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.student.Student;
 import com.example.spacelab.model.student.StudentTask;
@@ -19,6 +20,9 @@ public interface StudentTaskService {
     Page<StudentTask> getStudentTasks(Specification<StudentTask> spec, Pageable pageable);
     StudentTask getStudentTask(Long taskID);
     StudentTask fromTaskToStudentTask(Task task);
+
+    List<StudentTaskLessonDTO> getOpenStudentTasks(Student student);
+    List<StudentTaskLessonDTO> getNextStudentTasks(Student student);
 
     void createStudentTasksOnCourseTransfer(Student student, Course course);
     void clearStudentTasksOnDeletionFromCourse(Student student);
