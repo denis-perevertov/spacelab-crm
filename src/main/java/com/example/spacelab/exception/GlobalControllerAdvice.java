@@ -10,6 +10,7 @@ import lombok.extern.java.Log;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -61,10 +62,18 @@ public class GlobalControllerAdvice {
         );
     }
 
+    @ExceptionHandler(BadCredentialsException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ResponseEntity<ErrorMessage> badCredentialsInTokenHandler(BadCredentialsException ex) {
+        return new ResponseEntity<>(
+                new ErrorMessage("Bad credentials in JWT token!", HttpStatus.UNAUTHORIZED.value(), Map.of("msg", ex.getMessage())),
+                HttpStatus.UNAUTHORIZED
+        );
+    }
+
     @ExceptionHandler({AccessDeniedException.class, AuthenticationException.class})
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ResponseEntity<ErrorMessage> accessDeniedHandler(AccessDeniedException ex) {
-        log.severe("ALLO POIMAL");
         return new ResponseEntity<>(
                 new ErrorMessage("Access to this part of the API denied", HttpStatus.FORBIDDEN.value(), Map.of("access", ex.getMessage())),
                 HttpStatus.FORBIDDEN

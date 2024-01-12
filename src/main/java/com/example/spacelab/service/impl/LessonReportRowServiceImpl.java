@@ -3,6 +3,7 @@ package com.example.spacelab.service.impl;
 import com.example.spacelab.exception.ResourceNotFoundException;
 import com.example.spacelab.model.lesson.Lesson;
 import com.example.spacelab.model.lesson.LessonReportRow;
+import com.example.spacelab.model.student.Student;
 import com.example.spacelab.model.student.StudentTask;
 import com.example.spacelab.dto.lesson.LessonReportRowSaveDTO;
 import com.example.spacelab.repository.LessonReportRowRepository;
@@ -46,6 +47,13 @@ public class LessonReportRowServiceImpl implements LessonReportRowService {
 
     @Override
     public LessonReportRow updateLessonReportRow(LessonReportRowSaveDTO dto) {
+        Student st = studentService.getStudentById(dto.getStudentId());
+        String currentTaskSnapshot = String.join(", ", st.getTasks()
+                        .stream()
+                        .filter(t -> t.getStatus().equals(StudentTaskStatus.UNLOCKED))
+                        .map(t -> t.getTaskReference().getName() + " (" + t.getPercentOfCompletion() + "%)")
+                        .toList());
+//                    .reduce("", (a, b) -> String.join(",", a, b));
         LessonReportRow lessonReportRow =
                 lessonReportRowRepository.findById(dto.getId()).orElse(new LessonReportRow())
                         .setWasPresent(dto.getWasPresent())
@@ -53,7 +61,8 @@ public class LessonReportRowServiceImpl implements LessonReportRowService {
                         .setHoursNote(dto.getNote())
                         .setComment(dto.getComment())
                         .setRating(dto.getRating())
-                        .setStudent(studentService.getStudentById(dto.getStudentId()));
+                        .setStudent(st)
+                        .setCurrentTaskSnapshot(currentTaskSnapshot);
         lessonReportRow = lessonReportRowRepository.save(lessonReportRow);
         log.info("saved lesson report row");
 

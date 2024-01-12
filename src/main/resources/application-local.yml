@@ -1,0 +1,5 @@
+aws:
+  bucket:
+    name: spacelab-dp-bucket
+  accessKey: AKIAZ6H5HK6QC4ZQM7E7
+  secretKey: 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

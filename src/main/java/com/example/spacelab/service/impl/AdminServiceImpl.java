@@ -16,6 +16,7 @@ import lombok.extern.java.Log;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -136,7 +137,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return adminRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException("User not found by login: " + username));
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException, BadCredentialsException {
+        return adminRepository.findByEmail(username).orElseThrow(() -> new BadCredentialsException("User not found by login: " + username));
     }
 }
