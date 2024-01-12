@@ -42,10 +42,6 @@ public class TaskInfoDTO {
     // для показа выполняющих задание студентов - ID, имя и аватарка
     private List<StudentAvatarDTO> students = new ArrayList<>();
 
-    public TaskInfoDTO(Long id, String name) {
-        this.id = id;
-        this.name = name;
-    }
-
+    private List<TaskProgressPointDTO> taskProgressPoints = new ArrayList<>();
 
 }

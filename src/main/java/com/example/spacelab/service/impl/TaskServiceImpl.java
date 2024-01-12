@@ -144,6 +144,21 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    public void removeSubtaskFromList(Long taskId, Long subtaskId) {
+        log.info("removing subtask(id: {}) from list of task(id: {})", subtaskId, taskId);
+//        Task task = getTaskById(taskId);
+//        List<Task> subtasks = task.getSubtasks();
+//        subtasks.remove(
+//                subtasks.stream().filter(subtask -> subtask.getId().equals(subtaskId)).findFirst().orElse(new Task())
+//        );
+//        taskRepository.save(task);
+
+        Task subtask = getTaskById(subtaskId);
+        subtask.setParentTask(null);
+        taskRepository.save(subtask);
+    }
+
+    @Override
     public List<StudentTask> getStudentTasks(Long studentID) {
         log.info("Getting tasks of student w/ ID: " + studentID);
         return studentTaskRepository.findStudentTasks(studentID);

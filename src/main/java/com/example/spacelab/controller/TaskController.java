@@ -245,7 +245,7 @@ public class TaskController {
     }
 
     // Получение подзадач для какой-то 1 задачи
-    @GetMapping("/{id}/get-subtasks")
+    @GetMapping("/{id}/subtasks")
     public ResponseEntity<?> getSubtasks(@PathVariable Long id) {
 
         Task task = taskService.getTaskById(id);
@@ -255,6 +255,14 @@ public class TaskController {
 
         List<Task> subtasks = taskService.getTaskSubtasks(id);
         return ResponseEntity.ok(mapper.fromSubtaskToDTOList(subtasks));
+    }
+
+    // Удаление подзадачи из списка (не удаление задания целиком)
+    @DeleteMapping("/{taskId}/subtasks/remove/{subtaskId}")
+    public ResponseEntity<?> removeSubtaskFromList(@PathVariable Long taskId,
+                                                   @PathVariable Long subtaskId) {
+        taskService.removeSubtaskFromList(taskId, subtaskId);
+        return ResponseEntity.accepted().build();
     }
 
     // Получение задач(родительских) без курса

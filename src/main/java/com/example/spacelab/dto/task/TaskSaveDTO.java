@@ -47,6 +47,8 @@ public class TaskSaveDTO {
 
     private List<TaskLiteratureDTO> literatureList;
 
+    private List<TaskProgressPointDTO> taskProgressPoints;
+
     public TaskSaveDTO(Long id, String name) {
         this.id = id;
         this.name = name;

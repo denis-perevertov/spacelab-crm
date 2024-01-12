@@ -10,10 +10,12 @@ import com.example.spacelab.model.student.Student;
 import com.example.spacelab.model.student.StudentTask;
 import com.example.spacelab.model.task.CompletionTime;
 import com.example.spacelab.model.task.Task;
+import com.example.spacelab.model.task.TaskProgressPoint;
 import com.example.spacelab.repository.CourseRepository;
 import com.example.spacelab.repository.LiteratureRepository;
 import com.example.spacelab.repository.TaskRepository;
 import com.example.spacelab.util.TimeUnit;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.data.domain.Page;
@@ -40,6 +42,10 @@ public class TaskMapper {
         try {
             dto.setId(task.getId());
             dto.setName(task.getName());
+            if(task.getParentTask() != null) {
+                dto.setParentTask(fromTaskToTaskLinkDTO(task.getParentTask()));
+            }
+            dto.setCreatedAt(task.getCreatedAt());
             dto.setLevel(task.getLevel());
             dto.setStatus(task.getStatus());
             if(Objects.nonNull(task.getCourse())) {
@@ -203,6 +209,8 @@ public class TaskMapper {
 
             dto.setStudents(studentMapper.fromStudentListToAvatarListDTO(task.getActiveStudents()));
 
+            dto.setTaskProgressPoints(task.getTaskProgressPoints().stream().map(this::fromPointToDTO).toList());
+
         } catch (Exception e) {
             log.severe("Mapping error: " + e.getMessage());
             log.warning("DTO: " + dto);
@@ -213,8 +221,10 @@ public class TaskMapper {
     }
 
     public Task fromTaskSaveDTOToTask(TaskSaveDTO taskSaveDTO) {
-        Task task = new Task();
-        task.setId(taskSaveDTO.getId());
+        Task task = (taskSaveDTO.getId() != null)
+        ? taskRepository.findById(taskSaveDTO.getId()).orElseThrow(() -> new EntityNotFoundException("task not found"))
+        : new Task();
+
         task.setName(taskSaveDTO.getName());
 
         if (taskSaveDTO.getParentTaskID() != null) {
@@ -255,9 +265,31 @@ public class TaskMapper {
         });
         task.setRecommendedLiterature(recommendedLiterature);
 
+        task.getTaskProgressPoints().clear();
+        task.getTaskProgressPoints().addAll(
+                taskSaveDTO.getTaskProgressPoints().stream().map(this::fromDTOToPoint).toList()
+        );
+
         task.setStatus(taskSaveDTO.getStatus());
 
         return task;
+    }
+
+    public TaskProgressPoint fromDTOToPoint(TaskProgressPointDTO dto) {
+        if(dto == null) return null;
+        return new TaskProgressPoint().setName(dto.name()).setSubpoints(
+                dto.subpoints() != null
+                ? dto.subpoints().stream().map(this::fromDTOToPoint).toList()
+                : new ArrayList<>()
+        );
+    }
+
+    public TaskProgressPointDTO fromPointToDTO(TaskProgressPoint point) {
+        if(point == null) return null;
+        return new TaskProgressPointDTO(
+                point.getName(),
+                point.getSubpoints().stream().map(this::fromPointToDTO).toList()
+        );
     }
 
     public TaskCardDTO fromTaskToCardDTO(Task task) {
@@ -336,6 +368,8 @@ public class TaskMapper {
             dto.setSubtasksIDs(taskRepository.findTaskSubtasks(task.getId()).stream().map(Task::getId).toList());
             dto.setLiteratureList(task.getRecommendedLiterature().stream().map(this::fromLiteratureToTaskLiteratureDTO).toList());
 
+            dto.setTaskProgressPoints(task.getTaskProgressPoints().stream().map(this::fromPointToDTO).toList());
+
         } catch (Exception e) {
             log.severe("Mapping error: " + e.getMessage());
             log.warning("DTO: " + dto);
@@ -347,7 +381,13 @@ public class TaskMapper {
 
     public List<SubtaskDTO> fromSubtaskToDTOList(List<Task> subtasks) {
         return subtasks.stream()
-                .map(subtask -> new SubtaskDTO(subtask.getId(), subtask.getName(), subtask.getStatus()))
+                .map(subtask -> new SubtaskDTO(
+                        subtask.getId(),
+                        subtask.getName(),
+                        subtask.getCreatedAt(),
+                        subtask.getLevel(),
+                        subtask.getStatus()
+                ))
                 .toList();
     }
 

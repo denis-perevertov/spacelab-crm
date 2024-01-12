@@ -37,4 +37,5 @@ public interface TaskService extends StudentTaskService,
     Page<Task> getAvailableTasks(Pageable pageable);
 
 
+    void removeSubtaskFromList(Long taskId, Long subtaskId);
 }

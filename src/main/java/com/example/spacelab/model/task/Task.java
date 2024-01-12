@@ -68,6 +68,9 @@ public class Task {
     @Enumerated(value = EnumType.STRING)
     private TaskStatus status;
 
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TaskProgressPoint> taskProgressPoints = new ArrayList<>();
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 
