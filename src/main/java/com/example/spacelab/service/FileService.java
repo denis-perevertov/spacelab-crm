@@ -8,12 +8,9 @@ import java.io.IOException;
 
 public interface FileService {
 
-    void saveFile(MultipartFile file, String... directories) throws IOException;
-
-    File getFile(String fileName, String... directiories) throws IOException;
-
-    void deleteFile(String fileName, String... directiories) throws IOException;
-
-    boolean fileExists(String... directories);
+    void saveFile(MultipartFile file, String filename, String... directories) throws IOException;
+    File getFile(String filename, String... directiories) throws IOException;
+    void deleteFile(String filename, String... directiories) throws IOException;
+    boolean fileExists(String filename);
 
 }
