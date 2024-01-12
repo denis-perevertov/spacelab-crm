@@ -5,6 +5,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.File;
+
 @Data
 @NoArgsConstructor
 public class LiteratureInfoDTO {
@@ -40,6 +42,8 @@ public class LiteratureInfoDTO {
 
     @Schema(example = "book_thumbnail.png")
     private String thumbnail;
+
+    private byte[] test;
 
     private boolean verified;
 

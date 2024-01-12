@@ -13,10 +13,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.File;
+import java.nio.file.Files;
+import java.util.*;
 
 @Component
 @Log
@@ -132,6 +131,7 @@ public class LiteratureMapper {
             dto.setDescription(literature.getDescription());
             dto.setThumbnail(literature.getThumbnail());
             dto.setVerified(literature.getIs_verified());
+
         } catch (Exception e) {
             log.severe("Mapping error: " + e.getMessage());
             log.warning("DTO: " + dto);

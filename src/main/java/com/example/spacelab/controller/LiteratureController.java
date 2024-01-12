@@ -15,6 +15,7 @@ import com.example.spacelab.model.literature.Literature;
 import com.example.spacelab.model.literature.LiteratureType;
 import com.example.spacelab.model.role.PermissionType;
 import com.example.spacelab.model.student.StudentAccountStatus;
+import com.example.spacelab.service.FileService;
 import com.example.spacelab.service.LiteratureService;
 import com.example.spacelab.util.AuthUtil;
 import com.example.spacelab.util.FilterForm;
@@ -59,6 +60,8 @@ public class LiteratureController {
     private final LiteratureMapper mapper;
     private final LiteratureValidator validator;
 
+    private final FileService fileService;
+
     private final AuthUtil authUtil;
 
 
@@ -97,12 +100,11 @@ public class LiteratureController {
     // Получение литературы по id
     @PreAuthorize("!hasAuthority('literatures.read.NO_ACCESS')")
     @GetMapping("/{id}")
-    public ResponseEntity<LiteratureInfoDTO> getLiteratureById(@PathVariable @Parameter(example = "1") Long id) {
+    public ResponseEntity<LiteratureInfoDTO> getLiteratureById(@PathVariable @Parameter(example = "1") Long id) throws IOException {
 
         authUtil.checkAccessToCourse(literatureService.getLiteratureById(id).getCourse().getId(), "literatures.read");
-
-        LiteratureInfoDTO lit = mapper.fromLiteraturetoInfoDTO(literatureService.getLiteratureById(id));
-        return new ResponseEntity<>(lit, HttpStatus.OK);
+        LiteratureInfoDTO dto = mapper.fromLiteraturetoInfoDTO(literatureService.getLiteratureById(id));
+        return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
     // Верификация литературы

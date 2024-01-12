@@ -10,11 +10,13 @@ import com.example.spacelab.repository.LiteratureRepository;
 import com.example.spacelab.service.FileService;
 import com.example.spacelab.service.LiteratureService;
 import com.example.spacelab.service.specification.LiteratureSpecifications;
+import com.example.spacelab.util.FilenameUtils;
 import com.example.spacelab.util.FilterForm;
 import com.example.spacelab.model.literature.LiteratureType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -34,6 +36,8 @@ public class LiteratureServiceImpl implements LiteratureService{
     private final LiteratureRepository literatureRepository;
 
     private final LiteratureMapper literatureMapper;
+
+    @Qualifier("s3")
     private final FileService fileService;
 
     @Override
@@ -106,12 +110,15 @@ public class LiteratureServiceImpl implements LiteratureService{
         Literature lit = literatureMapper.fromLiteratureSaveDTOtoLiterature(saveRequest);
         MultipartFile file = saveRequest.getResource_file();
         if(file != null && file.getSize() > 0) {
-            fileService.saveFile(file, "literature", "books");
+            String filename = FilenameUtils.generateFileName(file);
+            fileService.saveFile(file, filename, "literature", "books");
+            lit.setResource_link(filename);
         }
         MultipartFile thumbnail = saveRequest.getThumbnail();
         if(thumbnail != null && thumbnail.getSize() > 0) {
-            fileService.saveFile(thumbnail, "literature", "thumbnails");
-            lit.setThumbnail("/uploads/literature/thumbnails/" + saveRequest.getThumbnail().getOriginalFilename());
+            String filename = FilenameUtils.generateFileName(thumbnail);
+            fileService.saveFile(thumbnail, filename, "literature", "thumbnails");
+            lit.setThumbnail(filename);
         }
         return literatureRepository.save(lit);
     }
@@ -122,20 +129,26 @@ public class LiteratureServiceImpl implements LiteratureService{
         Literature lit = literatureMapper.fromLiteratureSaveDTOtoLiterature(saveRequest);
         MultipartFile file = saveRequest.getResource_file();
         if(file != null && file.getSize() > 0) {
-            fileService.saveFile(file, "literature", "books");
+            String filename = FilenameUtils.generateFileName(file);
+            fileService.saveFile(file, filename, "literature", "books");
+            lit.setResource_link(filename);
         }
         MultipartFile thumbnail = saveRequest.getThumbnail();
         if(thumbnail != null && thumbnail.getSize() > 0) {
-            fileService.saveFile(thumbnail, "literature", "thumbnails");
-            lit.setThumbnail("/uploads/literature/thumbnails/" + saveRequest.getThumbnail().getOriginalFilename());
+            String filename = FilenameUtils.generateFileName(thumbnail);
+            fileService.saveFile(thumbnail, filename, "literature", "thumbnails");
+            lit.setThumbnail(filename);
+        }
+        else {
+            lit.setThumbnail(null);
         }
         return literatureRepository.save(lit);
     }
 
     @Override
     public File getLiteratureFileById(Long id) throws IOException {
-        String fileName = getLiteratureById(id).getResource_link();
-        return fileService.getFile(fileName, "literature", "books");
+        String filename = getLiteratureById(id).getResource_link();
+        return fileService.getFile(filename, "literature", "books");
     }
 
     @Override
