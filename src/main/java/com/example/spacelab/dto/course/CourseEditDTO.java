@@ -2,6 +2,7 @@ package com.example.spacelab.dto.course;
 
 import com.example.spacelab.dto.admin.AdminAvatarDTO;
 import com.example.spacelab.dto.student.StudentAvatarDTO;
+import com.example.spacelab.model.course.CourseStatus;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -13,6 +14,7 @@ public class CourseEditDTO {
     private Long id;
     private String name;
     private String icon;
+    private CourseStatus status;
     private CourseInfoDTO info;
     private CourseMembersDTO members;
     private CourseTaskStructureDTO structure;

@@ -21,11 +21,13 @@ import com.example.spacelab.service.FileService;
 import com.example.spacelab.service.StudentService;
 import com.example.spacelab.service.StudentTaskService;
 import com.example.spacelab.service.specification.CourseSpecifications;
+import com.example.spacelab.util.FilenameUtils;
 import com.example.spacelab.util.FilterForm;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -58,6 +60,7 @@ public class CourseServiceImpl implements CourseService {
     private final CourseMapper mapper;
     private final TaskMapper taskMapper;
 
+    @Qualifier("s3")
     private final FileService fileService;
 
     @Override
@@ -165,6 +168,7 @@ public class CourseServiceImpl implements CourseService {
     public Course createNewCourse(CourseEditDTO dto) {
         log.info("creating new course");
         Course c = mapper.fromEditDTOToCourse(dto);
+        c.setStatus(CourseStatus.ACTIVE);
         c = courseRepository.save(c);
         updateCourseTaskList(c, dto);
         updateCourseStudents(c, dto);
@@ -287,9 +291,10 @@ public class CourseServiceImpl implements CourseService {
     public void saveIcon(Long id, CourseIconDTO dto) throws IOException {
         MultipartFile file = dto.icon();
         if(file.getSize() > 0) {
-            fileService.saveFile(file, "courses", "icons");
+            String filename = FilenameUtils.generateFileName(file);
+            fileService.saveFile(file, filename,"courses");
             Course c = getCourseById(id);
-            c.setIcon("/uploads/courses/icons/" + file.getOriginalFilename());
+            c.setIcon(filename);
             courseRepository.save(c);
         }
     }

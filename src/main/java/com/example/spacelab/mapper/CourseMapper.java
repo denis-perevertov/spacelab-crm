@@ -271,6 +271,7 @@ public class CourseMapper {
             dto.setId(course.getId());
             dto.setName(course.getName());
             dto.setIcon(course.getIcon());
+            dto.setStatus(course.getStatus());
             dto.setInfo(
                 new CourseInfoDTO(
                         course.getCourseInfo().getMain_description(),
@@ -329,6 +330,7 @@ public class CourseMapper {
             CourseInfo courseInfo = course.getCourseInfo();
             dto.setName(course.getName());
             dto.setIcon(course.getIcon());
+            dto.setStatus(course.getStatus());
             dto.setInfo(
                     new CourseInfoDTO(
                             courseInfo.getMain_description(),
@@ -384,6 +386,7 @@ public class CourseMapper {
 
         try {
             course.setName(dto.getName());
+            if(dto.getStatus() != null) course.setStatus(dto.getStatus());
             CourseInfo courseInfo = course.getCourseInfo();
 
             courseInfo.setMain_description(dto.getInfo().getDescription());

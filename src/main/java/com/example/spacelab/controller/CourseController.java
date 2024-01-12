@@ -245,8 +245,6 @@ public class CourseController {
     @PostMapping("/{id}/icon")
     @ResponseBody
     public ResponseEntity<?> uploadIcon(@PathVariable Long id, @ModelAttribute CourseIconDTO dto) throws IOException {
-        log.info(dto.icon().toString());
-        log.info(dto.icon().getOriginalFilename());
         courseService.saveIcon(id, dto);
         return ResponseEntity.ok("Created");
     }
