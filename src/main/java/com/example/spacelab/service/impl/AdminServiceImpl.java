@@ -8,31 +8,39 @@ import com.example.spacelab.repository.AdminRepository;
 import com.example.spacelab.repository.CourseRepository;
 import com.example.spacelab.repository.UserRoleRepository;
 import com.example.spacelab.service.AdminService;
+import com.example.spacelab.service.FileService;
 import com.example.spacelab.service.specification.AdminSpecifications;
 import com.example.spacelab.service.specification.AdminTestSpec;
+import com.example.spacelab.util.FilenameUtils;
 import com.example.spacelab.util.FilterForm;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
 @Service
-@Log
+@Slf4j
 @RequiredArgsConstructor
 public class AdminServiceImpl implements AdminService {
 
     private final AdminRepository adminRepository;
     private final UserRoleRepository userRoleRepository;
     private final CourseRepository courseRepository;
+
+    private final FileService fileService;
 
     @Override
     public List<Admin> getAdmins() {
@@ -81,7 +89,7 @@ public class AdminServiceImpl implements AdminService {
             log.info("Saved admin: " + admin);
             return admin;
         } catch (Exception e) {
-            log.severe(e.getMessage());
+            log.error(e.getMessage());
             throw new RuntimeException("Unknown error during saving");
         }
     }
@@ -94,7 +102,7 @@ public class AdminServiceImpl implements AdminService {
             log.info("Saved admin: " + admin);
             return admin;
         } catch (Exception e) {
-            log.severe(e.getMessage());
+            log.error(e.getMessage());
             throw new RuntimeException("Unknown error during saving");
         }
     }
@@ -104,6 +112,29 @@ public class AdminServiceImpl implements AdminService {
         Admin admin = adminRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Admin not found!", Admin.class));
         log.info("Deleting admin with ID: " + id);
         adminRepository.delete(admin);
+    }
+
+    @Override
+    public void uploadAvatarForAdmin(Long id, MultipartFile avatar) throws IOException {
+        log.info("saving avatar for admin (id: {})", id);
+        Admin admin = getAdminById(id);
+        if(avatar != null && avatar.getSize() > 0) {
+            String filename = FilenameUtils.generateFileName(avatar);
+            fileService.saveFile(avatar, filename, "admins");
+            admin.setAvatar(filename);
+            adminRepository.save(admin);
+        }
+        else {
+            log.warn("avatar is empty, could not save");
+        }
+    }
+
+    @Override
+    public void deleteAvatarForAdmin(Long id) {
+        log.info("deleting avatar of admin (id: {})", id);
+        Admin admin = getAdminById(id);
+        admin.setAvatar(null);
+        adminRepository.save(admin);
     }
 
     @Override

@@ -118,13 +118,6 @@ public class AdminMapper {
                 (dto.getPassword() != null && !dto.getPassword().isEmpty()))
                 admin.setPassword(dto.getPassword());
 
-            List<Long> courseIDs = Arrays.asList(dto.getCourseID());
-            if(courseIDs.size() > 0) {
-                List<Course> adminCourses = admin.getCourses();
-                adminCourses.clear();
-                adminCourses.addAll(courseIDs.stream().map(courseRepository::getReferenceById).toList());
-            }
-
             if(dto.getRoleID() != null) admin.setRole(userRoleRepository.getReferenceById(dto.getRoleID()));
 
         } catch (EntityNotFoundException e) {

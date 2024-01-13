@@ -35,7 +35,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -116,7 +118,6 @@ public class AdminController {
         }
 
         admin.setPassword(passwordEncoder.encode(admin.getPassword()));
-
         Admin savedAdmin = adminService.createAdmin(adminMapper.fromEditDTOToAdmin(admin));
         return new ResponseEntity<>(adminMapper.fromAdminToDTO(savedAdmin), HttpStatus.CREATED);
     }
@@ -124,7 +125,6 @@ public class AdminController {
     // Получение формы админа на редактирование
     @GetMapping("/{id}/edit")
     public ResponseEntity<AdminEditDTO> getAdminForEdit(@PathVariable Long id) {
-
         return new ResponseEntity<>(adminMapper.fromAdminToEditDTO(adminService.getAdminById(id)), HttpStatus.OK);
     }
 
@@ -176,6 +176,21 @@ public class AdminController {
     }
 
     // ==================================
+
+    // Загрузка аватарки
+    @PostMapping("/{id}/avatar")
+    public ResponseEntity<?> uploadAvatar(@PathVariable Long id,
+                                          @RequestPart MultipartFile avatar) throws IOException {
+        adminService.uploadAvatarForAdmin(id, avatar);
+        return ResponseEntity.ok().build();
+    }
+
+    // Удаление аватарки
+    @DeleteMapping("/{id}/avatar")
+    public ResponseEntity<?> deleteAvatar(@PathVariable Long id) {
+        adminService.deleteAvatarForAdmin(id);
+        return ResponseEntity.ok().build();
+    }
 
     // Получение списка админов по ролям (для Select2)
     @Operation(description = "Get list of admins with a specified role (by its ID) - For Select2",
