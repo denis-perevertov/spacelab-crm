@@ -227,7 +227,7 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public void transferStudentToCourse(Student student, Course course) {
         student.setCourse(course);
-        taskService.createStudentTasksOnCourseTransfer(student, course);
+        taskService.createStudentTasksOnStudentCourseTransfer(student, course);
     }
 
     @Override

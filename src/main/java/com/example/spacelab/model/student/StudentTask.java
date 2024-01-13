@@ -49,7 +49,7 @@ public class StudentTask {
     private LocalDate endDate;
 
     @Enumerated(value = EnumType.STRING)
-    private StudentTaskStatus status;
+    private StudentTaskStatus status = StudentTaskStatus.LOCKED;
 
     private Integer percentOfCompletion;
 

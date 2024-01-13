@@ -24,8 +24,13 @@ public interface StudentTaskService {
     List<StudentTaskLessonDTO> getOpenStudentTasks(Student student);
     List<StudentTaskLessonDTO> getNextStudentTasks(Student student);
 
-    void createStudentTasksOnCourseTransfer(Student student, Course course);
-    void clearStudentTasksOnDeletionFromCourse(Student student);
+    /*
+    todo
+    - delete old student tasks after task transfer to different course ?
+     */
+
+    void createStudentTasksOnStudentCourseTransfer(Student student, Course course);
+    void clearStudentTasksOnStudentDeletionFromCourse(Student student);
 
     void lockStudentTask(Long taskID);
     void unlockStudentTask(Long taskID);
