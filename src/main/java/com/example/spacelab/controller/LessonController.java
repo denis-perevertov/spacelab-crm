@@ -55,8 +55,6 @@ public class LessonController {
     private final LessonMapper mapper;
     private final LessonBeforeStartValidator lessonBeforeStartValidator;
 
-    private final LessonMonitor monitor;
-
     private final AuthUtil authUtil;
 
 
@@ -265,8 +263,6 @@ public class LessonController {
     public List<LessonStatus> getStatusList() {
         return List.of(LessonStatus.values());
     }
-
-
 
 
 }

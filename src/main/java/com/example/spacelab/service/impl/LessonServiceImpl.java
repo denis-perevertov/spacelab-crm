@@ -8,6 +8,7 @@ import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.lesson.Lesson;
 import com.example.spacelab.model.lesson.LessonStatus;
+import com.example.spacelab.model.settings.Settings;
 import com.example.spacelab.model.student.Student;
 import com.example.spacelab.model.task.Task;
 import com.example.spacelab.model.task.TaskLevel;
@@ -16,49 +17,44 @@ import com.example.spacelab.repository.AdminRepository;
 import com.example.spacelab.repository.CourseRepository;
 import com.example.spacelab.repository.LessonRepository;
 import com.example.spacelab.service.LessonService;
+import com.example.spacelab.service.SettingsService;
 import com.example.spacelab.service.TaskService;
 import com.example.spacelab.service.specification.LessonSpecifications;
 import com.example.spacelab.service.specification.TaskSpecifications;
+import com.example.spacelab.util.AuthUtil;
 import com.example.spacelab.util.FilterForm;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
-@Log
+@Slf4j
 @Transactional
+@RequiredArgsConstructor
 public class LessonServiceImpl implements LessonService {
+
     private final CourseRepository courseRepository;
     private final AdminRepository adminRepository;
 
     private final LessonRepository lessonRepository;
-    private final LessonMonitor monitor;
 
     private final TaskService taskService;
+    private final SettingsService settingsService;
 
-    public LessonServiceImpl(@Autowired LessonRepository lessonRepository,
-                             @Autowired @Lazy LessonMonitor monitor,
-                             AdminRepository adminRepository,
-                             CourseRepository courseRepository,
-                             TaskService taskService) {
-        this.lessonRepository = lessonRepository;
-        this.monitor = monitor;
-        this.adminRepository = adminRepository;
-        this.courseRepository = courseRepository;
-        this.taskService = taskService;
-    }
+    private final AuthUtil authUtil;
 
     @Override
     public List<Lesson> getLessons() {
@@ -100,17 +96,12 @@ public class LessonServiceImpl implements LessonService {
 
     @Override
     public Lesson createNewLesson(Lesson lesson) {
-        if(lesson.getDatetime().isAfter(LocalDateTime.now()) && lesson.getStartsAutomatically())
-            monitor.getLessons().add(lesson);
         return lessonRepository.save(lesson);
     }
 
 
     @Override
     public Lesson editLesson(Lesson lesson) {
-
-        if(monitor.isMonitored(lesson) && !lesson.getStartsAutomatically()) monitor.removeFromMonitor(lesson);
-        if(!monitor.isMonitored(lesson) && lesson.getStartsAutomatically()) monitor.addToMonitor(lesson);
         return lessonRepository.save(lesson);
     }
 
@@ -133,18 +124,24 @@ public class LessonServiceImpl implements LessonService {
     public void deleteLessonById(Long id) {
         Lesson lesson = lessonRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Lesson with this ID doesn't exist!"));
         if(lesson.getStatus().equals(LessonStatus.ACTIVE)) {
-            log.warning("Attempt to delete a lesson already in progress");
-            log.warning(lesson.toString());
+            log.warn("Attempt to delete a lesson already in progress");
+            log.warn(lesson.toString());
             throw new RuntimeException("Cannot delete an active lesson!");
         }
-        if(monitor.isMonitored(lesson)) monitor.removeFromMonitor(lesson);
         lessonRepository.delete(lesson);
     }
 
     @Override
     public void startLesson(Long id) {
         Lesson lesson = getLessonById(id);
+        log.info("starting lesson (id: {})", id);
         if(!lesson.getStatus().equals(LessonStatus.PLANNED)) throw new LessonException("Can't start an active/completed lesson!");
+        lesson.setStatus(LessonStatus.ACTIVE);
+        lessonRepository.save(lesson);
+    }
+
+    private void startLesson(Lesson lesson) {
+        log.info("starting lesson (id: {})", lesson.getId());
         lesson.setStatus(LessonStatus.ACTIVE);
         lessonRepository.save(lesson);
     }
@@ -155,6 +152,34 @@ public class LessonServiceImpl implements LessonService {
         if(!lesson.getStatus().equals(LessonStatus.ACTIVE)) throw new LessonException("Can't complete a completed/planned lesson!");
         lesson.setStatus(LessonStatus.COMPLETED);
         lessonRepository.save(lesson);
+
+        Settings settings = settingsService.getSettingsForAdmin(authUtil.getLoggedInAdmin());
+        if(settings.isAutomaticLessonCreationSetting()) {
+            duplicateAndSaveLesson(lesson, settings);
+        };
+    }
+
+    private void duplicateAndSaveLesson(Lesson lesson, Settings settings) {
+        lessonRepository.save(
+                new Lesson()
+                        .setLink(lesson.getLink())
+                        .setCourse(lesson.getCourse())
+                        .setStartsAutomatically(settings.isAutomaticLessonStartSetting())
+                        .setStatus(LessonStatus.PLANNED)
+                        .setDatetime(lesson.getDatetime().plusDays(settings.getStandardIntervalSetting()))
+        );
+    }
+
+    @Scheduled(fixedRate = 1000 * 60)           // every 1 min
+    public void checkAutomaticLessonStart() {
+        log.info(" --- checking automatic lesson start --- ");
+
+        LocalDateTime now = LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC"));
+        lessonRepository.findLessonsForAutomaticStart().forEach(lesson -> {
+            if(Duration.between(lesson.getDatetime(), now).toMinutes() == 0) {
+                startLesson(lesson);
+            }
+        });
     }
 
     @Override

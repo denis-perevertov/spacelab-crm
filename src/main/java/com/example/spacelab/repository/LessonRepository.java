@@ -1,6 +1,7 @@
 package com.example.spacelab.repository;
 
 import com.example.spacelab.model.lesson.Lesson;
+import com.example.spacelab.model.lesson.LessonStatus;
 import com.example.spacelab.model.task.Task;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,5 +21,13 @@ public interface LessonRepository extends JpaRepository<Lesson, Long>, JpaSpecif
 
     @Query("SELECT l FROM Lesson l WHERE l.course.id IN :ids")
     Page<Lesson> findAllByAllowedCoursePage(Pageable pageable, @Param("ids") Long... ids);
+
+    @Query("""
+           SELECT l
+           FROM Lesson l
+           WHERE l.startsAutomatically = true
+           AND l.status = 'PLANNED'
+           """)
+    List<Lesson> findLessonsForAutomaticStart();
 
 }

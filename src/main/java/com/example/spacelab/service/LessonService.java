@@ -28,4 +28,6 @@ public interface LessonService extends EntityFilterService<Lesson>{
 
     void startLesson(Long id);
     void completeLesson(Long id);
+
+    void checkAutomaticLessonStart();
 }
