@@ -106,6 +106,7 @@ public class ContactInfoMapper {
             dto.setName(contactInfo.getName());
             dto.setAdminID(contactInfo.getAdmin().getId());
             dto.setAdminName(contactInfo.getAdmin().getFirstName() + " " + contactInfo.getAdmin().getLastName());
+            dto.setAdminAvatar(contactInfo.getAdmin().getAvatar());
             dto.setRoleName(contactInfo.getAdmin().getRole().getName());
             dto.setEmail(contactInfo.getEmail());
             dto.setPhone(contactInfo.getPhone());

@@ -11,6 +11,7 @@ public class ContactInfoEditDTO {
     @Schema(example = "1")
     private Long adminID;
     private String adminName;
+    private String adminAvatar;
     private String roleName;
     @Schema(example = "+380123456789")
     private String phone;

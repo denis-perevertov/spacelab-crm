@@ -164,7 +164,7 @@ public class RoleController {
                         role.getName(),
                         role.getUserList().stream().map(user -> {
                             Admin admin = adminRepository.findById(user.getId()).orElse(new Admin());
-                            return new AdminAvatarDTO(admin.getId(), admin.getFullName(), admin.getRole().getName());
+                            return new AdminAvatarDTO(admin.getId(), admin.getFullName(), admin.getAvatar());
                         }).toList()))
                 .toList();
     }

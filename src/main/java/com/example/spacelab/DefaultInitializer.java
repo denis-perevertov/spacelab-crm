@@ -50,7 +50,6 @@ public class DefaultInitializer implements CommandLineRunner {
 
     private final PasswordEncoder passwordEncoder;
 
-    private final LessonMonitor lessonMonitor;
     private final LessonService lessonService;
 
 
@@ -67,8 +66,6 @@ public class DefaultInitializer implements CommandLineRunner {
         Thread.sleep(50); checkForTasks();
         Thread.sleep(50); checkForLiterature();
         Thread.sleep(50); checkForLessons();
-
-        Thread.sleep(100); automaticLessons();
     }
 
 
@@ -562,15 +559,6 @@ public class DefaultInitializer implements CommandLineRunner {
 
             lessonRepository.save(lesson3);
         }
-    }
-
-    // ==============
-
-    private void automaticLessons() {
-        Specification<Lesson> spec = Specification.where(LessonSpecifications.hasBeginDateInFuture()).and(LessonSpecifications.hasAutomaticStart());
-        List<Lesson> lessonsToMonitor = lessonRepository.findAll(spec);
-        lessonMonitor.setLessons(lessonsToMonitor);
-        lessonMonitor.start();
     }
 
 }

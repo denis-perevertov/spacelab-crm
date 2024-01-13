@@ -203,7 +203,7 @@ public class CourseServiceImpl implements CourseService {
         // ids of old students to remove from course
         courseStudents.stream()
                 .filter(st -> !updatedStudentsIds.contains(st.getId()))
-                .forEach(st -> {st.setCourse(null); studentTaskService.clearStudentTasksOnDeletionFromCourse(st);});
+                .forEach(st -> {st.setCourse(null); studentTaskService.clearStudentTasksOnStudentDeletionFromCourse(st);});
 
         // ids of new students to add to course
         updatedStudentsIds.stream()
@@ -213,7 +213,7 @@ public class CourseServiceImpl implements CourseService {
                             foundStudent.setCourse(c);
                             Student st = studentRepository.save(foundStudent);
                             courseStudents.add(st);
-                            studentTaskService.createStudentTasksOnCourseTransfer(st, c);
+                            studentTaskService.createStudentTasksOnStudentCourseTransfer(st, c);
                     });
                 });
 
