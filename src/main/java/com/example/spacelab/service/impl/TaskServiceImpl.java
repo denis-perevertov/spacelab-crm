@@ -1,6 +1,7 @@
 package com.example.spacelab.service.impl;
 
 import com.example.spacelab.dto.student.StudentTaskLessonDTO;
+import com.example.spacelab.dto.task.TaskSubtaskListDTO;
 import com.example.spacelab.exception.ResourceNotFoundException;
 import com.example.spacelab.mapper.TaskMapper;
 import com.example.spacelab.model.course.Course;
@@ -89,12 +90,20 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public Task createNewTask(Task taskIn) {
         Task task = taskRepository.save(taskIn);
+        if(task.getCourse() != null) {
+            // create student task for every student of the course
+            createStudentTasksOnTaskCourseTransfer(task);
+        }
         return task;
     }
 
     @Override
     public Task editTask(Task taskIn) {
         Task task = taskRepository.save(taskIn);
+        if(task.getCourse() != null) {
+            // create student task for every student of the course
+            createStudentTasksOnTaskCourseTransfer(task);
+        }
         return task;
     }
 
@@ -129,7 +138,15 @@ public class TaskServiceImpl implements TaskService {
         return studentTask;
     }
 
-
+    private void createStudentTasksOnTaskCourseTransfer(Task task) {
+        log.info("creating new student tasks on course transfer (task ref ID: {})", task.getId());
+        task.getCourse().getStudents().forEach(st -> {
+            StudentTask studentTask = new StudentTask()
+                    .setStudent(st)
+                    .setTaskReference(task);
+            studentTaskRepository.save(studentTask);
+        });
+    }
 
     @Override
     public List<Task> getTaskSubtasks(Long id) {
@@ -137,10 +154,29 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Page<Task> getAvailableTasks(Pageable pageable) {
-        Page<Task> page = taskRepository.findAvailableParentTasks(pageable);
+    public Page<Task> getTasksWithoutCourse(Pageable pageable) {
+        Page<Task> page = taskRepository.findParentTasksWithoutCourse(pageable);
         log.info("found available tasks: {}", page);
         return page;
+    }
+
+    @Override
+    public Page<Task> getParentTasks(Pageable pageable){
+        Page<Task> page = taskRepository.findParentTasksAny(pageable);
+        log.info("found available tasks: {}", page);
+        return page;
+    }
+
+    @Override
+    public List<Task> addSubtasksToTask(Long taskId, TaskSubtaskListDTO dto) {
+        log.info("adding subtasks to task: {}", taskId);
+        Task task = getTaskById(taskId);
+        for(Long id : dto.ids()) {
+            Task subtask = getTaskById(id);
+            subtask.setParentTask(task);
+            taskRepository.save(subtask);
+        }
+        return getTaskSubtasks(taskId);
     }
 
     @Override
@@ -191,7 +227,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public void createStudentTasksOnCourseTransfer(Student student, Course course) {
+    public void createStudentTasksOnStudentCourseTransfer(Student student, Course course) {
         log.info("creating student tasks at the moment of transfering student(id:{}) to course(id:{})", student.getId(), course.getId());
         // clear student tasks which were not completed
         List<StudentTask> oldStudentTasks = student.getTasks();
@@ -215,11 +251,10 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public void clearStudentTasksOnDeletionFromCourse(Student student) {
+    public void clearStudentTasksOnStudentDeletionFromCourse(Student student) {
         student.getTasks().stream().filter(task -> task.getStatus() != StudentTaskStatus.COMPLETED)
                 .forEach(studentTaskRepository::delete);
     }
-
 
 
     @Override

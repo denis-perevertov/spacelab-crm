@@ -29,6 +29,10 @@ public class Task {
     @JoinColumn(name = "parent_task_id")
     private Task parentTask;
 
+    @ToString.Exclude
+    @OneToMany(mappedBy = "parentTask")
+    private List<Task> subtasks = new ArrayList<>();
+
     @ManyToOne
     @JoinColumn(name = "course_id")
     private Course course;
@@ -48,10 +52,6 @@ public class Task {
 
     @Column(columnDefinition = "TEXT")
     private String taskDescription;
-
-    @ToString.Exclude
-    @OneToMany
-    private List<Task> subtasks = new ArrayList<>();
 
     @ToString.Exclude
     @ManyToMany

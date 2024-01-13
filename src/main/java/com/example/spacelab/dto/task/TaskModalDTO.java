@@ -10,6 +10,8 @@ import lombok.experimental.Accessors;
 public class TaskModalDTO {
     private Long id;
     private String name;
+    private String parentTaskName;
+    private String courseName;
     private TaskLevel level;
     private TaskStatus status;
 }

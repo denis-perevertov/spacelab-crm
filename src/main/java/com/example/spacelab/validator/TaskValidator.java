@@ -35,10 +35,10 @@ public class TaskValidator implements Validator {
         else if (dto.getName().length() < 3 || dto.getName().length() > 100)
             e.rejectValue("name", "name.length", "Name length: 3-100");
 
-        if (dto.getCourseID() == null || dto.getCourseID() == 0)
-            e.rejectValue("courseID", "courseID.empty", "Select course!");
-        else if (dto.getCourseID() != -1 && !courseRepository.existsById(dto.getCourseID()))
-            e.rejectValue("courseID", "courseID.no-match", "Course with this ID doesn't exist!");
+//        if (dto.getCourseID() == null || dto.getCourseID() == 0)
+//            e.rejectValue("courseID", "courseID.empty", "Select course!");
+//        else if (dto.getCourseID() != -1 && !courseRepository.existsById(dto.getCourseID()))
+//            e.rejectValue("courseID", "courseID.no-match", "Course with this ID doesn't exist!");
 
         if (dto.getLevel() == null)
             e.rejectValue("level", "level.empty", "Select level of task!");

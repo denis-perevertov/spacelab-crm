@@ -3,6 +3,7 @@ package com.example.spacelab.dto.task;
 import com.example.spacelab.dto.course.CourseLinkDTO;
 import com.example.spacelab.dto.student.StudentAvatarDTO;
 import com.example.spacelab.model.task.TaskLevel;
+import com.example.spacelab.model.task.TaskStatus;
 import com.example.spacelab.util.TimeUnit;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -20,6 +21,8 @@ public class TaskInfoDTO {
 
     @Schema(example = "TaskName")
     private String name;
+
+    private TaskStatus status;
 
     private TaskLinkDTO parentTask;
 

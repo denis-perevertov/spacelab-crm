@@ -42,7 +42,15 @@ public interface TaskRepository extends JpaRepository<Task, Long>, JpaSpecificat
            WHERE t.course IS NULL
            AND t.parentTask IS NULL
            """)
-    Page<Task> findAvailableParentTasks(Pageable pageable);
+    Page<Task> findParentTasksWithoutCourse(Pageable pageable);
+
+    @Query("""
+           SELECT t
+           FROM Task t
+           WHERE t.parentTask IS NULL
+           ORDER BY CASE WHEN t.course IS NULL THEN 0 ELSE 1 END
+           """)
+    Page<Task> findParentTasksAny(Pageable pageable);
 
     List<Task> findTasksByParentTask(Task parentTask);
 }

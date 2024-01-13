@@ -1,6 +1,7 @@
 package com.example.spacelab.controller;
 
 
+import com.example.spacelab.dto.SelectDTO;
 import com.example.spacelab.dto.course.CourseSelectDTO;
 import com.example.spacelab.dto.task.*;
 import com.example.spacelab.exception.ErrorMessage;
@@ -10,6 +11,7 @@ import com.example.spacelab.mapper.TaskMapper;
 import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.lesson.LessonStatus;
+import com.example.spacelab.model.literature.LiteratureType;
 import com.example.spacelab.model.role.PermissionType;
 import com.example.spacelab.model.task.Task;
 import com.example.spacelab.model.task.TaskLevel;
@@ -36,10 +38,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Tag(name="Task", description = "Task controller")
 @RestController
@@ -257,6 +256,13 @@ public class TaskController {
         return ResponseEntity.ok(mapper.fromSubtaskToDTOList(subtasks));
     }
 
+    @PostMapping("/{taskId}/subtasks/add")
+    public ResponseEntity<?> addSubtaskToList(@PathVariable Long taskId,
+                                              @RequestBody TaskSubtaskListDTO dto) {
+        List<Task> subtasks = taskService.addSubtasksToTask(taskId, dto);
+        return ResponseEntity.ok(mapper.fromSubtaskToDTOList(subtasks));
+    }
+
     // Удаление подзадачи из списка (не удаление задания целиком)
     @DeleteMapping("/{taskId}/subtasks/remove/{subtaskId}")
     public ResponseEntity<?> removeSubtaskFromList(@PathVariable Long taskId,
@@ -266,24 +272,45 @@ public class TaskController {
     }
 
     // Получение задач(родительских) без курса
-    @GetMapping("/available")
+    @GetMapping("/unused")
+    public ResponseEntity<?> getTasksWithoutCourse(@RequestParam(defaultValue = "0") int page,
+                                                   @RequestParam(defaultValue = "5") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Task> availableTasks = taskService.getTasksWithoutCourse(pageable);
+        return ResponseEntity.ok(
+                new PageImpl<>(
+                        availableTasks.stream().map(mapper::fromTaskToModalDTO).toList(),
+                        pageable,
+                        availableTasks.getTotalElements()
+                )
+        );
+    }
+
+    // Получение задач(родительских) , сортировка по наличию курса
+    @GetMapping("/parent")
     public ResponseEntity<?> getAvailableTasks(@RequestParam(defaultValue = "0") int page,
                                                @RequestParam(defaultValue = "5") int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Task> availableTasks = taskService.getAvailableTasks(pageable);
-        return ResponseEntity.ok(new PageImpl<>(availableTasks.stream().map(mapper::fromTaskToModalDTO).toList(), pageable, availableTasks.getTotalElements()));
+        Page<Task> availableTasks = taskService.getParentTasks(pageable);
+        return ResponseEntity.ok(
+                new PageImpl<>(
+                        availableTasks.stream().map(mapper::fromTaskToModalDTO).toList(),
+                        pageable,
+                        availableTasks.getTotalElements()
+                )
+        );
     }
 
     // Получение списка уровней
     @GetMapping("/get-level-list")
-    public List<TaskLevel> getLevelList() {
-        return List.of(TaskLevel.values());
+    public List<SelectDTO> getLevelList() {
+        return Arrays.stream(TaskLevel.values()).map(type -> new SelectDTO(type.name(), type.name())).toList();
     }
 
     // Получение списка cтатусов
     @GetMapping("/get-status-list")
-    public List<TaskStatus> getStatusList() {
-        return List.of(TaskStatus.values());
+    public List<SelectDTO> getStatusList() {
+        return Arrays.stream(TaskStatus.values()).map(type -> new SelectDTO(type.name(), type.name())).toList();
     }
 
 }

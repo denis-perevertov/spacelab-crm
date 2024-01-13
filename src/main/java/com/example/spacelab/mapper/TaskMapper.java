@@ -185,6 +185,7 @@ public class TaskMapper {
         try {
             dto.setId(task.getId());
             dto.setName(task.getName());
+            dto.setStatus(task.getStatus());
             if(Objects.nonNull(task.getCourse())) {
                 dto.setCourse(new CourseLinkDTO().setId(task.getCourse().getId()).setName(task.getCourse().getName()));
             }
@@ -395,6 +396,8 @@ public class TaskMapper {
         return new TaskModalDTO()
                 .setId(task.getId())
                 .setName(task.getName())
+                .setParentTaskName(Optional.ofNullable(task.getParentTask()).orElse(new Task()).getName())
+                .setCourseName(Optional.ofNullable(task.getCourse()).orElse(new Course()).getName())
                 .setLevel(task.getLevel())
                 .setStatus(task.getStatus());
     }

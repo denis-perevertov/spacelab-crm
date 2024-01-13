@@ -1,5 +1,6 @@
 package com.example.spacelab.service;
 
+import com.example.spacelab.dto.task.TaskSubtaskListDTO;
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.student.Student;
 import com.example.spacelab.model.student.StudentTask;
@@ -34,8 +35,11 @@ public interface TaskService extends StudentTaskService,
 
     List<Task> getTaskSubtasks(Long id);
 
-    Page<Task> getAvailableTasks(Pageable pageable);
+    Page<Task> getTasksWithoutCourse(Pageable pageable);
+    Page<Task> getParentTasks(Pageable pageable);
 
 
+    List<Task> addSubtasksToTask(Long taskId, TaskSubtaskListDTO dto);
     void removeSubtaskFromList(Long taskId, Long subtaskId);
+
 }
