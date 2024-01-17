@@ -1,5 +1,13 @@
-aws:
-  bucket:
-    name: spacelab-dp-bucket
-  accessKey: AKIAZ6H5HK6QC4ZQM7E7
-  secretKey: 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
+application:
+  teamwork:
+    apiVersion: v3
+    baseUrl: https://denisscompany18.teamwork.com
+    projectId: 641861
+    token: twp_QrGASGXS0eiIr83897z18EQXoWzV
+  aws:
+    bucket:
+      name: spacelab-dp-bucket
+    accessKey: AKIAZ6H5HK6QC4ZQM7E7
+    secretKey: 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
+
+

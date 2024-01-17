@@ -60,6 +60,16 @@ application:
     port: 3001
   frontend-personal-cabinet:
     port: 3000
+  teamwork:
+    apiVersion: ${TEAMWORK_VERSION}
+    baseUrl: ${TEAMWORK_BASE_URL}
+    projectId: ${TEAMWORK_PROJECT_ID}
+    token: ${TEAMWORK_TOKEN}
+  aws:
+    bucket:
+      name: spacelab-dp-bucket
+    accessKey: ${AWS_ACCESS_KEY}
+    secretKey: ${AWS_SECRET_KEY}
 
 #logging:
 #  level:
