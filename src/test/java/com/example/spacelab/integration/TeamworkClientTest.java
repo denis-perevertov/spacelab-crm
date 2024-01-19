@@ -11,8 +11,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.ZonedDateTime;
-import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -30,29 +28,14 @@ public class TeamworkClientTest {
 
     @Test
     void userCreationTest() {
-//        UserCreateRequest request = new UserCreateRequest(
-//                "email@gmail.com",
-//                "FirstName",
-//                "LastName",
-//                false,
-//                "Title",
-//                "githubLink",
-//                "linkedInLink",
-//                "language",
-//                false,
-//                false,
-//                false,
-//                false,
-//                "account"
-//        );
-//        UserResponse response = trackingService.createTaskUser(request);
-//        assertThat(response).isNotNull();
+
     }
 
     @Test
     void createTaskListTest() {
 
-        TaskListCreateRequest request = new TaskListCreateRequest(
+        TeamworkTaskListRequest request = new TeamworkTaskListRequest(
+                null,
                 false,
                 new TaskListDescription(
                         "TestTaskDesc",
@@ -60,14 +43,15 @@ public class TeamworkClientTest {
                 )
         );
         ApiResponse<TeamworkTaskListCreateResponse> response = client.createTaskList(request);
-        assertThat(response).isNotNull();
+        assertThat(response.getData()).isNotNull();
+        assertThat(response.getData().taskListId()).isNotNull();
     }
 
     @Test
     void createTaskInTaskListTest() {
 
-        TeamworkTaskCreateRequest request = new TeamworkTaskCreateRequest(
-                new TeamworkTaskCreateRequest.Task(
+        TeamworkTaskRequest request = new TeamworkTaskRequest(
+                new TeamworkTaskRequest.Task(
                         "TestTaskName",
                         "TestTaskDescription",
                         null,
@@ -97,8 +81,8 @@ public class TeamworkClientTest {
     @Test
     void updateTaskTest() {
 
-        TeamworkTaskCreateRequest request = new TeamworkTaskCreateRequest(
-                new TeamworkTaskCreateRequest.Task(
+        TeamworkTaskRequest request = new TeamworkTaskRequest(
+                new TeamworkTaskRequest.Task(
                         "TestTaskNameEDITED222",
                         "TestTaskDescriptionEDITED222",
                         null,
@@ -132,8 +116,9 @@ public class TeamworkClientTest {
 
     @Test
     void getTasksFromTaskListTest() {
-        String taskListId = String.valueOf(3265785);
+        String taskListId = String.valueOf(3270959);
         ApiResponse<TeamworkTaskListResponse> response = client.getAllTasksFromTaskList(taskListId);
+        System.out.println(response.getData().tasks().stream().map(TeamworkTask::status).toList());
         assertThat(response.getErrors()).isNull();
         assertThat(response.getData()).isNotNull();
     }
@@ -158,8 +143,8 @@ public class TeamworkClientTest {
     void createSubtaskTest() {
         Long parentTaskId = (long) 40425842;
         Long taskListId = (long) 3265785;
-        TeamworkTaskCreateRequest request = new TeamworkTaskCreateRequest(
-                new TeamworkTaskCreateRequest.Task(
+        TeamworkTaskRequest request = new TeamworkTaskRequest(
+                new TeamworkTaskRequest.Task(
                         "TestTaskNameEDITED222",
                         "TestTaskDescriptionEDITED222",
                         null,
@@ -201,7 +186,8 @@ public class TeamworkClientTest {
         Long taskId = (long) 40425842;
         Long userId = (long) 472016;
         TeamworkTimeEntryCreateRequest request = new TeamworkTimeEntryCreateRequest(
-                new TeamworkTimeEntryCreateRequest.TimeEntry(
+                new TimeEntry (
+                        null,
                         LocalDate.now(),
                         LocalTime.now(),
                         "TimeEntryDescription",
@@ -224,7 +210,8 @@ public class TeamworkClientTest {
         Long taskId = (long) 40425842;
         Long userId = (long) 472016;
         TeamworkTimeEntryCreateRequest request = new TeamworkTimeEntryCreateRequest(
-                new TeamworkTimeEntryCreateRequest.TimeEntry(
+                new TimeEntry(
+                        timelogId,
                         LocalDate.now(),
                         LocalTime.now(),
                         "TimeEntryDescription",

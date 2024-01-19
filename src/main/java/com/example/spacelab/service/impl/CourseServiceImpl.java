@@ -6,6 +6,9 @@ import com.example.spacelab.dto.course.StudentCourseTaskInfoDTO;
 import com.example.spacelab.dto.student.StudentAvatarDTO;
 import com.example.spacelab.dto.task.TaskCourseDTO;
 import com.example.spacelab.exception.ResourceNotFoundException;
+import com.example.spacelab.integration.TaskTrackingService;
+import com.example.spacelab.integration.data.ProjectRequest;
+import com.example.spacelab.integration.data.ProjectResponse;
 import com.example.spacelab.mapper.CourseMapper;
 import com.example.spacelab.mapper.TaskMapper;
 import com.example.spacelab.model.admin.Admin;
@@ -31,6 +34,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -47,6 +51,7 @@ import java.util.List;
 @Transactional
 @RequiredArgsConstructor
 public class CourseServiceImpl implements CourseService {
+
     private final StudentTaskRepository studentTaskRepository;
     private final StudentRepository studentRepository;
     private final TaskRepository taskRepository;
@@ -60,7 +65,8 @@ public class CourseServiceImpl implements CourseService {
     private final CourseMapper mapper;
     private final TaskMapper taskMapper;
 
-    @Qualifier("s3")
+    private final TaskTrackingService trackingService;
+
     private final FileService fileService;
 
     @Override
@@ -159,12 +165,6 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public Course createNewCourse(Course course) {
-        course.setStatus(CourseStatus.ACTIVE);
-        return courseRepository.save(course);
-    }
-
-    @Override
     public Course createNewCourse(CourseEditDTO dto) {
         log.info("creating new course");
         Course c = mapper.fromEditDTOToCourse(dto);
@@ -176,11 +176,6 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public Course editCourse(Course course) {
-        return courseRepository.save(course);
-    }
-
-    @Override
     public Course editCourse(CourseEditDTO dto) {
         log.info("editing course");
         Course c = mapper.fromEditDTOToCourse(dto);
@@ -188,6 +183,30 @@ public class CourseServiceImpl implements CourseService {
         updateCourseStudents(c, dto);
         updateStudentsCourseTaskList(c);
         return courseRepository.save(c);
+    }
+
+    @Async
+    @Override
+    public void createTrackingCourseProject(Course course) {
+        log.info("creating tracking project");
+        ProjectResponse response = trackingService.createProject(new ProjectRequest(
+                null,
+                course.getName(),
+                course.getName() + " - Description"
+        ));
+        course.setTrackingId(response.id());
+        log.info("tracking id set: {}", response.id());
+    }
+
+    @Async
+    @Override
+    public void updateTrackingCourseProject(Course course) {
+        log.info("updating tracking project for course: {}", course.getId());
+        trackingService.updateProject(new ProjectRequest(
+                course.getTrackingId(),
+                course.getName(),
+                course.getName() + " - Description"
+        ));
     }
 
     // fixme maybe later

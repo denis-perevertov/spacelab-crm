@@ -2,9 +2,9 @@ package com.example.spacelab.integration.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record TaskListCreateRequest(
+public record TaskListRequest(
+        Long id,
         Boolean applyDefaultsToExistingTasks,
-        @JsonProperty("todo-list")
         TaskListDescription taskList
 ) {
 }

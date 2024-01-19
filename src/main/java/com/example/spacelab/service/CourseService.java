@@ -29,9 +29,7 @@ public interface CourseService extends EntityFilterService<Course> {
     Page<Course> getCoursesByName(String name, Pageable pageable);
 
     Course getCourseById(Long id);
-    Course createNewCourse(Course course);
     Course createNewCourse(CourseEditDTO dto);
-    Course editCourse(Course course);
     Course editCourse(CourseEditDTO dto);
 
     void deleteCourseById(Long id);
@@ -42,4 +40,7 @@ public interface CourseService extends EntityFilterService<Course> {
     List<Task> getCourseTasks(Long id);
 
     StudentCourseTaskInfoDTO getStudentCourseInfo(Long studentID);
+
+    void createTrackingCourseProject(Course course);
+    void updateTrackingCourseProject(Course course);
 }

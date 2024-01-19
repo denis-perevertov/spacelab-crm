@@ -2,10 +2,9 @@ package com.example.spacelab.integration.teamwork.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record TeamworkTaskListCreateResponse(
-        @JsonProperty("TASKLISTID")
-        String taskListId,
+public record TeamworkProjectResponse(
         @JsonProperty("STATUS")
-        String status
+        String status,
+        String id
 ) {
 }

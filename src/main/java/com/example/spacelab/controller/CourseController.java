@@ -182,6 +182,7 @@ public class CourseController {
         }
 
         Course course = courseService.createNewCourse(dto);
+        courseService.createTrackingCourseProject(course);
         return new ResponseEntity<>(course.getId(), HttpStatus.CREATED);
     }
 
@@ -219,6 +220,7 @@ public class CourseController {
         Course c = mapper.fromEditDTOToCourse(dto);
         log.info("COURSE TO EDIT: " + c);
         Course course = courseService.editCourse(dto);
+        courseService.updateTrackingCourseProject(course);
         return new ResponseEntity<>(course.getId(), HttpStatus.OK);
     }
 

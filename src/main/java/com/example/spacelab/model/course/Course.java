@@ -25,6 +25,8 @@ public class Course {
     @Column(name = "id", nullable = false)
     private Long id;
 
+    private String trackingId;
+
     private String name;
 
     private String icon;
@@ -60,8 +62,5 @@ public class Course {
     @Enumerated(value = EnumType.STRING)
     private CourseStatus status;
 
-    public Course(Long id, String name) {
-        this.id = id;
-        this.name = name;
-    }
+
 }

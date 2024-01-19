@@ -3,10 +3,10 @@ package com.example.spacelab.service.impl;
 import com.example.spacelab.dto.student.StudentTaskLessonDTO;
 import com.example.spacelab.dto.task.TaskSubtaskListDTO;
 import com.example.spacelab.exception.ResourceNotFoundException;
-import com.example.spacelab.mapper.TaskMapper;
+import com.example.spacelab.integration.TaskTrackingService;
+import com.example.spacelab.integration.data.*;
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.student.Student;
-import com.example.spacelab.model.student.StudentAccountStatus;
 import com.example.spacelab.model.student.StudentTask;
 import com.example.spacelab.model.student.StudentTaskStatus;
 import com.example.spacelab.model.task.Task;
@@ -17,11 +17,9 @@ import com.example.spacelab.repository.StudentRepository;
 import com.example.spacelab.repository.StudentTaskRepository;
 import com.example.spacelab.repository.TaskRepository;
 import com.example.spacelab.service.TaskService;
-import com.example.spacelab.service.specification.StudentSpecifications;
 import com.example.spacelab.service.specification.TaskSpecifications;
 import com.example.spacelab.util.FilterForm;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -34,6 +32,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static java.util.Objects.isNull;
+
 @Service
 @Log4j2
 @RequiredArgsConstructor
@@ -43,6 +43,8 @@ public class TaskServiceImpl implements TaskService {
     private final StudentTaskRepository studentTaskRepository;
     private final StudentRepository studentRepository;
     private final CourseRepository courseRepository;
+
+    private final TaskTrackingService trackingService;
 
     @Override
     public List<Task> getTasks() {
@@ -104,6 +106,7 @@ public class TaskServiceImpl implements TaskService {
             // create student task for every student of the course
             createStudentTasksOnTaskCourseTransfer(task);
         }
+        // todo update task list name ?
         return task;
     }
 
@@ -119,7 +122,6 @@ public class TaskServiceImpl implements TaskService {
         taskRepository.deleteById(id);
     }
 
-    @Override
     public StudentTask unlockTaskForStudent(Long taskID, Long studentID) {
         Student student = studentRepository.findById(studentID).orElseThrow();
         Task originalTask = getTaskById(taskID);
@@ -307,7 +309,6 @@ public class TaskServiceImpl implements TaskService {
                 .toList();
     }
 
-    // todo check statuses
     @Override
     public void lockStudentTask(Long taskID) {
         StudentTask task = studentTaskRepository.findById(taskID).orElseThrow();
@@ -319,7 +320,6 @@ public class TaskServiceImpl implements TaskService {
         log.info("task locked");
     }
 
-    // todo check statuses
     @Override
     public void unlockStudentTask(Long taskID) {
         StudentTask task = studentTaskRepository.findById(taskID).orElseThrow();
@@ -329,9 +329,73 @@ public class TaskServiceImpl implements TaskService {
         task.setEndDate(null);
         studentTaskRepository.save(task);
         log.info("task unlocked");
+
+        if(isNull(task.getTaskTrackingId())) {
+            createTrackingList(task);
+        }
     }
 
-    // todo check statuses
+    private void createTrackingList(StudentTask task) {
+        log.info("creating tracking list for task");
+        TaskListResponse response = trackingService.createTaskList(new TaskListRequest(
+                null,
+                false,
+                new TaskListDescription(
+                        task.getTaskReference().getName(),
+                        String.format("%s [%s]",
+                                task.getTaskReference().getName(),
+                                task.getStudent().getInitials())
+                )
+        ));
+        task.setTaskTrackingId(response.taskListId());
+        studentTaskRepository.save(task);
+        log.info("created tracking list for task, creating progress points");
+        task.getTaskReference().getTaskProgressPoints().forEach(point -> {
+            TaskResponse createdParentTask = trackingService.createTaskInTaskList(
+                    new TaskCreateRequest(
+                            point.getName(),
+                            point.getName(),
+                            null,
+                            0,
+                            new Long[]{trackingService.getTagByName(trackingService.getRecommendedTagName()).id()},
+                            null,
+                            LocalDate.now(),
+                            null,
+                            Long.valueOf(task.getTaskTrackingId()),
+                            new Integer[]{Integer.valueOf(task.getStudent().getTaskTrackingProfileId())}
+                    )
+            );
+            point.getSubpoints().forEach(subpoint -> trackingService.createTaskInTaskList(
+                    new TaskCreateRequest(
+                            subpoint.getName(),
+                            subpoint.getName(),
+                            null,
+                            0,
+                            new Long[]{trackingService.getTagByName(trackingService.getRecommendedTagName()).id()},
+                            null,
+                            LocalDate.now(),
+                            createdParentTask.id(),
+                            Long.valueOf(task.getTaskTrackingId()),
+                            new Integer[]{Integer.valueOf(task.getStudent().getTaskTrackingProfileId())}
+                    )
+            ));
+        });
+    }
+
+    private void updateTrackingList(StudentTask task) {
+        log.info("creating tracking list for task");
+        trackingService.updateTaskList(new TaskListRequest(
+                Long.valueOf(task.getTaskTrackingId()),
+                false,
+                new TaskListDescription(
+                        task.getTaskReference().getName(),
+                        String.format("%s [%s]",
+                                task.getTaskReference().getName(),
+                                task.getStudent().getInitials())
+                )
+        ));
+    }
+
     @Override
     public void completeStudentTask(Long taskID) {
         StudentTask task = studentTaskRepository.findById(taskID).orElseThrow();
@@ -342,7 +406,6 @@ public class TaskServiceImpl implements TaskService {
         log.info("task completed");
     }
 
-    // todo check statuses
     @Override
     public void resetStudentTask(Long taskID) {
         StudentTask task = studentTaskRepository.findById(taskID).orElseThrow();

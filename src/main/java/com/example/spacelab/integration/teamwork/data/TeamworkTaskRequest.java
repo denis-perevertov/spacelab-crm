@@ -3,10 +3,8 @@ package com.example.spacelab.integration.teamwork.data;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
-import java.util.Date;
 
-public record TeamworkTaskCreateRequest (
+public record TeamworkTaskRequest(
         Task task
 ) {
         public record Task(

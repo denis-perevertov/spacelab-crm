@@ -1,5 +1,7 @@
 package com.example.spacelab.integration.teamwork.data;
 
+import com.example.spacelab.integration.data.TimeEntry;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Date;
@@ -9,13 +11,5 @@ public record TeamworkTimeEntryCreateRequest(
         Object[] tags,
         Object timelogOptions
 ) {
-    public record TimeEntry (
-            LocalDate date,
-            LocalTime time,
-            String description,
-            Integer hours,
-            Integer minutes,
-            Long taskId,
-            Long userId
-    ) {}
+
 }

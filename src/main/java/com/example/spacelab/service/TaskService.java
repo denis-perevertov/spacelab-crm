@@ -29,15 +29,12 @@ public interface TaskService extends StudentTaskService,
 
     List<Student> getTaskStudents(Long taskId);
 
-    StudentTask unlockTaskForStudent(Long taskID, Long studentID);
-
     List<StudentTask> createStudentTaskListFromCourse(Course course);
 
     List<Task> getTaskSubtasks(Long id);
 
     Page<Task> getTasksWithoutCourse(Pageable pageable);
     Page<Task> getParentTasks(Pageable pageable);
-
 
     List<Task> addSubtasksToTask(Long taskId, TaskSubtaskListDTO dto);
     void removeSubtaskFromList(Long taskId, Long subtaskId);
