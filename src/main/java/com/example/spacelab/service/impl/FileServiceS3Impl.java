@@ -38,7 +38,6 @@ public class FileServiceS3Impl implements FileService {
         String uploadPath = uploadDirectory + "/" + filename;
 
         log.info("path to file in bucket: {}", uploadPath);
-
         s3Client.uploadFile(file, uploadPath);
         log.info("file uploaded to s3 bucket");
 

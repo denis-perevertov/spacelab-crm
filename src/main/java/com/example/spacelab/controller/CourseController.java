@@ -1,5 +1,6 @@
 package com.example.spacelab.controller;
 
+import com.example.spacelab.dto.SelectDTO;
 import com.example.spacelab.dto.course.*;
 import com.example.spacelab.dto.task.TaskCourseDTO;
 import com.example.spacelab.exception.ErrorMessage;
@@ -24,6 +25,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,17 +36,14 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
 @Tag(name = "Course", description = "Course controller")
-@RestController
-@Log
+@Slf4j
 @Data
+@RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/courses")
 public class CourseController {
@@ -76,7 +75,7 @@ public class CourseController {
         Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "id");
 
         PermissionType permissionForLoggedInAdmin = loggedInAdmin.getRole().getPermissions().getReadCourses();
-        List<Course> adminCourses = loggedInAdmin.getCourses();
+        Set<Course> adminCourses = loggedInAdmin.getCourses();
 
         if(permissionForLoggedInAdmin == PermissionType.FULL) {
             coursePage = courseService.getCourses(filters, pageable);
@@ -182,7 +181,6 @@ public class CourseController {
         }
 
         Course course = courseService.createNewCourse(dto);
-        courseService.createTrackingCourseProject(course);
         return new ResponseEntity<>(course.getId(), HttpStatus.CREATED);
     }
 
@@ -217,10 +215,8 @@ public class CourseController {
             throw new ObjectValidationException(errors);
         }
 
-        Course c = mapper.fromEditDTOToCourse(dto);
-        log.info("COURSE TO EDIT: " + c);
+        courseService.removeAdminsFromCourse(dto.getId());
         Course course = courseService.editCourse(dto);
-        courseService.updateTrackingCourseProject(course);
         return new ResponseEntity<>(course.getId(), HttpStatus.OK);
     }
 
@@ -285,7 +281,7 @@ public class CourseController {
     }
 
     @GetMapping("/get-status-list")
-    public List<CourseStatus> getStatusList() {
-        return List.of(CourseStatus.values());
+    public ResponseEntity<?> getStatusList() {
+        return ResponseEntity.ok(Arrays.stream(CourseStatus.values()).map(v -> new SelectDTO(v.name(), v.name())).toList());
     }
 }

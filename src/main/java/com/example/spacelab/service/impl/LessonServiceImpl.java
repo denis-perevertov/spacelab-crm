@@ -23,6 +23,8 @@ import com.example.spacelab.service.specification.LessonSpecifications;
 import com.example.spacelab.service.specification.TaskSpecifications;
 import com.example.spacelab.util.AuthUtil;
 import com.example.spacelab.util.FilterForm;
+import com.example.spacelab.util.NumericUtils;
+import com.example.spacelab.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
@@ -108,12 +110,12 @@ public class LessonServiceImpl implements LessonService {
     @Override
     public List<StudentLessonDisplayDTO> getStudentLessonDisplayData(Long id) {
         Lesson lesson = getLessonById(id);
-        List<Student> courseStudents = lesson.getCourse().getStudents();
+        List<Student> courseStudents = lesson.getCourse().getStudents().stream().toList();
         List<StudentLessonDisplayDTO> lessonDisplayData = new ArrayList<>();
         courseStudents.forEach(st -> lessonDisplayData.add(new StudentLessonDisplayDTO(
                 st.getId(),
                 st.getFullName(),
-                10.00,
+                40.00,
                 taskService.getOpenStudentTasks(st),
                 taskService.getNextStudentTasks(st)
         )));
@@ -166,7 +168,7 @@ public class LessonServiceImpl implements LessonService {
                         .setCourse(lesson.getCourse())
                         .setStartsAutomatically(settings.isAutomaticLessonStartSetting())
                         .setStatus(LessonStatus.PLANNED)
-                        .setDatetime(lesson.getDatetime().plusDays(settings.getStandardIntervalSetting()))
+                        .setDatetime(lesson.getDatetime().plusDays(lesson.getCourse().getCourseInfo().getLessonInterval()))
         );
     }
 
@@ -201,10 +203,10 @@ public class LessonServiceImpl implements LessonService {
             endDate = LocalDate.parse(end, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         }
 
-        Course course = (courseID == null) ? null : courseRepository.getReferenceById(courseID);
-        LessonStatus status = (statusInput == null) ? null : LessonStatus.valueOf(statusInput);
-        Admin mentor = (mentorID == null) ? null : adminRepository.findById(mentorID).orElseThrow();
-        Admin manager = (managerID == null) ? null : adminRepository.findById(managerID).orElseThrow();
+        Course course = NumericUtils.fieldIsEmpty(courseID) ? null : courseRepository.getReferenceById(courseID);
+        LessonStatus status = StringUtils.fieldIsEmpty(statusInput) ? null : LessonStatus.valueOf(statusInput);
+        Admin mentor = NumericUtils.fieldIsEmpty(mentorID) ? null : adminRepository.findById(mentorID).orElseThrow();
+        Admin manager = NumericUtils.fieldIsEmpty(managerID) ? null : adminRepository.findById(managerID).orElseThrow();
 
         Specification<Lesson> spec = LessonSpecifications.hasDatesBetween(beginDate, endDate)
                                     .and(LessonSpecifications.hasCourse(course))

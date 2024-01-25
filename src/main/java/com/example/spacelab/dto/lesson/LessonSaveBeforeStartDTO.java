@@ -22,7 +22,7 @@ public class LessonSaveBeforeStartDTO {
     private Long courseID;
 
     @Schema(example = "ACTIVE")
-    private LessonStatus status;
+    private LessonStatus status = LessonStatus.PLANNED;
 
     @Schema(example = "http://www.link.com")
     private String link;

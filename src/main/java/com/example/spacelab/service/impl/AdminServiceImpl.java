@@ -1,5 +1,6 @@
 package com.example.spacelab.service.impl;
 
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.example.spacelab.exception.ResourceNotFoundException;
 import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.model.course.Course;
@@ -11,8 +12,10 @@ import com.example.spacelab.service.AdminService;
 import com.example.spacelab.service.FileService;
 import com.example.spacelab.service.specification.AdminSpecifications;
 import com.example.spacelab.service.specification.AdminTestSpec;
+import com.example.spacelab.util.AuthUtil;
 import com.example.spacelab.util.FilenameUtils;
 import com.example.spacelab.util.FilterForm;
+import com.example.spacelab.util.NumericUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +42,7 @@ public class AdminServiceImpl implements AdminService {
     private final AdminRepository adminRepository;
     private final UserRoleRepository userRoleRepository;
     private final CourseRepository courseRepository;
-
+    private final AuthUtil authUtil;
     private final FileService fileService;
 
     @Override
@@ -108,6 +111,15 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    public boolean canDeleteAdmin(Long id) {
+        Admin admin = getAdminById(id);
+        return !(
+            admin.getRole().getName().equalsIgnoreCase("ADMIN")
+            || authUtil.getLoggedInAdmin().getId().equals(admin.getId())
+        );
+    }
+
+    @Override
     public void deleteAdminById(Long id) {
         Admin admin = adminRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Admin not found!", Admin.class));
         log.info("Deleting admin with ID: " + id);
@@ -119,10 +131,16 @@ public class AdminServiceImpl implements AdminService {
         log.info("saving avatar for admin (id: {})", id);
         Admin admin = getAdminById(id);
         if(avatar != null && avatar.getSize() > 0) {
-            String filename = FilenameUtils.generateFileName(avatar);
-            fileService.saveFile(avatar, filename, "admins");
-            admin.setAvatar(filename);
-            adminRepository.save(admin);
+            try {
+                String filename = FilenameUtils.generateFileName(avatar);
+                fileService.saveFile(avatar, filename, "admins");
+                admin.setAvatar(filename);
+                adminRepository.save(admin);
+            } catch (AmazonS3Exception ex) {
+                log.error("could not save file: {}", ex.getMessage());
+            } catch (Exception e) {
+                log.error("unknown error: {}", e.getMessage());
+            }
         }
         else {
             log.warn("avatar is empty, could not save");
@@ -150,8 +168,8 @@ public class AdminServiceImpl implements AdminService {
         Long courseID = filters.getCourse();
         String phone = filters.getPhone();
 
-        UserRole role = (roleID == null) ? null : userRoleRepository.getReferenceById(roleID);
-        Course course = (courseID == null) ? null : courseRepository.getReferenceById(courseID);
+        UserRole role = NumericUtils.fieldIsEmpty(roleID) ? null : userRoleRepository.getReferenceById(roleID);
+        Course course = NumericUtils.fieldIsEmpty(courseID) ? null : courseRepository.getReferenceById(courseID);
 
         if(course != null) log.info(course.toString());
 

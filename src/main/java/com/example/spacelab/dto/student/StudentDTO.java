@@ -1,5 +1,6 @@
 package com.example.spacelab.dto.student;
 
+import com.example.spacelab.dto.course.CourseLinkIconDTO;
 import com.example.spacelab.dto.course.CourseListDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
@@ -20,11 +21,10 @@ public class StudentDTO {
     @NotBlank
     private String firstName, lastName, fathersName;
 
-//    private CourseListDTO course;
-
     @NotBlank
     @Email
-    private Map<String, Object> course;  // ?
+    private CourseLinkIconDTO course;
+
     @Schema(example = "test@gmail.com")
     private String email;
 

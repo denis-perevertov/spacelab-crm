@@ -15,6 +15,7 @@ import java.util.Optional;
 
 @Repository
 public interface CourseRepository extends JpaRepository<Course, Long>, JpaSpecificationExecutor<Course> {
+    boolean existsByName(String name);
 
     @Query("SELECT c FROM Course c WHERE c.id IN :ids")
     List<Course> findAllowedCourses(@Param("ids") Long... ids);

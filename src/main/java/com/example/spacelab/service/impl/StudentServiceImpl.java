@@ -17,6 +17,8 @@ import com.example.spacelab.service.specification.StudentSpecifications;
 import com.example.spacelab.util.FilterForm;
 import com.example.spacelab.model.student.StudentAccountStatus;
 import com.example.spacelab.model.student.StudentTaskStatus;
+import com.example.spacelab.util.NumericUtils;
+import com.example.spacelab.util.StringUtils;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
@@ -254,10 +256,12 @@ public class StudentServiceImpl implements StudentService {
         String phoneInput = filters.getPhone();
         String telegramInput = filters.getTelegram();
         Integer ratingInput = filters.getRating();
+        Integer ratingFromInput = filters.getRatingFrom();
+        Integer ratingToInput = filters.getRatingTo();
         String statusInput = filters.getStatus();
 
-        Course course = (courseID == null) ? null : courseRepository.getReferenceById(courseID);
-        StudentAccountStatus status = (statusInput == null) ? null : StudentAccountStatus.valueOf(statusInput);
+        Course course = NumericUtils.fieldIsEmpty(courseID) ? null : courseRepository.getReferenceById(courseID);
+        StudentAccountStatus status = StringUtils.fieldIsEmpty(statusInput) ? null : StudentAccountStatus.valueOf(statusInput);
 
         Specification<Student> combinedSpec = Specification.where(StudentSpecifications.hasNameOrEmailLike(combined).or(StudentSpecifications.hasTelegramLike(combined)));
 
@@ -265,7 +269,8 @@ public class StudentServiceImpl implements StudentService {
                                                     .and(StudentSpecifications.hasId(studentId))
                                                     .and(StudentSpecifications.hasCourse(course))
                                                     .and(StudentSpecifications.hasPhoneLike(phoneInput))
-                                                    .and(StudentSpecifications.hasRatingOrHigher(ratingInput))
+                                                    .and(StudentSpecifications.hasRatingBetween(ratingFromInput, ratingToInput))
+//                                                    .and(StudentSpecifications.hasRatingOrHigher(ratingInput))
                                                     .and(StudentSpecifications.hasStatus(status)));
 
         return spec;

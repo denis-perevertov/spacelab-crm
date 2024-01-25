@@ -21,6 +21,8 @@ public class FilterForm {
     private String telegram;
 //    @Schema(defaultValue = "0")
     private Integer rating;
+    private Integer ratingFrom;
+    private Integer ratingTo;
 //    @Schema(defaultValue = "TEST")
     private String status;
     private String level;

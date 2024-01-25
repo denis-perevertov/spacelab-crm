@@ -4,16 +4,20 @@ import com.example.spacelab.model.task.Task;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.ToString;
+import lombok.*;
 import lombok.experimental.Accessors;
+import org.hibernate.Hibernate;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-@Data
+@Getter
+@Setter
+@ToString
+@RequiredArgsConstructor
 @Entity
 @Table(name="student_tasks")
 @Accessors(chain = true)
@@ -53,7 +57,18 @@ public class StudentTask {
 
     private Integer percentOfCompletion;
 
-
     private String taskTrackingId;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        StudentTask that = (StudentTask) o;
+        return Objects.equals(id, that.id) && Objects.equals(beginDate, that.beginDate) && Objects.equals(endDate, that.endDate) && status == that.status && Objects.equals(percentOfCompletion, that.percentOfCompletion) && Objects.equals(taskTrackingId, that.taskTrackingId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, beginDate, endDate, status, percentOfCompletion, taskTrackingId);
+    }
 }

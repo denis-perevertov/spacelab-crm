@@ -37,12 +37,12 @@ public class LessonSpecifications {
 
     public static Specification<Lesson> hasMentor(Admin admin) {
         if(admin == null) return (root, query, cb) -> null;
-        return (root, query, cb) -> cb.equal(root.get("mentor"), admin);
+        return (root, query, cb) -> cb.equal(root.get("course").get("mentor"), admin);
     }
 
     public static Specification<Lesson> hasManager(Admin admin) {
         if(admin == null) return (root, query, cb) -> null;
-        return (root, query, cb) -> cb.equal(root.get("manager"), admin);
+        return (root, query, cb) -> cb.equal(root.get("course").get("manager"), admin);
     }
 
     public static Specification<Lesson> hasStatus(LessonStatus status) {

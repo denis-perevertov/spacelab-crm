@@ -15,6 +15,8 @@ import org.springframework.validation.Validator;
 
 import java.util.Objects;
 
+import static com.example.spacelab.util.ValidationUtils.*;
+
 @Component
 @RequiredArgsConstructor
 public class StudentValidator implements Validator {
@@ -35,22 +37,26 @@ public class StudentValidator implements Validator {
     public void validate(Object target, Errors e) {
         StudentEditDTO dto = (StudentEditDTO) target;
 
-        if(dto.firstName() == null || dto.firstName().isEmpty())
+        if(fieldIsEmpty(dto.firstName()))
             e.rejectValue("firstName", "firstName.empty", "Enter first name!");
-        else if(dto.firstName().length() < 2 || dto.firstName().length() > 50)
+        else if(fieldLengthIsIncorrect(dto.firstName(), 2, 50))
             e.rejectValue("firstName", "firstName.length", "Name length: 2-50");
 
-        if(dto.lastName() == null || dto.lastName().isEmpty())
+        if(fieldIsEmpty(dto.lastName()))
             e.rejectValue("lastName", "lastName.empty", "Enter last name!");
-        else if(dto.lastName().length() < 2 || dto.lastName().length() > 50)
+        else if(fieldLengthIsIncorrect(dto.lastName(), 2, 50))
             e.rejectValue("lastName", "lastName.length", "Name length: 2-50");
 
-        if(dto.fathersName() == null || dto.fathersName().isEmpty())
-            e.rejectValue("fathersName", "fathersName.empty", "Enter fathers name!");
-        else if(dto.fathersName().length() < 2 || dto.fathersName().length() > 50)
-            e.rejectValue("fathersName", "fathersName.length", "Name length: 2-50");
+//        if(fieldIsEmpty(dto.fathersName()))
+//            e.rejectValue("fathersName", "fathersName.empty", "Enter fathers name!");
+//        else if(dto.fathersName().length() < 2 || dto.fathersName().length() > 50)
+//            e.rejectValue("fathersName", "fathersName.length", "Name length: 2-50");
 
-        if(dto.email() == null || dto.email().isEmpty())
+        if(fieldIsNotEmpty(dto.fathersName()) && fieldLengthIsIncorrect(dto.fathersName(), 2, 50)) {
+            e.rejectValue("fathersName", "fathersName.length", "Name length: 2-50");
+        }
+
+        if(fieldIsEmpty(dto.email()))
             e.rejectValue("email", "email.empty", "Enter email!");
         else if(!dto.email().matches(EMAIL_PATTERN))
             e.rejectValue("email", "email.no-match", "Incorrect email format!");
@@ -61,15 +67,15 @@ public class StudentValidator implements Validator {
                 e.rejectValue("email", "email.taken", "Student with this email already exists!");
         }
 
-        if(dto.phone() == null || dto.phone().isEmpty())
+        if(fieldIsEmpty(dto.phone()))
             e.rejectValue("phone", "phone.empty", "Enter phone!");
         else if(!dto.phone().matches(PHONE_PATTERN))
             e.rejectValue("phone", "phone.no-match", "Incorrect phone format!");
 
-        if(dto.telegram() == null || dto.telegram().isEmpty())
-            e.rejectValue("telegram", "telegram.empty", "Enter telegram!");
-        else if(!dto.telegram().matches(TELEGRAM_PATTERN))
-            e.rejectValue("telegram", "telegram.no-match", "Incorrect telegram format!");
+//        if(dto.telegram() == null || dto.telegram().isEmpty())
+//            e.rejectValue("telegram", "telegram.empty", "Enter telegram!");
+//        else if(!dto.telegram().matches(TELEGRAM_PATTERN))
+//            e.rejectValue("telegram", "telegram.no-match", "Incorrect telegram format!");
 
     }
 

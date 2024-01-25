@@ -26,15 +26,15 @@ public class TaskSaveDTO {
     private Long courseID;
 
     @Schema(example = "ADVANCED")
-    private TaskLevel level;
+    private String level;
 
     @Schema(example = "ACTIVE")
-    private TaskStatus status;
+    private String status;
 
     @Schema(example = "6-8 days")
     private String completionTime;
 
-    private TimeUnit completionTimeUnit;
+    private String completionTimeUnit;
 
     @Schema(example = "Skills description")
     private String skillsDescription;
@@ -49,8 +49,5 @@ public class TaskSaveDTO {
 
     private List<TaskProgressPointDTO> taskProgressPoints;
 
-    public TaskSaveDTO(Long id, String name) {
-        this.id = id;
-        this.name = name;
-    }
+
 }

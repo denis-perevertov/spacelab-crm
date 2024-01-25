@@ -41,6 +41,7 @@ public class LessonMapper {
         if (course != null) {
             dto.setCourseId(course.getId());
             dto.setCourseName(course.getName());
+            dto.setCourseIcon(course.getIcon());
 
             if(course.getMentor() != null) {
                 dto.setMentorId(course.getMentor().getId());
@@ -103,13 +104,15 @@ public class LessonMapper {
                 )
         );
 
-        dto.setMentor(
-                new AdminAvatarDTO(
-                        lesson.getCourse().getMentor().getId(),
-                        lesson.getCourse().getMentor().getFullName(),
-                        lesson.getCourse().getMentor().getAvatar()
-                )
-        );
+        if(lesson.getCourse().getMentor() != null) {
+            dto.setMentor(
+                    new AdminAvatarDTO(
+                            lesson.getCourse().getMentor().getId(),
+                            lesson.getCourse().getMentor().getFullName(),
+                            lesson.getCourse().getMentor().getAvatar()
+                    )
+            );
+        }
 
         List<StudentAvatarDTO> students = lesson
                 .getCourse()
@@ -144,6 +147,7 @@ public class LessonMapper {
         dto.setId(lesson.getId());
         dto.setLessonStartTime(lesson.getDatetime().atZone(ZoneId.of("UTC")));
         dto.setCourseID(lesson.getCourse().getId());
+        dto.setCourseName(lesson.getCourse().getName());
         dto.setLink(lesson.getLink());
         dto.setStatus(lesson.getStatus());
         dto.setStartsAutomatically(lesson.getStartsAutomatically());

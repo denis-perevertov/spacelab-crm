@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
+import static com.example.spacelab.util.ValidationUtils.*;
+
 @Component
 @RequiredArgsConstructor
 public class ContactValidator implements Validator {
@@ -29,26 +31,46 @@ public class ContactValidator implements Validator {
     public void validate(Object target, Errors e) {
         ContactInfoEditDTO dto = (ContactInfoEditDTO) target;
 
-        if(dto.getPhone() == null || dto.getPhone().isEmpty())
-            e.rejectValue("phone", "phone.empty", "Enter phone!");
-        else if(!dto.getPhone().matches(PHONE_PATTERN))
-            e.rejectValue("phone", "phone.no-match", "Incorrect phone format!");
+        if(fieldIsNotEmpty(dto.getEmail())) {
+            if(fieldLengthIsIncorrect(dto.getEmail(), 2, 50)) {
+                e.rejectValue("email", "email.length", "Email length : 2-50");
+            }
+            else if(!fieldMatchesPattern(dto.getEmail(), PHONE_PATTERN)) {
+                e.rejectValue("email", "email.no-match", "Incorrect email format!");
+            }
+        }
 
-        if(dto.getEmail() == null || dto.getEmail().isEmpty())
-            e.rejectValue("email", "email.empty", "Enter email!");
-        else if(!dto.getEmail().matches(EMAIL_PATTERN))
-            e.rejectValue("email", "email.no-match", "Incorrect email format!");
+        if(fieldIsNotEmpty(dto.getPhone())) {
+            if(fieldLengthIsIncorrect(dto.getPhone(), 9, 20)) {
+                e.rejectValue("phone", "phone.length", "Phone length : 9-20");
+            }
+            else if(!fieldMatchesPattern(dto.getPhone(), PHONE_PATTERN)) {
+                e.rejectValue("phone", "phone.no-match", "Incorrect phone format!");
+            }
+        }
 
-        if(dto.getTelegram() == null || dto.getTelegram().isEmpty())
-            e.rejectValue("telegram", "telegram.empty", "Enter telegram!");
-        else if(!dto.getTelegram().matches(TELEGRAM_PATTERN))
+        if(fieldIsNotEmpty(dto.getTelegram()) && !fieldMatchesPattern(dto.getTelegram(), TELEGRAM_PATTERN)) {
             e.rejectValue("telegram", "telegram.no-match", "Incorrect telegram format!");
+        }
 
-        if(dto.getAdminID() == null || dto.getAdminID() == 0)
+        if(fieldIsNotEmpty(dto.getTelegram())) {
+            if(fieldLengthIsIncorrect(dto.getTelegram(), 2, 50)) {
+                e.rejectValue("telegram", "telegram.length", "Length: 2-50");
+            }
+            else if(!fieldMatchesPattern(dto.getTelegram(), TELEGRAM_PATTERN)) {
+                e.rejectValue("telegram", "telegram.no-match", "Incorrect telegram format!");
+            }
+        }
+
+        if(fieldIsEmpty(dto.getAdminID())) {
             e.rejectValue("adminID", "adminID.empty", "Select admin!");
-        else if(!adminRepository.existsById(dto.getAdminID()))
+        }
+        else if(!adminExists(dto.getAdminID()))
             e.rejectValue("adminID", "adminID.no-match", "Admin with this ID doesn't exist!");
 
+    }
 
+    private boolean adminExists(Long adminId) {
+        return adminRepository.existsById(adminId);
     }
 }

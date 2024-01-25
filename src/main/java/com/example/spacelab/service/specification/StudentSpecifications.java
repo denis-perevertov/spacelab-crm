@@ -56,6 +56,13 @@ public class StudentSpecifications {
         return (root, query, cb) -> cb.greaterThanOrEqualTo(root.get(Student_.RATING), rating);
     }
 
+    public static Specification<Student> hasRatingBetween(Integer from, Integer to) {
+        if(from == null && to == null) return (root, query, cb) -> null;
+        else if(from == null) return (root, query, cb) -> cb.lessThanOrEqualTo(root.get(Student_.RATING), to);
+        else if(to == null) return (root, query, cb) -> cb.greaterThanOrEqualTo(root.get(Student_.RATING), from);
+        return (root, query, cb) -> cb.between(root.get(Student_.RATING), from, to);
+    }
+
     public static Specification<Student> hasStatus(StudentAccountStatus status) {
         if(status == null) return (root, query, cb) -> null;
         return (root, query, cb) -> cb.equal(root.get(Student_.DETAILS).get(StudentDetails_.ACCOUNT_STATUS), status);

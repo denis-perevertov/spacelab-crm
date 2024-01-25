@@ -21,4 +21,7 @@ public interface LiteratureRepository extends JpaRepository<Literature, Long>, J
     @Query("SELECT l FROM Literature l WHERE l.course.id IN :ids")
     Page<Literature> findAllByAllowedCoursePage(Pageable pageable, @Param("ids") Long... ids);
 
+    @Query("SELECT COUNT(l) FROM Literature l WHERE l.is_verified = false")
+    int getVerificationCount();
+
 }

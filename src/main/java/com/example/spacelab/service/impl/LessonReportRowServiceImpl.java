@@ -13,6 +13,7 @@ import com.example.spacelab.service.LessonReportRowService;
 import com.example.spacelab.model.student.StudentTaskStatus;
 import com.example.spacelab.service.LessonService;
 import com.example.spacelab.service.StudentService;
+import com.example.spacelab.service.TaskService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,7 @@ public class LessonReportRowServiceImpl implements LessonReportRowService {
     private final StudentService studentService;
     private final LessonReportRowRepository lessonReportRowRepository;
     private final StudentTaskRepository studentTaskRepository;
+    private final TaskService taskService;
 
     @Override
     public LessonReportRow getLessonReportRowById(Long id) {
@@ -72,18 +74,10 @@ public class LessonReportRowServiceImpl implements LessonReportRowService {
         log.info("added report row to lesson entity");
 
         log.info("checking completed tasks for student");
-        dto.getCompletedTasksIds().forEach(id -> {
-            StudentTask studentTask = studentTaskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("StudentTask task not found"));
-            studentTask.setStatus(StudentTaskStatus.COMPLETED);
-            studentTaskRepository.save(studentTask);
-        });
+        dto.getCompletedTasksIds().forEach(taskService::completeStudentTask);
 
         log.info("checking unlocked tasks for student");
-        dto.getUnlockedTasksIds().forEach(id -> {
-            StudentTask studentTask = studentTaskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("StudentTask task not found"));
-            studentTask.setStatus(StudentTaskStatus.UNLOCKED);
-            studentTaskRepository.save(studentTask);
-        });
+        dto.getUnlockedTasksIds().forEach(taskService::unlockStudentTask);
 
         return lessonReportRow;
     }

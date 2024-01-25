@@ -40,8 +40,11 @@ public class CourseMapper {
         dto.setName(course.getName());
         dto.setIcon(course.getIcon());
         dto.setStudentsQuantity((long) course.getStudents().size());
-        dto.setBegin_date(course.getBeginningDate());
-        dto.setEnd_date(course.getEndDate());
+        dto.setBeginDate(course.getCourseInfo().getBeginDate());
+        dto.setCompletionTime(course.getCourseInfo().getCompletionTime());
+        if(course.getCourseInfo().getCompletionTimeUnit() != null) {
+            dto.setCompletionTimeUnit(course.getCourseInfo().getCompletionTimeUnit().name());
+        }
 
         Admin mentor = course.getMentor();
         if (mentor != null) {
@@ -105,10 +108,12 @@ public class CourseMapper {
         dto.setDescription(courseInfo.getMain_description());
         dto.setTopics(courseInfo.getTopics());
         dto.setSettings(new CourseSettingsDTO(
+                courseInfo.getBeginDate(),
                 courseInfo.getCompletionTime(),
                 courseInfo.getCompletionTimeUnit(),
                 courseInfo.getGroupSize(),
-                courseInfo.getHoursNorm()
+                courseInfo.getHoursNorm(),
+                courseInfo.getLessonInterval()
         ));
         return dto;
     }
@@ -216,7 +221,7 @@ public class CourseMapper {
         }
 
 
-        List<Student> students = new ArrayList<>();
+        Set<Student> students = new HashSet<>();
         if (courseDTO.getStudents() != null && !courseDTO.getStudents().isEmpty()) {
             for (Long studentId : courseDTO.getStudents()) {
                 students.add(studentRepository.findById(studentId).orElse(null));
@@ -225,7 +230,7 @@ public class CourseMapper {
         course.setStudents(students);
 
 
-        List<Task> tasks = new ArrayList<>();
+        Set<Task> tasks = new HashSet<>();
         if (courseDTO.getTasks() != null && !courseDTO.getTasks().isEmpty()) {
             for (Long taskId : courseDTO.getTasks()) {
                 tasks.add(taskRepository.findById(taskId).orElse(null));
@@ -233,7 +238,7 @@ public class CourseMapper {
         }
 //        course.setTasks(tasks);
 
-        List <Literature > literature = new ArrayList<>();
+        Set <Literature > literature = new HashSet<>();
         if (courseDTO.getLiterature() != null && !courseDTO.getLiterature().isEmpty()) {
             for (Long literatureId : courseDTO.getLiterature()) {
                 literature.add(literatureRepository.findById(literatureId).orElse(null));
@@ -277,10 +282,12 @@ public class CourseMapper {
                         course.getCourseInfo().getMain_description(),
                         course.getCourseInfo().getTopics(),
                         new CourseSettingsDTO(
+                                courseInfo.getBeginDate(),
                                 courseInfo.getCompletionTime(),
                                 courseInfo.getCompletionTimeUnit(),
                                 courseInfo.getGroupSize(),
-                                courseInfo.getHoursNorm()
+                                courseInfo.getHoursNorm(),
+                                courseInfo.getLessonInterval()
                         )
                 )
             );
@@ -336,10 +343,12 @@ public class CourseMapper {
                             courseInfo.getMain_description(),
                             courseInfo.getTopics(),
                             new CourseSettingsDTO(
+                                    courseInfo.getBeginDate(),
                                     courseInfo.getCompletionTime(),
                                     courseInfo.getCompletionTimeUnit(),
                                     courseInfo.getGroupSize(),
-                                    courseInfo.getHoursNorm()
+                                    courseInfo.getHoursNorm(),
+                                    courseInfo.getLessonInterval()
                             )
                     )
             );
@@ -396,6 +405,8 @@ public class CourseMapper {
             courseInfo.setHoursNorm(dto.getInfo().getSettings().hoursNorm());
             courseInfo.setCompletionTime(dto.getInfo().getSettings().completionTime());
             courseInfo.setCompletionTimeUnit(dto.getInfo().getSettings().completionTimeUnit());
+            courseInfo.setLessonInterval(dto.getInfo().getSettings().lessonInterval());
+            courseInfo.setBeginDate(dto.getInfo().getSettings().beginDate());
 
             AdminAvatarDTO mentor = dto.getMembers().getMentor();
             AdminAvatarDTO manager = dto.getMembers().getManager();

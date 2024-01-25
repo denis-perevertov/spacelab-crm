@@ -1,14 +1,15 @@
 package com.example.spacelab.service.impl;
 
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.example.spacelab.dto.course.CourseEditDTO;
 import com.example.spacelab.dto.course.CourseIconDTO;
 import com.example.spacelab.dto.course.StudentCourseTaskInfoDTO;
 import com.example.spacelab.dto.student.StudentAvatarDTO;
 import com.example.spacelab.dto.task.TaskCourseDTO;
 import com.example.spacelab.exception.ResourceNotFoundException;
+import com.example.spacelab.exception.TeamworkException;
 import com.example.spacelab.integration.TaskTrackingService;
-import com.example.spacelab.integration.data.ProjectRequest;
-import com.example.spacelab.integration.data.ProjectResponse;
+import com.example.spacelab.integration.data.*;
 import com.example.spacelab.mapper.CourseMapper;
 import com.example.spacelab.mapper.TaskMapper;
 import com.example.spacelab.model.admin.Admin;
@@ -26,6 +27,8 @@ import com.example.spacelab.service.StudentTaskService;
 import com.example.spacelab.service.specification.CourseSpecifications;
 import com.example.spacelab.util.FilenameUtils;
 import com.example.spacelab.util.FilterForm;
+import com.example.spacelab.util.NumericUtils;
+import com.example.spacelab.util.ValidationUtils;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
@@ -44,11 +47,13 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Data
 @Slf4j
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class CourseServiceImpl implements CourseService {
 
@@ -82,7 +87,6 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public Page<Course> getCourses(FilterForm filters, Pageable pageable) {
         Specification<Course> spec = buildSpecificationFromFilters(filters);
-
         return courseRepository.findAll(spec, pageable);
     }
 
@@ -113,10 +117,11 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public List<Task> getCourseTasks(Long id) {
         if(id == null) return new ArrayList<>();
-        else return getCourseById(id).getTasks();
+        else return getCourseById(id).getTasks().stream().toList();
     }
 
     @Override
+    @Transactional
     public StudentCourseTaskInfoDTO getStudentCourseInfo(Long studentID) {
         Student student = studentService.getStudentById(studentID);
         Course studentCourse = student.getCourse();
@@ -141,13 +146,13 @@ public class CourseServiceImpl implements CourseService {
         Long managerID = filters.getManager();
         String status = filters.getStatus();
 
-        CourseStatus courseStatus = (status == null || status.isEmpty()) ? null : CourseStatus.valueOf(status);
+        CourseStatus courseStatus = (ValidationUtils.fieldIsEmpty(status)) ? null : CourseStatus.valueOf(status);
 
-        Admin mentor = (mentorID == null) ? null : adminRepository.getReferenceById(mentorID);
-        Admin manager = (managerID == null) ? null : adminRepository.getReferenceById(managerID);
+        Admin mentor = ValidationUtils.fieldIsEmpty(mentorID) ? null : adminRepository.getReferenceById(mentorID);
+        Admin manager = ValidationUtils.fieldIsEmpty(managerID) ? null : adminRepository.getReferenceById(managerID);
 
-        LocalDate beginDate = (beginDateString != null && !beginDateString.isEmpty()) ? LocalDate.parse(beginDateString, DateTimeFormatter.ofPattern("yyyy-MM-dd")) : null;
-        LocalDate endDate = (endDateString != null && !endDateString.isEmpty()) ? LocalDate.parse(endDateString, DateTimeFormatter.ofPattern("yyyy-MM-dd")) : null;
+        LocalDate beginDate = (ValidationUtils.fieldIsNotEmpty(beginDateString)) ? LocalDate.parse(beginDateString, DateTimeFormatter.ofPattern("yyyy-MM-dd")) : null;
+        LocalDate endDate = (ValidationUtils.fieldIsNotEmpty(endDateString)) ? LocalDate.parse(endDateString, DateTimeFormatter.ofPattern("yyyy-MM-dd")) : null;
 
         Specification<Course> spec = Specification.where(
                         CourseSpecifications.hasNameLike(name)
@@ -170,19 +175,71 @@ public class CourseServiceImpl implements CourseService {
         Course c = mapper.fromEditDTOToCourse(dto);
         c.setStatus(CourseStatus.ACTIVE);
         c = courseRepository.save(c);
+        c.getMentor().getCourses().add(c);
+        c.getManager().getCourses().add(c);
         updateCourseTaskList(c, dto);
         updateCourseStudents(c, dto);
+        updateStudentsCourseTaskList(c);
+        try {
+            createTrackingCourseProject(c);
+            addStudentsToProject(
+                    c.getStudents().stream().map(Student::getTaskTrackingProfileId).filter(Objects::nonNull).toList(),
+                    c.getTrackingId()
+            );
+        } catch (TeamworkException ex) {
+            log.error("could not update tracking project: {}", ex.getMessage());
+        }
         return courseRepository.save(c);
     }
 
     @Override
     public Course editCourse(CourseEditDTO dto) {
+        log.info("removing admins from old course reference");
+        removeAdminsFromCourse(dto.getId());
+
         log.info("editing course");
         Course c = mapper.fromEditDTOToCourse(dto);
+        Set<Student> oldStudentList = c.getStudents();
+        Admin mentor = c.getMentor();
+        Admin manager = c.getManager();
+//        log.info(mentor.toString());
+//        log.info(manager.toString());
+        mentor.getCourses().add(c);
+        manager.getCourses().add(c);
+//        log.info("after adding courses");
+//        log.info(mentor.getCourses().stream().map(Course::getId).map(Object::toString).collect(Collectors.joining(",")));
+//        log.info(manager.getCourses().stream().map(Course::getId).map(Object::toString).collect(Collectors.joining(",")));
         updateCourseTaskList(c, dto);
         updateCourseStudents(c, dto);
         updateStudentsCourseTaskList(c);
+        Set<Student> newStudentList = c.getStudents();
+        try {
+            updateTrackingCourseProject(c);
+            updateStudentsInProject(oldStudentList, newStudentList, c.getTrackingId());
+        } catch (TeamworkException ex) {
+            log.error("could not update tracking project: {}", ex.getMessage());
+        }
         return courseRepository.save(c);
+    }
+
+    @Override
+    public void removeAdminsFromCourse(Long courseId) {
+        Course oldCourse = getCourseById(courseId);
+        Admin mentor = oldCourse.getMentor();
+        Admin manager = oldCourse.getManager();
+        log.info(mentor.toString());
+        log.info(manager.toString());
+        log.info("before deleting courses");
+        log.info(mentor.getCourses().stream().map(Course::getId).map(Object::toString).collect(Collectors.joining(",")));
+        log.info(manager.getCourses().stream().map(Course::getId).map(Object::toString).collect(Collectors.joining(",")));
+        mentor.getCourses().remove(oldCourse);
+        manager.getCourses().remove(oldCourse);
+        log.info("after deleting courses");
+        log.info(mentor.getCourses().stream().map(Course::getId).map(Object::toString).collect(Collectors.joining(",")));
+        log.info(manager.getCourses().stream().map(Course::getId).map(Object::toString).collect(Collectors.joining(",")));
+        adminRepository.save(mentor);
+        adminRepository.save(manager);
+        courseRepository.save(oldCourse);
     }
 
     @Async
@@ -209,41 +266,46 @@ public class CourseServiceImpl implements CourseService {
         ));
     }
 
-    // fixme maybe later
-    private void updateCourseStudents(Course c, CourseEditDTO dto) {
-        log.info("updating course students");
-        List<Student> courseStudents = c.getStudents();
-//        courseStudents.forEach(student -> student.setCourse(null));
-//        courseStudents.clear();
-
-        List<Long> oldStudentIds = courseStudents.stream().map(Student::getId).toList();
-        List<Long> updatedStudentsIds = dto.getMembers().getStudents().stream().map(StudentAvatarDTO::getId).toList();
-
-        // ids of old students to remove from course
-        courseStudents.stream()
-                .filter(st -> !updatedStudentsIds.contains(st.getId()))
-                .forEach(st -> {st.setCourse(null); studentTaskService.clearStudentTasksOnStudentDeletionFromCourse(st);});
-
-        // ids of new students to add to course
-        updatedStudentsIds.stream()
-                .filter(newId -> !oldStudentIds.contains(newId))
-                .forEach(newId -> {
-                        studentRepository.findById(newId).ifPresent(foundStudent -> {
-                            foundStudent.setCourse(c);
-                            Student st = studentRepository.save(foundStudent);
-                            courseStudents.add(st);
-                            studentTaskService.createStudentTasksOnStudentCourseTransfer(st, c);
-                    });
-                });
-
+    @Async
+    private void addStudentsToProject(List<String> studentIds, String projectId) {
+        log.info("Adding students(ids:{}) to project(id:{})", studentIds.toString(), projectId);
+        UserAddResponse response = trackingService.addUsersToProject(
+                new UserAddRequest(
+                        projectId,
+                        studentIds.stream().map(Integer::parseInt).toArray(Integer[]::new)
+                )
+        );
+        log.info(response.toString());
     }
 
-    // fixme maybe later
+    @Async
+    private void updateStudentsInProject(Set<Student> oldList, Set<Student> newList, String projectId) {
+        List<Student> studentsToAdd = newList.stream().filter(st -> !oldList.contains(st)).toList();
+        List<Student> studentsToRemove = oldList.stream().filter(st -> !newList.contains(st)).toList();
+
+        addStudentsToProject(
+                studentsToAdd.stream().map(Student::getTaskTrackingProfileId).filter(Objects::nonNull).toList(),
+                projectId
+        );
+        removeStudentsFromProject(
+                studentsToRemove.stream().map(Student::getTaskTrackingProfileId).filter(Objects::nonNull).toList(),
+                projectId
+        );
+    }
+
+    @Async
+    private void removeStudentsFromProject(List<String> studentIds, String projectId) {
+        log.info("Removing students(ids:{}) from project(id:{})", studentIds.toString(), projectId);
+        UserRemoveResponse response = trackingService.removeUsersFromProject(new UserRemoveRequest(projectId, new UserRemoveRequest.Remove(
+                String.join(",", studentIds)
+        )));
+        log.info(response.toString());
+    }
+
+
+    @Transactional
     private void updateCourseTaskList(Course c, CourseEditDTO dto) {
         log.info("updating course task list");
-//        List<Task> oldTaskList = taskRepository.getCourseTasks(c.getId());
-//        log.info("old task list: {}", oldTaskList.stream().map(Task::getId).toList());
-//        oldTaskList.forEach(task -> {task.setCourse(null); taskRepository.save(task);});
 
         c.getTasks().forEach(t -> t.setCourse(null));
         c.getTasks().clear();
@@ -262,59 +324,111 @@ public class CourseServiceImpl implements CourseService {
         log.info("new task list: {}", newTaskList.stream().map(Task::getId).toList());
     }
 
-    // fixme maybe later
-    // tasks which are removed from course structure list -> clear student task copies
+    @Transactional
+    private void updateCourseStudents(Course c, CourseEditDTO dto) {
+        log.info("updating course students");
+        List<Student> courseStudents = c.getStudents().stream().toList();
+
+        List<Long> oldStudentIds = courseStudents.stream().map(Student::getId).toList();
+        List<Long> updatedStudentsIds = dto.getMembers().getStudents().stream().map(StudentAvatarDTO::getId).toList();
+
+        // ids of old students to remove from course
+        courseStudents.stream()
+                .filter(st -> !updatedStudentsIds.contains(st.getId()))
+                .forEach(st -> {st.setCourse(null); studentTaskService.clearStudentTasksOnStudentDeletionFromCourse(st);});
+
+        // ids of new students to add to course
+        updatedStudentsIds.stream()
+                .filter(newId -> !oldStudentIds.contains(newId))
+                .forEach(newId -> {
+                        studentRepository.findById(newId).ifPresent(foundStudent -> {
+                            log.info("adding student(id:{}) to course", newId);
+                            foundStudent.setCourse(c);
+                            Student st = studentRepository.save(foundStudent);
+                            courseStudents.add(st);
+//                            studentTaskService.createStudentTasksOnStudentCourseTransfer(st, c);
+                    });
+                });
+
+    }
+
+    // tasks which are removed from course structure list -> clear student task copies ???
     // tasks which are added to course structure -> create new student tasks for them
+    @Transactional
     private void updateStudentsCourseTaskList(Course c) {
 
         List<Long> courseTasksIds = c.getTasks().stream().map(Task::getId).toList();
-        List<Student> courseStudents = c.getStudents();
+        List<Student> courseStudents = c.getStudents().stream().toList();
         courseStudents.forEach(student -> {
 
-            student.getTasks().stream()
+            /*
+            fixme
+            delete student tasks - not necessary
+
+             student.getTasks().stream()
                     .filter(studentTask -> (
                             !courseTasksIds.contains(studentTask.getTaskReference().getId())
                             && studentTask.getStatus() != StudentTaskStatus.COMPLETED
                     ))
                     .forEach(studentTaskRepository::delete);
+             */
+
 
             List<Long> studentTaskIds = student.getTasks().stream().map(st -> st.getTaskReference().getId()).toList();
 
             courseTasksIds.stream()
                     .filter(newId -> !studentTaskIds.contains(newId))
-                    .forEach(newId -> {
-                        taskRepository.findById(newId).ifPresent(foundTask -> {
-                            StudentTask st = studentTaskService.fromTaskToStudentTask(foundTask);
-                            st.setStudent(student);
-                            studentTaskRepository.save(st);
-                        });
-                    });
+                    .forEach(newId -> taskRepository.findById(newId).ifPresent(foundTask -> {
+                        log.info("student(id:{}) does not have task(id:{}), creating", student.getId(), newId);
+                        StudentTask st = studentTaskService.fromTaskToStudentTask(foundTask);
+                        st.setStudent(student);
+                        student.getTasks().add(studentTaskRepository.save(st));
+                    }));
         });
     }
 
     @Override
+    @Transactional
     public void deleteCourseById(Long id) {
         Course c = getCourseById(id);
-        c.getStudents().forEach(st -> {
-            st.setCourse(null);
-        });
-        c.getStudents().clear();
+        c.getMentor().getCourses().remove(c);
+        c.getManager().getCourses().remove(c);
         c.setManager(null);
         c.setMentor(null);
+        c.getStudents().forEach(st -> st.setCourse(null));
+        c.getStudents().clear();
         c.getTasks().forEach(t -> t.setCourse(null));
         c.getTasks().clear();
+        c.getLiterature().forEach(l -> l.setCourse(null));
+        c.getLiterature().clear();
+        deleteTrackingProject(c.getTrackingId());
         courseRepository.delete(c);
+    }
+
+    @Async
+    private void deleteTrackingProject(String id) {
+        try {
+            trackingService.deleteProject(id);
+            log.info("Deleted tracking project (tracking id {})", id);
+        } catch (TeamworkException ex) {
+            log.error("Could not delete tracking project (tracking id {}), errors: {}", id, ex.getMessage());
+        }
     }
 
     @Override
     public void saveIcon(Long id, CourseIconDTO dto) throws IOException {
         MultipartFile file = dto.icon();
         if(file.getSize() > 0) {
-            String filename = FilenameUtils.generateFileName(file);
-            fileService.saveFile(file, filename,"courses");
             Course c = getCourseById(id);
-            c.setIcon(filename);
-            courseRepository.save(c);
+            String filename = FilenameUtils.generateFileName(file);
+            try {
+                fileService.saveFile(file, filename,"courses");
+                c.setIcon(filename);
+                courseRepository.save(c);
+            } catch (AmazonS3Exception ex) {
+                log.error("could not save icon: {}", ex.getMessage());
+            }
+
         }
     }
 

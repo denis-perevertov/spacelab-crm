@@ -81,7 +81,7 @@ public class LiteratureController {
 
         Admin loggedInAdmin = authUtil.getLoggedInAdmin();
         PermissionType permissionForLoggedInAdmin = loggedInAdmin.getRole().getPermissions().getReadStudents();
-        List<Course> adminCourses = loggedInAdmin.getCourses();
+        Set<Course> adminCourses = loggedInAdmin.getCourses();
 
         if(permissionForLoggedInAdmin == PermissionType.FULL) {
             litPage = literatureService.getLiterature(filters, pageable);
@@ -237,6 +237,11 @@ public class LiteratureController {
     @GetMapping("/get-literature-type-list")
     public List<SelectDTO> getStatusList() {
         return Arrays.stream(LiteratureType.values()).map(type -> new SelectDTO(type.name(), type.name())).toList();
+    }
+
+    @GetMapping("/verification-count")
+    public ResponseEntity<?> getVerificationCount() {
+        return ResponseEntity.ok(literatureService.getVerificationCount());
     }
 
 }

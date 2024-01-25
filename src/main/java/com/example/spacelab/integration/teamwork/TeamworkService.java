@@ -20,9 +20,60 @@ public class TeamworkService implements TaskTrackingService {
 
     @Override
     public UserResponse createTaskUser(UserCreateRequest request) {
-        UserResponse response = client.createUser(request).getData();
-        log.info("response in service: {}", response);
-        return response;
+        TeamworkUserCreateRequest teamworkRequest = new TeamworkUserCreateRequest(
+                new TeamworkUserCreateRequest.Person(
+                    request.email(),
+                    request.firstName(),
+                    request.lastName(),
+                    request.sendInvite(),
+                    request.title(),
+                    request.github(),
+                    request.linkedin(),
+                    request.language(),
+                    request.administrator(),
+                    request.canAddProjects(),
+                    request.canAccessAllProjects(),
+                    request.setProjectAdmin(),
+                    request.userType()
+                )
+        );
+        ApiResponse<TeamworkUserResponse> response = client.createUser(teamworkRequest);
+        return Optional.ofNullable(response.getData())
+                .map(res -> new UserResponse(
+                        res.status(),
+                        res.id()
+                ))
+                .orElseThrow(() -> new TeamworkException(response.getErrors()));
+    }
+
+    @Override
+    public UserAddResponse addUsersToProject(UserAddRequest request) {
+        ApiResponse<TeamworkUserAddResponse> response = client.addUsersToProject(request.projectId(), new TeamworkUserAddRequest(request.userIds()));
+        return Optional.ofNullable(response.getData())
+                .map(res -> new UserAddResponse(
+                        res.usersAdded(),
+                        res.usersAlreadyInProject(),
+                        res.usersNotAdded()
+                ))
+                .orElseThrow(() -> new TeamworkException(response.getErrors()));
+    }
+
+    @Override
+    public UserRemoveResponse removeUsersFromProject(UserRemoveRequest request) {
+        ApiResponse<TeamworkUserRemoveResponse> response = client.removeUsersFromProject(
+                request.projectId(),
+                new TeamworkUserRemoveRequest(new TeamworkUserRemoveRequest.Remove(request.remove().userIdList()))
+        );
+        return Optional.ofNullable(response.getData())
+                .map(res -> new UserRemoveResponse(
+                        res.status(),
+                        new UserRemoveResponse.Details(
+                                res.details().added(),
+                                res.details().removed(),
+                                res.details().failed()
+                        )
+                ))
+                .orElseThrow(() -> new TeamworkException(response.getErrors()));
     }
 
     @Override
@@ -76,7 +127,7 @@ public class TeamworkService implements TaskTrackingService {
                 request.applyDefaultsToExistingTasks(),
                 request.taskList()
         );
-        ApiResponse<TeamworkTaskListCreateResponse> response = client.createTaskList(teamworkRequest);
+        ApiResponse<TeamworkTaskListCreateResponse> response = client.createTaskList(request.projectId(), teamworkRequest);
         return Optional.ofNullable(response.getData())
                 .map(res -> new TaskListResponse(
                         res.status(),
@@ -102,7 +153,7 @@ public class TeamworkService implements TaskTrackingService {
     }
 
     @Override
-    public TaskResponse createTaskInTaskList(TaskCreateRequest request) {
+    public TaskResponse createTaskInTaskList(TaskRequest request) {
         TeamworkTaskRequest teamworkRequest = new TeamworkTaskRequest(
                 new TeamworkTaskRequest.Task(
                         request.name(),
@@ -134,13 +185,14 @@ public class TeamworkService implements TaskTrackingService {
                         res.task().startDate(),
                         res.task().parentTaskId(),
                         res.task().taskListId(),
+                        res.task().subTaskIds(),
                         res.task().assigneeIds()
                 ))
                 .orElseThrow(() -> new TeamworkException(response.getErrors()));
     }
 
     @Override
-    public void deleteTaskListById(String taskListId) {
+    public void deleteTaskList(String taskListId) {
         Optional.ofNullable(client.deleteTaskList(taskListId).getErrors())
                 .ifPresent(errors -> {
                     throw new TeamworkException(errors);
@@ -163,6 +215,7 @@ public class TeamworkService implements TaskTrackingService {
                                 task.startDate(),
                                 task.parentTaskId(),
                                 task.taskListId(),
+                                task.subTaskIds(),
                                 task.assigneeIds()
                         )).toList()
                 )
@@ -170,7 +223,7 @@ public class TeamworkService implements TaskTrackingService {
     }
 
     @Override
-    public TaskResponse getTaskById(String taskId) {
+    public TaskResponse getTask(String taskId) {
         ApiResponse<TeamworkTaskResponse> response = client.getTask(taskId);
         return Optional.ofNullable(response.getData())
                 .map(res -> new TaskResponse(
@@ -184,13 +237,14 @@ public class TeamworkService implements TaskTrackingService {
                         res.task().startDate(),
                         res.task().parentTaskId(),
                         res.task().taskListId(),
+                        res.task().subTaskIds(),
                         res.task().assigneeIds()
                 ))
                 .orElseThrow(() -> new TeamworkException(response.getErrors()));
     }
 
     @Override
-    public TaskResponse updateTaskById(String taskId, TaskUpdateRequest request) {
+    public TaskResponse updateTask(TaskRequest request) {
         TeamworkTaskRequest teamworkRequest = new TeamworkTaskRequest(
                 new TeamworkTaskRequest.Task(
                         request.name(),
@@ -209,7 +263,7 @@ public class TeamworkService implements TaskTrackingService {
                         )
                 )
         );
-        ApiResponse<TeamworkTaskResponse> response = client.updateTask(taskId, teamworkRequest);
+        ApiResponse<TeamworkTaskResponse> response = client.updateTask(request.id(), teamworkRequest);
         return Optional.ofNullable(response.getData())
                 .map(res -> new TaskResponse(
                         res.task().id(),
@@ -222,13 +276,14 @@ public class TeamworkService implements TaskTrackingService {
                         res.task().startDate(),
                         res.task().parentTaskId(),
                         res.task().taskListId(),
+                        res.task().subTaskIds(),
                         res.task().assigneeIds()
                 ))
                 .orElseThrow(() -> new TeamworkException(response.getErrors()));
     }
 
     @Override
-    public void deleteTaskById(String taskId) {
+    public void deleteTask(String taskId) {
         Optional.ofNullable(client.deleteTask(taskId).getErrors())
                 .ifPresent(errors -> {
                     throw new TeamworkException(errors);
@@ -267,6 +322,7 @@ public class TeamworkService implements TaskTrackingService {
                                 task.startDate(),
                                 task.parentTaskId(),
                                 task.taskListId(),
+                                task.subTaskIds(),
                                 task.assigneeIds()
                         )).toList()
                 )
@@ -274,7 +330,7 @@ public class TeamworkService implements TaskTrackingService {
     }
 
     @Override
-    public TaskResponse createTaskSubtask(TaskCreateRequest request) {
+    public TaskResponse createTaskSubtask(TaskRequest request) {
         TeamworkTaskRequest teamworkRequest = new TeamworkTaskRequest(
                 new TeamworkTaskRequest.Task(
                         request.name(),
@@ -306,6 +362,7 @@ public class TeamworkService implements TaskTrackingService {
                         res.task().startDate(),
                         res.task().parentTaskId(),
                         res.task().taskListId(),
+                        res.task().subTaskIds(),
                         res.task().assigneeIds()
                 ))
                 .orElseThrow(() -> new TeamworkException(response.getErrors()));
@@ -372,7 +429,28 @@ public class TeamworkService implements TaskTrackingService {
                 request.tags(),
                 request.timelogOptions()
         );
-        ApiResponse<TeamworkTimeEntryResponse> response = client.updateTaskTimeEntry(request.timelog().id(), teamworkRequest);
+        ApiResponse<TeamworkTimeEntryResponse> response = client.updateTaskTimeEntry(request.id(), teamworkRequest);
+        return Optional.ofNullable(response.getData())
+                .map(TeamworkTimeEntryResponse::timelog)
+                .map(timeEntry -> new TimeEntryResponse(
+                        timeEntry.id(),
+                        timeEntry.minutes(),
+                        timeEntry.beginTime(),
+                        timeEntry.userId(),
+                        timeEntry.taskId(),
+                        timeEntry.projectId()
+                ))
+                .orElseThrow(() -> new TeamworkException(response.getErrors()));
+    }
+
+    @Override
+    public TimeEntryResponse createTimeEntryForProject(TimeEntryRequest request) {
+        TeamworkTimeEntryCreateRequest teamworkRequest = new TeamworkTimeEntryCreateRequest(
+                request.timelog(),
+                request.tags(),
+                request.timelogOptions()
+        );
+        ApiResponse<TeamworkTimeEntryResponse> response = client.createProjectTimeEntry(teamworkRequest);
         return Optional.ofNullable(response.getData())
                 .map(TeamworkTimeEntryResponse::timelog)
                 .map(timeEntry -> new TimeEntryResponse(
@@ -430,9 +508,9 @@ public class TeamworkService implements TaskTrackingService {
 
     @Override
     public TagResponse getTagByName(String tagName) {
-        ApiResponse<TeamworkTagResponse> response = client.getTagBySearchTerm(tagName);
+        ApiResponse<TeamworkTagListResponse> response = client.getTagBySearchTerm(tagName);
         return Optional.ofNullable(response.getData())
-                .map(TeamworkTagResponse::tags)
+                .map(TeamworkTagListResponse::tags)
                 .flatMap(tags -> tags.stream().findFirst())
                 .map(tag -> new TagResponse(
                         tag.id(),
@@ -447,13 +525,11 @@ public class TeamworkService implements TaskTrackingService {
     public TagResponse getTagById(String tagId) {
         ApiResponse<TeamworkTagResponse> response = client.getTagById(tagId);
         return Optional.ofNullable(response.getData())
-                .map(TeamworkTagResponse::tags)
-                .flatMap(tags -> tags.stream().findFirst())
                 .map(tag -> new TagResponse(
-                        tag.id(),
-                        tag.projectId(),
-                        tag.name(),
-                        tag.color()
+                        tag.tag().id(),
+                        tag.tag().projectId(),
+                        tag.tag().name(),
+                        tag.tag().color()
                 ))
                 .orElseThrow(() -> new TeamworkException(response.getErrors()));
     }

@@ -2,7 +2,7 @@ package com.example.spacelab.integration.data;
 
 import java.time.ZonedDateTime;
 
-public record TaskResponse(
+public record TaskResponse (
         Long id,
         String name,
         String description,
@@ -13,6 +13,7 @@ public record TaskResponse(
         ZonedDateTime startDate,
         Long parentTaskId,
         Long tasklistId,
+        Integer[] subTaskIds,
         Long[] assigneeIds
 ) {
 }

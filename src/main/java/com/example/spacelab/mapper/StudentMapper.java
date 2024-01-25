@@ -1,5 +1,6 @@
 package com.example.spacelab.mapper;
 
+import com.example.spacelab.dto.course.CourseLinkIconDTO;
 import com.example.spacelab.dto.student.*;
 import com.example.spacelab.exception.MappingException;
 
@@ -49,8 +50,11 @@ public class StudentMapper {
             dto.setAvatar(student.getAvatar());
 
             if(student.getCourse() != null) {
-                dto.setCourse(Map.of("id", student.getCourse().getId(), "name", student.getCourse().getName()));
-//                dto.setCourse(courseMapper.fromCourseToListDTO(student.getCourse()));
+                dto.setCourse(new CourseLinkIconDTO(
+                        student.getCourse().getId(),
+                        student.getCourse().getName(),
+                        student.getCourse().getIcon()
+                ));
             }
         } catch (Exception e) {
             log.severe("Mapping error: " + e.getMessage());
@@ -149,8 +153,7 @@ public class StudentMapper {
             student.setAvatar(studentDTO.getAvatar());
 
             if(studentDTO.getCourse() != null) {
-                student.setCourse(courseRepository.getReferenceById((Long) studentDTO.getCourse().get("id")));
-//                student.setCourse(courseRepository.getReferenceById(studentDTO.getCourse().getId()));
+                student.setCourse(courseRepository.getReferenceById(studentDTO.getCourse().id()));
             }
         } catch (EntityNotFoundException e) {
             log.severe("Error: " + e.getMessage());

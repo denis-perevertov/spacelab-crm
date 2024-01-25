@@ -23,8 +23,8 @@ public class CourseSpecifications {
     public static Specification<Course> hasDatesBetween(LocalDate from, LocalDate to) {
         if(from == null || to == null) return (root, query, cb) -> null;
         return (root, query, cb) -> cb.or(
-                cb.between(root.get(Course_.BEGINNING_DATE), from, to),
-                cb.between(root.get(Course_.END_DATE), from, to)
+                cb.between(root.get("courseInfo").get("beginDate"), from, to),
+                cb.between(root.get("courseInfo").get("beginDate"), from, to)
         );
     }
 

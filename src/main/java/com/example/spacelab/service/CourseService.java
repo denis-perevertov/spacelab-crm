@@ -43,4 +43,6 @@ public interface CourseService extends EntityFilterService<Course> {
 
     void createTrackingCourseProject(Course course);
     void updateTrackingCourseProject(Course course);
+
+    void removeAdminsFromCourse(Long courseId);
 }

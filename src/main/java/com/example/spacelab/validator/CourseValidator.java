@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
+import static com.example.spacelab.util.ValidationUtils.*;
+
 @Component
 @RequiredArgsConstructor
 public class CourseValidator implements Validator {
@@ -26,14 +28,17 @@ public class CourseValidator implements Validator {
     public void validate(Object target, Errors e) {
         CourseEditDTO dto = (CourseEditDTO) target;
 
-        if(dto.getName() == null || dto.getName().isEmpty())
+        if(fieldIsEmpty(dto.getName()))
             e.rejectValue("name", "name.empty", "Enter name!");
-        else if(dto.getName().length() > 100)
+        else if(fieldMaxLengthIsIncorrect(dto.getName(), 100))
             e.rejectValue("name", "name.length", "Name length: 1-100");
+        else if(courseExists(dto.getName()) && !courseHasSameId(dto.getId(), courseRepository.findByName(dto.getName()).orElseThrow())) {
+            e.rejectValue("name", "name.exists", "Name already exists");
+        }
 
         CourseInfoDTO info = dto.getInfo();
 
-        if(info.getDescription() == null || info.getDescription().isEmpty())
+        if(fieldIsEmpty(info.getDescription()))
             e.rejectValue("info.description", "info.description.empty", "Enter description!");
         else if(info.getDescription().length() > 3000 || info.getDescription().length() < 20)
             e.rejectValue("info.description", "info.description.length", "Description length: 20-3000");
@@ -63,12 +68,20 @@ public class CourseValidator implements Validator {
 
         CourseMembersDTO members = dto.getMembers();
 
-        if(members.getStudents() == null || members.getStudents().size() < 1)
-            e.rejectValue("members.students", "members.students.empty", "Add students!");
-        else if(members.getStudents().size() > 30)
-            e.rejectValue("members.students", "members.students.size", "Course can't have more than 30 students!");
+//        if(members.getStudents() == null || members.getStudents().size() < 1)
+//            e.rejectValue("members.students", "members.students.empty", "Add students!");
+//        else if(members.getStudents().size() > 30)
+//            e.rejectValue("members.students", "members.students.size", "Course can't have more than 30 students!");
 
         //structure validation
 
+    }
+
+    private boolean courseExists(String courseName) {
+        return courseRepository.existsByName(courseName);
+    }
+
+    private boolean courseHasSameId(Long id, Course course) {
+        return course.getId().equals(id);
     }
 }

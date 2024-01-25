@@ -5,8 +5,10 @@ import com.example.spacelab.model.settings.LanguageSetting;
 import com.example.spacelab.model.settings.ThemeSetting;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
 public class SettingsDTO {
 

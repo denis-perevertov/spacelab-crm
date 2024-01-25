@@ -14,6 +14,7 @@ import org.springframework.validation.Validator;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Component
@@ -41,7 +42,7 @@ public class LessonBeforeStartValidator implements Validator {
 //            e.rejectValue("lessonStartTime", "past", "datetime is in the past");
 //        }
 
-        if(dto.getCourseID() == null || dto.getCourseID() == 0)
+        if(dto.getCourseID() == null || dto.getCourseID() < 0)
             e.rejectValue("courseID", "courseID.empty", "Select course!");
         else if(!courseRepository.existsById(dto.getCourseID()))
             e.rejectValue("courseID", "courseID.no-match", "Course with this ID doesn't exist!");
@@ -55,9 +56,9 @@ public class LessonBeforeStartValidator implements Validator {
 //            e.rejectValue("status", "status.active", "Cannot create/edit an active lesson!");
 //        }
 
-//        if(dto.getStatus().equals(LessonStatus.PLANNED) && dto.getDate().isBefore(LocalDate.now())) {
-//            e.rejectValue("date", "date.past", "Cannot create a planned lesson in the past!");
-//        }
+        if(dto.getStatus().equals(LessonStatus.PLANNED) && dto.getLessonStartTime().isBefore(ZonedDateTime.now())) {
+            e.rejectValue("lessonStartTime", "lessonStartTime.past", "Cannot create a planned lesson in the past!");
+        }
 
     }
 }

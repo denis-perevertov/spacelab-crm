@@ -1,5 +1,6 @@
 package com.example.spacelab.controller;
 
+import com.example.spacelab.dto.SelectDTO;
 import com.example.spacelab.dto.SelectSearchDTO;
 import com.example.spacelab.dto.admin.AdminContactDTO;
 import com.example.spacelab.exception.ErrorMessage;
@@ -170,9 +171,14 @@ public class AdminController {
     })
     @PreAuthorize("!hasAuthority('settings.delete.NO_ACCESS')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteAdmin(@PathVariable @Parameter(example = "1") Long id) {
-        adminService.deleteAdminById(id);
-        return new ResponseEntity<>("Admin with ID: " + id + " deleted", HttpStatus.OK);
+    public ResponseEntity<?> deleteAdmin(@PathVariable @Parameter(example = "1") Long id) {
+        if(adminService.canDeleteAdmin(id)) {
+            adminService.deleteAdminById(id);
+            return ResponseEntity.ok().build();
+        }
+        else {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     // ==================================
@@ -193,48 +199,53 @@ public class AdminController {
     }
 
     // Получение списка админов по ролям (для Select2)
-    @Operation(description = "Get list of admins with a specified role (by its ID) - For Select2",
-                summary = "Get Admins By Role ID - For Select2", tags = {"Admin"})
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful Operation"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
-            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Role Not Found", content = @Content),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
-    })
-    @GetMapping("/get-admins-by-role")
-    public Map<String, Object> getAdminsByRole(@RequestParam(required=false) @Parameter(example = "1", name = "Role ID") Long roleID,
-                                               @RequestParam(required=false) String roleName,
-                                               @RequestParam @Parameter(example = "1") Integer page) {
+//    @Operation(description = "Get list of admins with a specified role (by its ID) - For Select2",
+//                summary = "Get Admins By Role ID - For Select2", tags = {"Admin"})
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "Successful Operation"),
+//            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+//            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
+//            @ApiResponse(responseCode = "404", description = "Role Not Found", content = @Content),
+//            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
+//    })
+//    @GetMapping("/get-admins-by-role")
+//    public Map<String, Object> getAdminsByRole(@RequestParam(required=false) @Parameter(example = "1", name = "Role ID") Long roleID,
+//                                               @RequestParam(required=false) String roleName,
+//                                               @RequestParam @Parameter(example = "1") Integer page) {
+//
+//        FilterForm form = FilterForm.with()
+//                                    .role(roleID)
+//                                    .build();
+//        Pageable pageable = PageRequest.of(page, 10);
+//
+//        Page<Admin> adminPage =  adminService.getAdmins(form, pageable);
+//
+//        List<SelectSearchDTO> adminList = adminPage.getContent()
+//                                                    .stream()
+//                                                    .map(admin -> new SelectSearchDTO(admin.getId(),
+//                                                            admin.getFirstName() + " " + admin.getLastName()))
+//                                                    .toList();
+//        Map<String, Object> selectMap = new HashMap<>();
+//        selectMap.put("results", adminList);
+//        selectMap.put("pagination", Map.of("more", adminPage.getNumber() < adminPage.getTotalPages()));
+//
+//        return selectMap;
+//    }
 
-        FilterForm form = FilterForm.with()
-                                    .role(roleID)
-                                    .build();
-        Pageable pageable = PageRequest.of(page, 10);
-
-        Page<Admin> adminPage =  adminService.getAdmins(form, pageable);
-
-        List<SelectSearchDTO> adminList = adminPage.getContent()
-                                                    .stream()
-                                                    .map(admin -> new SelectSearchDTO(admin.getId(),
-                                                            admin.getFirstName() + " " + admin.getLastName()))
-                                                    .toList();
-        Map<String, Object> selectMap = new HashMap<>();
-        selectMap.put("results", adminList);
-        selectMap.put("pagination", Map.of("more", adminPage.getNumber() < adminPage.getTotalPages()));
-
-        return selectMap;
+    @GetMapping("/select")
+    public ResponseEntity<?> getAdminSelect() {
+        return ResponseEntity.ok(adminService.getAdmins().stream().map(a -> new SelectDTO(a.getId().toString(), a.getFullName())).toList());
     }
 
     @GetMapping("/get-admins-list-by-role")
-    public ResponseEntity<List<AdminContactDTO>> getAdminsListByRole(@RequestParam Long role) {
+    public ResponseEntity<?> getAdminsListByRole(@RequestParam Long role) {
         FilterForm filters = FilterForm.with()
                 .role(role)
                 .build();
-        List<AdminContactDTO> adminList = adminService.getAdmins(filters).stream()
-                                                        .map(adminMapper::fromAdminToContactDTO)
+        List<SelectDTO> adminList = adminService.getAdmins(filters).stream()
+                                                        .map(a -> new SelectDTO(a.getId().toString(), a.getFullName()))
                                                         .toList();
-        return new ResponseEntity<>(adminList, HttpStatus.OK);
+        return ResponseEntity.ok(adminList);
     }
 
     // Получение списка незанятых админов (админов без назначенных курсов)

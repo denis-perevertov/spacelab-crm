@@ -18,6 +18,7 @@ public class LessonEditDTO {
 
     @Schema(example = "3")
     private Long courseID;
+    private String courseName;
 
     @Schema(example = "ACTIVE")
     private LessonStatus status;

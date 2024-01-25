@@ -3,6 +3,7 @@ package com.example.spacelab.integration.data;
 import java.time.LocalDate;
 
 public record TaskUpdateRequest(
+        String id,
         String name,
         String description,
         String priority,

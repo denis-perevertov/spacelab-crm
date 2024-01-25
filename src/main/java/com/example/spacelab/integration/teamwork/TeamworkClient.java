@@ -1,15 +1,19 @@
 package com.example.spacelab.integration.teamwork;
 
 import com.example.spacelab.config.TeamworkProperties;
-import com.example.spacelab.integration.data.*;
+import com.example.spacelab.integration.data.ApiResponse;
+import com.example.spacelab.integration.data.ErrorResponse;
 import com.example.spacelab.integration.teamwork.data.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+
+import java.time.ZonedDateTime;
+import java.util.Arrays;
 
 @Slf4j
 @Component
@@ -54,14 +58,13 @@ public class TeamworkClient {
         return response;
     }
 
-    // todo use teamwork class
-    public ApiResponse<UserResponse> createUser(UserCreateRequest request) {
+    public ApiResponse<TeamworkUserResponse> createUser(TeamworkUserCreateRequest request) {
 
         log.info("client request: {}", request);
 
         WebClient client = clientBuilder.build();
 
-        ApiResponse<UserResponse> response = client.post()
+        ApiResponse<TeamworkUserResponse> response = client.post()
                 .uri(properties.getBaseUrl() + "/people.json")
                 .headers(headers -> {
                     headers.setBasicAuth(properties.getToken(), "");
@@ -71,11 +74,20 @@ public class TeamworkClient {
                 .bodyValue(request)
                 .exchangeToMono(res -> {
                     if(res.statusCode().is2xxSuccessful()) {
-                        return res.bodyToMono(new ParameterizedTypeReference<ApiResponse<UserResponse>>() {
-                        });
+                        return res.bodyToMono(TeamworkUserResponse.class)
+                                .map(data -> new ApiResponse<>(
+                                        data,
+                                        null,
+                                        res.statusCode().toString()
+                                ));
                     }
                     else {
-                        return res.createException().flatMap(Mono::error);
+                        return res.bodyToMono(ErrorResponse.class)
+                                .map(errors -> new ApiResponse<TeamworkUserResponse>(
+                                        null,
+                                        errors.errors(),
+                                        res.statusCode().toString()
+                                ));
                     }
                 })
                 .block();
@@ -85,7 +97,7 @@ public class TeamworkClient {
         return response;
     }
 
-    public ApiResponse<TeamworkTaskListCreateResponse> createTaskList(TeamworkTaskListRequest request) {
+    public ApiResponse<TeamworkTaskListCreateResponse> createTaskList(String projectId, TeamworkTaskListRequest request) {
 
         log.info("client request: {}", request);
 
@@ -93,7 +105,7 @@ public class TeamworkClient {
 
         ApiResponse<TeamworkTaskListCreateResponse> response = client.post()
                 .uri(properties.getBaseUrl() +
-                        "/projects/" + properties.getProjectId() +
+                        "/projects/" + projectId +
                         "/tasklists.json")
                 .headers(headers -> {
                     headers.setBasicAuth(properties.getToken(), "");
@@ -179,13 +191,10 @@ public class TeamworkClient {
                 .uri(properties.getBaseUrl() + "/tasklists/" + taskListId)
                 .headers(headers -> {
                     headers.setBasicAuth(properties.getToken(), "");
-                }).exchangeToMono(res -> {
+                })
+                .exchangeToMono(res -> {
                     if(res.statusCode().is2xxSuccessful()) {
-                        return Mono.empty().map(empty -> new ApiResponse<Void>(
-                                null,
-                                null,
-                                res.statusCode().toString()
-                        ));
+                        return Mono.empty();
                     }
                     else {
                         return res.bodyToMono(ErrorResponse.class)
@@ -196,6 +205,7 @@ public class TeamworkClient {
                                 ));
                     }
                 })
+                .defaultIfEmpty(new ApiResponse<>(null, null, HttpStatus.OK.toString()))
                 .block();
 
         log.info("client response: {}", response);
@@ -299,11 +309,7 @@ public class TeamworkClient {
                 })
                 .exchangeToMono(res -> {
                     if(res.statusCode().is2xxSuccessful()) {
-                        return Mono.empty().map(empty -> new ApiResponse<Void>(
-                                null,
-                                null,
-                                res.statusCode().toString()
-                        ));
+                        return Mono.empty();
                     }
                     else {
                         return res.bodyToMono(ErrorResponse.class)
@@ -314,6 +320,7 @@ public class TeamworkClient {
                                 ));
                     }
                 })
+                .defaultIfEmpty(new ApiResponse<>(null, null, HttpStatus.OK.toString()))
                 .block();
 
         log.info("client response: {}", response);
@@ -333,6 +340,7 @@ public class TeamworkClient {
                 .uri(builder -> builder
                         .path("/projects/api/v3/tasklists/" + taskListId + "/tasks.json")
                         .queryParam("includeCompletedTasks", true)
+                        .queryParam("includeRelatedTasks", true)
                         .build())
                 .headers(headers -> {
                     headers.setBasicAuth(properties.getToken(), "");
@@ -359,11 +367,72 @@ public class TeamworkClient {
 
         log.info("client response: {}", response);
 
+        if(response != null && response.getData() != null && response.getData().tasks().isEmpty()) {
+            log.info("tasks not found, trying api v1 url");
+
+            response = client.get()
+                    .uri(builder -> builder
+                            .path("/tasklists/" + taskListId + "/tasks.json")
+                            .queryParam("includeCompletedTasks", true)
+                            .queryParam("includeRelatedTasks", true)
+                            .build())
+                    .headers(headers -> {
+                        headers.setBasicAuth(properties.getToken(), "");
+                    })
+                    .exchangeToMono(res -> {
+                        if(res.statusCode().is2xxSuccessful()) {
+                            return res.bodyToMono(TeamworkTaskListV1Response.class)
+                                    .map(data -> new ApiResponse<>(
+                                            new TeamworkTaskListResponse(
+                                                   data.tasks().stream().map(task -> new TeamworkTask(
+                                                         task.id(),
+                                                         task.content(),
+                                                         "",
+                                                         "",
+                                                         0,
+                                                           (
+                                                               task.tags() == null || task.tags().length == 0
+                                                               ? new Long[]{}
+                                                               : Arrays.stream(task.tags()).map(TeamworkTaskListV1Response.TeamworkTaskV1.Tag::id).toArray(Long[]::new)
+                                                           ),
+                                                           task.status(),
+                                                           ZonedDateTime.now(),
+                                                           (
+                                                                   task.parentTaskId() == null || task.parentTaskId().isEmpty()
+                                                                   ? 0L
+                                                                   : Long.parseLong(task.parentTaskId())
+                                                           ),
+                                                           Long.valueOf(taskListId),
+                                                           new Integer[]{},
+                                                           new Long[]{}
+                                                   )).toList(),
+                                                    new Object(),
+                                                    new Object()
+                                            ),
+                                            null,
+                                            res.statusCode().toString()
+                                    ));
+                        }
+                        else {
+                            return res.bodyToMono(ErrorResponse.class)
+                                    .map(errors -> new ApiResponse<TeamworkTaskListResponse>(
+                                            null,
+                                            errors.errors(),
+                                            res.statusCode().toString()
+                                    ));
+                        }
+                    })
+                    .block();
+
+
+
+        }
+
         return response;
 
     }
 
-    public ApiResponse<TeamworkTagResponse> getTagBySearchTerm(String searchTerm) {
+    public ApiResponse<TeamworkTagListResponse> getTagBySearchTerm(String searchTerm) {
 
         log.info("client request: {}", searchTerm);
 
@@ -372,14 +441,14 @@ public class TeamworkClient {
                 "/projects/api/" + properties.getApiVersion() +
                 "/tags.json?searchTerm="+searchTerm;
 
-        ApiResponse<TeamworkTagResponse> response = client.get()
+        ApiResponse<TeamworkTagListResponse> response = client.get()
                 .uri(uri)
                 .headers(headers -> {
                     headers.setBasicAuth(properties.getToken(), "");
                 })
                 .exchangeToMono(res -> {
                     if(res.statusCode().is2xxSuccessful()) {
-                        return res.bodyToMono(TeamworkTagResponse.class)
+                        return res.bodyToMono(TeamworkTagListResponse.class)
                                 .map(data -> new ApiResponse<>(
                                         data,
                                         null,
@@ -388,7 +457,7 @@ public class TeamworkClient {
                     }
                     else {
                         return res.bodyToMono(ErrorResponse.class)
-                                .map(errors -> new ApiResponse<TeamworkTagResponse>(
+                                .map(errors -> new ApiResponse<TeamworkTagListResponse>(
                                         null,
                                         errors.errors(),
                                         res.statusCode().toString()
@@ -407,7 +476,6 @@ public class TeamworkClient {
 
         WebClient client = clientBuilder.build();
         String uri = properties.getBaseUrl() +
-                "/projects/api/" + properties.getApiVersion() +
                 "/tags/" + tagId + ".json";
 
         ApiResponse<TeamworkTagResponse> response = client.get()
@@ -696,11 +764,7 @@ public class TeamworkClient {
                 })
                 .exchangeToMono(res -> {
                     if(res.statusCode().is2xxSuccessful()) {
-                        return Mono.empty().map(empty -> new ApiResponse<Void>(
-                                null,
-                                null,
-                                res.statusCode().toString()
-                        ));
+                        return Mono.empty();
                     }
                     else {
                         return res.bodyToMono(ErrorResponse.class)
@@ -711,6 +775,7 @@ public class TeamworkClient {
                                 ));
                     }
                 })
+                .defaultIfEmpty(new ApiResponse<>(null, null, HttpStatus.OK.toString()))
                 .block();
 
         log.info("client response: {}", response);
@@ -836,6 +901,46 @@ public class TeamworkClient {
         return response;
     }
 
+    public ApiResponse<TeamworkUserRemoveResponse> removeUsersFromProject(String projectId, TeamworkUserRemoveRequest request) {
+
+        log.info("client request: {}", request);
+
+        WebClient client = clientBuilder.build();
+
+        ApiResponse<TeamworkUserRemoveResponse> response = client.put()
+                .uri(properties.getBaseUrl() +
+                        "/projects/" + projectId + "/people.json")
+                .headers(headers -> {
+                    headers.setBasicAuth(properties.getToken(), "");
+                    headers.setContentType(MediaType.APPLICATION_JSON);
+                })
+                .bodyValue(request)
+                .exchangeToMono(res -> {
+                    if(res.statusCode().is2xxSuccessful()) {
+                        return res.bodyToMono(TeamworkUserRemoveResponse.class)
+                                .map(data -> new ApiResponse<>(
+                                        data,
+                                        null,
+                                        res.statusCode().toString()
+                                ));
+                    }
+                    else {
+                        return res.bodyToMono(ErrorResponse.class)
+                                .map(errors -> new ApiResponse<TeamworkUserRemoveResponse>(
+                                        null,
+                                        errors.errors(),
+                                        res.statusCode().toString()
+                                ));
+                    }
+                })
+                .block();
+
+        log.info("client response: {}", response);
+
+        return response;
+
+    }
+
     public ApiResponse<TeamworkProjectResponse> createProject(TeamworkProjectRequest request) {
 
         log.info("client request: {}", request);
@@ -933,15 +1038,53 @@ public class TeamworkClient {
                 })
                 .exchangeToMono(res -> {
                     if(res.statusCode().is2xxSuccessful()) {
-                        return Mono.empty().map(empty -> new ApiResponse<Void>(
-                                null,
-                                null,
-                                res.statusCode().toString()
-                        ));
+                        return Mono.empty();
                     }
                     else {
                         return res.bodyToMono(ErrorResponse.class)
                                 .map(errors -> new ApiResponse<Void>(
+                                        null,
+                                        errors.errors(),
+                                        res.statusCode().toString()
+                                ));
+                    }
+                })
+                .defaultIfEmpty(new ApiResponse<>(null, null, HttpStatus.OK.toString()))
+                .block();
+
+        log.info("client response: {}", response);
+
+        return response;
+    }
+
+    public ApiResponse<TeamworkTimeEntryResponse> createProjectTimeEntry(TeamworkTimeEntryCreateRequest request) {
+
+        log.info("client request: {}", request);
+
+        WebClient client = clientBuilder.build();
+
+        ApiResponse<TeamworkTimeEntryResponse> response = client.post()
+                .uri(properties.getBaseUrl() +
+                        "/projects/api/" + properties.getApiVersion() +
+                        "/projects/" + request.timelog().projectId() + "/time.json")
+                .headers(headers -> {
+                    headers.setBasicAuth(properties.getToken(), "");
+                    headers.setContentType(MediaType.APPLICATION_JSON);
+                })
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .exchangeToMono(res -> {
+                    if(res.statusCode().is2xxSuccessful()) {
+                        return res.bodyToMono(TeamworkTimeEntryResponse.class)
+                                .map(data -> new ApiResponse<>(
+                                        data,
+                                        null,
+                                        res.statusCode().toString()
+                                ));
+                    }
+                    else {
+                        return res.bodyToMono(ErrorResponse.class)
+                                .map(errors -> new ApiResponse<TeamworkTimeEntryResponse>(
                                         null,
                                         errors.errors(),
                                         res.statusCode().toString()
@@ -953,16 +1096,16 @@ public class TeamworkClient {
         log.info("client response: {}", response);
 
         return response;
+
     }
 
-    // todo might need different type
     public ApiResponse<Void> completeTask(String taskId) {
 
         log.info("client request: {}", taskId);
 
         WebClient client = clientBuilder.build();
 
-        ApiResponse<Void> response = client.delete()
+        ApiResponse<Void> response = client.put()
                 .uri(properties.getBaseUrl() +
                         "/tasks/" + taskId + "/complete.json")
                 .headers(headers -> {
@@ -970,11 +1113,7 @@ public class TeamworkClient {
                 })
                 .exchangeToMono(res -> {
                     if(res.statusCode().is2xxSuccessful()) {
-                        return Mono.empty().map(empty -> new ApiResponse<Void>(
-                                null,
-                                null,
-                                res.statusCode().toString()
-                        ));
+                        return Mono.empty();
                     }
                     else {
                         return res.bodyToMono(ErrorResponse.class)
@@ -985,6 +1124,7 @@ public class TeamworkClient {
                                 ));
                     }
                 })
+                .defaultIfEmpty(new ApiResponse<>(null, null, HttpStatus.ACCEPTED.toString()))
                 .block();
 
         log.info("client response: {}", response);
@@ -993,14 +1133,13 @@ public class TeamworkClient {
 
     }
 
-    // todo might need different type
     public ApiResponse<Void> uncompleteTask(String taskId) {
 
         log.info("client request: {}", taskId);
 
         WebClient client = clientBuilder.build();
 
-        ApiResponse<Void> response = client.delete()
+        ApiResponse<Void> response = client.put()
                 .uri(properties.getBaseUrl() +
                         "/tasks/" + taskId + "/uncomplete.json")
                 .headers(headers -> {
@@ -1008,11 +1147,7 @@ public class TeamworkClient {
                 })
                 .exchangeToMono(res -> {
                     if(res.statusCode().is2xxSuccessful()) {
-                        return Mono.empty().map(empty -> new ApiResponse<Void>(
-                                null,
-                                null,
-                                res.statusCode().toString()
-                        ));
+                        return Mono.empty();
                     }
                     else {
                         return res.bodyToMono(ErrorResponse.class)
@@ -1023,6 +1158,7 @@ public class TeamworkClient {
                                 ));
                     }
                 })
+                .defaultIfEmpty(new ApiResponse<>(null, null, HttpStatus.ACCEPTED.toString()))
                 .block();
 
         log.info("client response: {}", response);

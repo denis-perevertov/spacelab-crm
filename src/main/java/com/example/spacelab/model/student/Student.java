@@ -2,16 +2,19 @@ package com.example.spacelab.model.student;
 
 import com.example.spacelab.model.UserEntity;
 import com.example.spacelab.model.course.Course;
-import com.example.spacelab.model.lesson.LessonReportRow;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.ToString;
+import lombok.*;
+import org.hibernate.Hibernate;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
-@Data
+@Getter
+@Setter
+@ToString
+@RequiredArgsConstructor
 @Entity
 @Table(name="students")
 public class Student extends UserEntity {
@@ -30,7 +33,7 @@ public class Student extends UserEntity {
     @ToString.Exclude
     @JsonManagedReference
     @OneToMany(mappedBy = "student")
-    private List<StudentTask> tasks = new ArrayList<>();
+    private Set<StudentTask> tasks = new HashSet<>();
 
     private String taskTrackingProfileId;
 
@@ -45,5 +48,17 @@ public class Student extends UserEntity {
         return this.details.getFirstName().charAt(0) + "." + this.details.getLastName();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        Student student = (Student) o;
+        return Objects.equals(details, student.details) && Objects.equals(password, student.password) && Objects.equals(rating, student.rating) && Objects.equals(taskTrackingProfileId, student.taskTrackingProfileId);
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), details, password, rating, taskTrackingProfileId);
+    }
 }

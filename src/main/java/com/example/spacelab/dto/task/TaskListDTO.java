@@ -33,12 +33,6 @@ public class TaskListDTO {
     @Schema(example = "CourseName")
     private String courseName;
 
-    public TaskListDTO(Long id, String name) {
-        this.id = id;
-        this.name = name;
-    }
+    private String courseIcon;
 
-//
-//    private CourseListDTO course;
-//    private String courseName;
 }

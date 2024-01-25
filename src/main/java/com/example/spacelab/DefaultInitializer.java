@@ -29,6 +29,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -36,6 +37,7 @@ import java.util.List;
 
 @Component
 @Log
+@Transactional
 @RequiredArgsConstructor
 public class DefaultInitializer implements CommandLineRunner {
 
@@ -318,46 +320,55 @@ public class DefaultInitializer implements CommandLineRunner {
 
             Course javaCourse = new Course();
             javaCourse.setName("Java");
-            javaCourse.setBeginningDate(LocalDate.of(2023,8,1));
             javaCourse.setMentor(adminRepository.findById(4L).orElse(null));
-            javaCourse.setManager(adminRepository.findById(5L).orElse(null));
+            javaCourse.setManager(adminRepository.findById(3L).orElse(null));
             javaCourse.setStatus(CourseStatus.ACTIVE);
+            javaCourse.setIcon("java.png");
             CourseInfo info = new CourseInfo();
             info.setMain_description("Main Description For Java Course");
             info.setTopics(List.of("Topic 1", "Topic 2", "Topic 3"));
-            info.setCompletionTime("6-9 months");
+            info.setCompletionTime("6-9");
+            info.setCompletionTimeUnit(TimeUnit.MONTHS);
             info.setGroupSize(15);
             info.setHoursNorm(35);
+            info.setLessonInterval(7);
+            info.setBeginDate(LocalDate.now());
             javaCourse.setCourseInfo(info);
             courseRepository.save(javaCourse);
 
             Course jsCourse = new Course();
             jsCourse.setName("JS");
-            jsCourse.setBeginningDate(LocalDate.of(2023,8,1));
             jsCourse.setMentor(adminRepository.findById(4L).orElse(null));
-            jsCourse.setManager(adminRepository.findById(5L).orElse(null));
+            jsCourse.setManager(adminRepository.findById(3L).orElse(null));
             jsCourse.setStatus(CourseStatus.ACTIVE);
+            jsCourse.setIcon("js.png");
             info = new CourseInfo();
             info.setMain_description("Main Description For JS Course");
             info.setTopics(List.of("Topic 1", "Topic 2", "Topic 3"));
-            info.setCompletionTime("6-9 months");
+            info.setCompletionTime("6-9");
+            info.setCompletionTimeUnit(TimeUnit.MONTHS);
             info.setGroupSize(15);
             info.setHoursNorm(35);
+            info.setLessonInterval(7);
+            info.setBeginDate(LocalDate.now());
             jsCourse.setCourseInfo(info);
             courseRepository.save(jsCourse);
 
             Course pythonCourse = new Course();
             pythonCourse.setName("Python");
-            pythonCourse.setBeginningDate(LocalDate.of(2023,8,1));
             pythonCourse.setMentor(adminRepository.findById(4L).orElse(null));
-            pythonCourse.setManager(adminRepository.findById(5L).orElse(null));
+            pythonCourse.setManager(adminRepository.findById(3L).orElse(null));
             pythonCourse.setStatus(CourseStatus.ACTIVE);
+            pythonCourse.setIcon("python.png");
             info = new CourseInfo();
             info.setMain_description("Main Description For Python Course");
             info.setTopics(List.of("Topic 1", "Topic 2", "Topic 3"));
-            info.setCompletionTime("6-9 months");
+            info.setCompletionTime("6-9");
+            info.setCompletionTimeUnit(TimeUnit.MONTHS);
             info.setGroupSize(15);
             info.setHoursNorm(35);
+            info.setLessonInterval(7);
+            info.setBeginDate(LocalDate.now());
             pythonCourse.setCourseInfo(info);
 
             courseRepository.save(pythonCourse);
@@ -373,7 +384,7 @@ public class DefaultInitializer implements CommandLineRunner {
                 contact.setAdmin(admin);
                 contact.setEmail(admin.getEmail());
                 contact.setPhone(admin.getPhone());
-                contact.setTelegram("@contact");
+                contact.setTelegram("@telegram");
 
                 contactRepository.save(contact);
             });
@@ -385,11 +396,12 @@ public class DefaultInitializer implements CommandLineRunner {
             log.info("Adding default students");
 
             Student student1 = new Student();
-            student1.setAvatar("placeholder.jpg");
+            student1.setAvatar("1.png");
             student1.setRole(roleRepository.getReferenceByName("STUDENT"));
             student1.setPassword(passwordEncoder.encode("student1"));
             student1.setRating(10);
             student1.setCourse(courseRepository.findById(1L).orElse(null));
+
             StudentDetails details = student1.getDetails();
             details.setFirstName("Student");
             details.setLastName("Default");
@@ -406,10 +418,13 @@ public class DefaultInitializer implements CommandLineRunner {
             details.setWorkStatus(StudentWorkStatus.UNEMPLOYED);
             details.setAccountStatus(StudentAccountStatus.ACTIVE);
 
-            studentRepository.save(student1);
+            courseRepository.findByName("Java").ifPresentOrElse(c -> {
+                student1.setCourse(c);
+                c.getStudents().add(studentRepository.save(student1));
+            }, () -> studentRepository.save(student1));
 
             Student student2 = new Student();
-            student2.setAvatar("placeholder.jpg");
+            student2.setAvatar("2.png");
             student2.setRole(roleRepository.getReferenceByName("STUDENT"));
             student2.setPassword(passwordEncoder.encode("student2"));
             student2.setRating(10);
@@ -430,10 +445,13 @@ public class DefaultInitializer implements CommandLineRunner {
             details.setWorkStatus(StudentWorkStatus.UNEMPLOYED);
             details.setAccountStatus(StudentAccountStatus.ACTIVE);
 
-            studentRepository.save(student2);
+            courseRepository.findByName("JS").ifPresentOrElse(c -> {
+                student2.setCourse(c);
+                c.getStudents().add(studentRepository.save(student2));
+            }, () -> studentRepository.save(student2));
 
             Student student3 = new Student();
-            student3.setAvatar("placeholder.jpg");
+            student3.setAvatar("3.png");
             student3.setRole(roleRepository.getReferenceByName("STUDENT"));
             student3.setPassword(passwordEncoder.encode("student3"));
             student3.setRating(10);
@@ -454,7 +472,10 @@ public class DefaultInitializer implements CommandLineRunner {
             details.setWorkStatus(StudentWorkStatus.UNEMPLOYED);
             details.setAccountStatus(StudentAccountStatus.ACTIVE);
 
-            studentRepository.save(student3);
+            courseRepository.findByName("Python").ifPresentOrElse(c -> {
+                student3.setCourse(c);
+                c.getStudents().add(studentRepository.save(student3));
+            }, () -> studentRepository.save(student3));
         }
     }
     private void checkForTasks() {

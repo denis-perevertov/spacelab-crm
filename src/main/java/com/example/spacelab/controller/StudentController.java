@@ -1,5 +1,6 @@
 package com.example.spacelab.controller;
 
+import com.example.spacelab.dto.SelectDTO;
 import com.example.spacelab.dto.SelectSearchDTO;
 import com.example.spacelab.dto.course.StudentCourseTaskInfoDTO;
 import com.example.spacelab.dto.student.StudentTaskDTO;
@@ -84,7 +85,7 @@ public class StudentController {
 
         Admin loggedInAdmin = authUtil.getLoggedInAdmin();
         PermissionType permissionForLoggedInAdmin = loggedInAdmin.getRole().getPermissions().getReadStudents();
-        List<Course> adminCourses = loggedInAdmin.getCourses();
+        Set<Course> adminCourses = loggedInAdmin.getCourses();
 
         if(permissionForLoggedInAdmin == PermissionType.FULL) {
             studentPage = studentService.getStudents(filters, pageable);
@@ -337,8 +338,8 @@ public class StudentController {
 
     // Получение списка статусов студентов
     @GetMapping("/get-status-list")
-    public List<StudentAccountStatus> getStatusList() {
-        return List.of(StudentAccountStatus.values());
+    public ResponseEntity<?> getStatusList() {
+        return ResponseEntity.ok(Arrays.stream(StudentAccountStatus.values()).map(v -> new SelectDTO(v.name(), v.name())).toList());
     }
 
 

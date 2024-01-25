@@ -4,11 +4,15 @@ import com.example.spacelab.util.ProgramDuration;
 import com.example.spacelab.util.TimeUnit;
 import lombok.Data;
 
+import java.time.LocalDate;
+
 public record CourseSettingsDTO(
+        LocalDate beginDate,
         String completionTime,
         TimeUnit completionTimeUnit,
         Integer groupSize,
-        Integer hoursNorm
+        Integer hoursNorm,
+        Integer lessonInterval
 ) {
 
 }

@@ -21,6 +21,7 @@ public interface AdminService extends EntityFilterService<Admin>, UserDetailsSer
     Admin createAdmin(Admin admin);
     Admin updateAdmin(Admin admin);
 
+    boolean canDeleteAdmin(Long id);
     void deleteAdminById(Long id);
 
     void uploadAvatarForAdmin(Long id, MultipartFile avatar) throws IOException;

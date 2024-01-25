@@ -1,5 +1,6 @@
 package com.example.spacelab.service.impl;
 
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.example.spacelab.dto.literature.LiteratureSaveDTO;
 import com.example.spacelab.exception.ResourceNotFoundException;
 import com.example.spacelab.mapper.LiteratureMapper;
@@ -13,6 +14,8 @@ import com.example.spacelab.service.specification.LiteratureSpecifications;
 import com.example.spacelab.util.FilenameUtils;
 import com.example.spacelab.util.FilterForm;
 import com.example.spacelab.model.literature.LiteratureType;
+import com.example.spacelab.util.NumericUtils;
+import com.example.spacelab.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
@@ -110,15 +113,23 @@ public class LiteratureServiceImpl implements LiteratureService{
         Literature lit = literatureMapper.fromLiteratureSaveDTOtoLiterature(saveRequest);
         MultipartFile file = saveRequest.getResource_file();
         if(file != null && file.getSize() > 0) {
-            String filename = FilenameUtils.generateFileName(file);
-            fileService.saveFile(file, filename, "literature", "books");
-            lit.setResource_link(filename);
+            try {
+                String filename = FilenameUtils.generateFileName(file);
+                fileService.saveFile(file, filename, "literature", "books");
+                lit.setResource_link(filename);
+            } catch (AmazonS3Exception ex) {
+                log.error("could not save file: {}", ex.getMessage());
+            }
         }
         MultipartFile thumbnail = saveRequest.getThumbnail();
         if(thumbnail != null && thumbnail.getSize() > 0) {
-            String filename = FilenameUtils.generateFileName(thumbnail);
-            fileService.saveFile(thumbnail, filename, "literature", "thumbnails");
-            lit.setThumbnail(filename);
+            try {
+                String filename = FilenameUtils.generateFileName(thumbnail);
+                fileService.saveFile(thumbnail, filename, "literature", "thumbnails");
+                lit.setThumbnail(filename);
+            } catch (AmazonS3Exception ex) {
+                log.error("could not save file: {}", ex.getMessage());
+            }
         }
         return literatureRepository.save(lit);
     }
@@ -129,15 +140,23 @@ public class LiteratureServiceImpl implements LiteratureService{
         Literature lit = literatureMapper.fromLiteratureSaveDTOtoLiterature(saveRequest);
         MultipartFile file = saveRequest.getResource_file();
         if(file != null && file.getSize() > 0) {
-            String filename = FilenameUtils.generateFileName(file);
-            fileService.saveFile(file, filename, "literature", "books");
-            lit.setResource_link(filename);
+            try {
+                String filename = FilenameUtils.generateFileName(file);
+                fileService.saveFile(file, filename, "literature", "books");
+                lit.setResource_link(filename);
+            } catch (AmazonS3Exception ex) {
+                log.error("could not save file: {}", ex.getMessage());
+            }
         }
         MultipartFile thumbnail = saveRequest.getThumbnail();
         if(thumbnail != null && thumbnail.getSize() > 0) {
-            String filename = FilenameUtils.generateFileName(thumbnail);
-            fileService.saveFile(thumbnail, filename, "literature", "thumbnails");
-            lit.setThumbnail(filename);
+            try {
+                String filename = FilenameUtils.generateFileName(thumbnail);
+                fileService.saveFile(thumbnail, filename, "literature", "thumbnails");
+                lit.setThumbnail(filename);
+            } catch (AmazonS3Exception ex) {
+                log.error("could not save file: {}", ex.getMessage());
+            }
         }
         else {
             lit.setThumbnail(null);
@@ -157,6 +176,11 @@ public class LiteratureServiceImpl implements LiteratureService{
     }
 
     @Override
+    public Integer getVerificationCount() {
+        return literatureRepository.getVerificationCount();
+    }
+
+    @Override
     public Specification<Literature> buildSpecificationFromFilters(FilterForm filters) {
         String nameAuthorInput = filters.getNameAndAuthor();
         Long courseID = filters.getCourse();
@@ -165,8 +189,8 @@ public class LiteratureServiceImpl implements LiteratureService{
 
         Boolean verified = filters.getVerified();
 
-        Course course = (courseID == null) ? null : courseRepository.getReferenceById(courseID);
-        LiteratureType type = (typeString == null) ? null : LiteratureType.valueOf(typeString);
+        Course course = NumericUtils.fieldIsEmpty(courseID) ? null : courseRepository.getReferenceById(courseID);
+        LiteratureType type = StringUtils.fieldIsEmpty(typeString) ? null : LiteratureType.valueOf(typeString);
 
         Specification<Literature> spec = Specification.where(
                 LiteratureSpecifications.hasNameOrAuthorLike(nameAuthorInput)

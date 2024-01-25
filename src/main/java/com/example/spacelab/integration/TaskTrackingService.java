@@ -13,6 +13,8 @@ import java.util.List;
 public interface TaskTrackingService {
 
         UserResponse createTaskUser(UserCreateRequest request);
+        UserAddResponse addUsersToProject(UserAddRequest request);
+        UserRemoveResponse removeUsersFromProject(UserRemoveRequest request);
         // todo add users to project
 
         ProjectResponse createProject(ProjectRequest request);
@@ -21,24 +23,25 @@ public interface TaskTrackingService {
 
         TaskListResponse createTaskList(TaskListRequest request);
         TaskListResponse updateTaskList(TaskListRequest request);
-        void deleteTaskListById(String taskListId);
+        void deleteTaskList(String taskListId);
 
         List<TaskResponse> getAllTasksFromList(String taskListId);
-        TaskResponse createTaskInTaskList(TaskCreateRequest request);
-        TaskResponse getTaskById(String taskId);
-        TaskResponse updateTaskById(String taskId, TaskUpdateRequest request);
-        void deleteTaskById(String taskId);
+        TaskResponse createTaskInTaskList(TaskRequest request);
+        TaskResponse getTask(String taskId);
+        TaskResponse updateTask(TaskRequest request);
+        void deleteTask(String taskId);
         void completeTask(String taskId);
         void uncompleteTask(String taskId);
 
         List<TaskResponse> getTaskSubtasks(String taskId);
-        TaskResponse createTaskSubtask(TaskCreateRequest request);
+        TaskResponse createTaskSubtask(TaskRequest request);
 
         List<TimeEntryResponse> getAllTimeEntriesForTask(String taskId);
-        // todo get user time entries
+        // todo get user time entries or user time total
         TimeEntryResponse getTimeEntry(String timelogId);
         TimeEntryResponse createTimeEntryForTask(TimeEntryRequest request);
         TimeEntryResponse updateTimeEntryForTask(TimeEntryRequest request);
+        TimeEntryResponse createTimeEntryForProject(TimeEntryRequest request);
         void deleteTimeEntry(String timelogId);
 
         TimeTotalResponse getTotalTimeOnTaskList(String taskListId);

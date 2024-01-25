@@ -22,6 +22,7 @@ public class LessonListDTO {
     private Long courseId;
     @Schema(example = "CourseName")
     private String courseName;
+    private String courseIcon;
 
     @Schema(example = "http://www.link.com")
     private String link; // ?

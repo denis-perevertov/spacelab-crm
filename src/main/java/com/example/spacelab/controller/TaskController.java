@@ -75,7 +75,7 @@ public class TaskController {
 
         Admin loggedInAdmin = authUtil.getLoggedInAdmin();
         PermissionType permissionForLoggedInAdmin = loggedInAdmin.getRole().getPermissions().getReadStudents();
-        List<Course> adminCourses = loggedInAdmin.getCourses();
+        Set<Course> adminCourses = loggedInAdmin.getCourses();
 
         if(permissionForLoggedInAdmin == PermissionType.FULL) {
             taskPage = taskService.getTasks(filters, pageable);
@@ -273,10 +273,11 @@ public class TaskController {
 
     // Получение задач(родительских) без курса
     @GetMapping("/unused")
-    public ResponseEntity<?> getTasksWithoutCourse(@RequestParam(defaultValue = "0") int page,
+    public ResponseEntity<?> getTasksWithoutCourse(FilterForm filters,
+                                                   @RequestParam(defaultValue = "0") int page,
                                                    @RequestParam(defaultValue = "5") int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Task> availableTasks = taskService.getTasksWithoutCourse(pageable);
+        Page<Task> availableTasks = taskService.getTasksWithoutCourse(taskService.buildSpecificationFromFilters(filters), pageable);
         return ResponseEntity.ok(
                 new PageImpl<>(
                         availableTasks.stream().map(mapper::fromTaskToModalDTO).toList(),
@@ -288,10 +289,11 @@ public class TaskController {
 
     // Получение задач(родительских) , сортировка по наличию курса
     @GetMapping("/parent")
-    public ResponseEntity<?> getAvailableTasks(@RequestParam(defaultValue = "0") int page,
+    public ResponseEntity<?> getAvailableTasks(FilterForm filters,
+                                               @RequestParam(defaultValue = "0") int page,
                                                @RequestParam(defaultValue = "5") int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Task> availableTasks = taskService.getParentTasks(pageable);
+        Page<Task> availableTasks = taskService.getParentTasks(taskService.buildSpecificationFromFilters(filters), pageable);
         return ResponseEntity.ok(
                 new PageImpl<>(
                         availableTasks.stream().map(mapper::fromTaskToModalDTO).toList(),

@@ -32,4 +32,6 @@ public interface LiteratureService extends EntityFilterService<Literature>{
     void verifyLiterature(Long id);
 
     void deleteLiteratureById(Long id);
+
+    Integer getVerificationCount();
 }

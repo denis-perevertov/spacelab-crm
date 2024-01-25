@@ -16,6 +16,7 @@ public record TeamworkTask (
         Long parentTaskId,
         @JsonProperty("tasklistId")
         Long taskListId,
+        Integer[] subTaskIds,
         @JsonProperty("assigneeUserIds")
         Long[] assigneeIds
 ) {

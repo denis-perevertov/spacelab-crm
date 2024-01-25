@@ -8,9 +8,7 @@ import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.literature.Literature;
 import com.example.spacelab.model.student.Student;
 import com.example.spacelab.model.student.StudentTask;
-import com.example.spacelab.model.task.CompletionTime;
-import com.example.spacelab.model.task.Task;
-import com.example.spacelab.model.task.TaskProgressPoint;
+import com.example.spacelab.model.task.*;
 import com.example.spacelab.repository.CourseRepository;
 import com.example.spacelab.repository.LiteratureRepository;
 import com.example.spacelab.repository.TaskRepository;
@@ -48,9 +46,11 @@ public class TaskMapper {
             dto.setCreatedAt(task.getCreatedAt());
             dto.setLevel(task.getLevel());
             dto.setStatus(task.getStatus());
-            if(Objects.nonNull(task.getCourse())) {
-                dto.setCourseID(task.getCourse().getId());
-                dto.setCourseName(task.getCourse().getName());
+            Course c = task.getCourse();
+            if(Objects.nonNull(c)) {
+                dto.setCourseID(c.getId());
+                dto.setCourseName(c.getName());
+                dto.setCourseIcon(c.getIcon());
             }
 
         } catch (Exception e) {
@@ -243,9 +243,9 @@ public class TaskMapper {
             }
         }
 
-        task.setLevel(taskSaveDTO.getLevel());
+        task.setLevel(TaskLevel.valueOf(taskSaveDTO.getLevel()));
         task.setCompletionTime(new CompletionTime()
-                .setTimeUnit(taskSaveDTO.getCompletionTimeUnit())
+                .setTimeUnit(TimeUnit.valueOf(taskSaveDTO.getCompletionTimeUnit()))
                 .setValue(taskSaveDTO.getCompletionTime()));
         task.setSkillsDescription(taskSaveDTO.getSkillsDescription());
         task.setTaskDescription(taskSaveDTO.getTaskDescription());
@@ -271,13 +271,13 @@ public class TaskMapper {
                 taskSaveDTO.getTaskProgressPoints().stream().map(this::fromDTOToPoint).toList()
         );
 
-        task.setStatus(taskSaveDTO.getStatus());
+        task.setStatus(TaskStatus.valueOf(taskSaveDTO.getStatus()));
 
         return task;
     }
 
     public TaskProgressPoint fromDTOToPoint(TaskProgressPointDTO dto) {
-        if(dto == null) return null;
+        if(dto == null || dto.name() == null || dto.name().isEmpty()) return null;
         return new TaskProgressPoint().setName(dto.name()).setSubpoints(
                 dto.subpoints() != null
                 ? dto.subpoints().stream().map(this::fromDTOToPoint).toList()
@@ -358,11 +358,11 @@ public class TaskMapper {
             dto.setName(task.getName());
             if(task.getParentTask() != null) dto.setParentTaskID(task.getParentTask().getId());
             if(task.getCourse() != null) dto.setCourseID(task.getCourse().getId());
-            dto.setLevel(task.getLevel());
-            dto.setStatus(task.getStatus());
+            dto.setLevel(task.getLevel().name());
+            dto.setStatus(task.getStatus().name());
             if(task.getCompletionTime() != null) {
                 dto.setCompletionTime(task.getCompletionTime().getValue());
-                dto.setCompletionTimeUnit(task.getCompletionTime().getTimeUnit());
+                dto.setCompletionTimeUnit(task.getCompletionTime().getTimeUnit().name());
             }
             dto.setSkillsDescription(task.getSkillsDescription());
             dto.setTaskDescription(task.getTaskDescription());

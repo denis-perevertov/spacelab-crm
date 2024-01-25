@@ -3,6 +3,7 @@ package com.example.spacelab.service.impl;
 import com.example.spacelab.dto.student.StudentTaskLessonDTO;
 import com.example.spacelab.dto.task.TaskSubtaskListDTO;
 import com.example.spacelab.exception.ResourceNotFoundException;
+import com.example.spacelab.exception.TeamworkException;
 import com.example.spacelab.integration.TaskTrackingService;
 import com.example.spacelab.integration.data.*;
 import com.example.spacelab.model.course.Course;
@@ -19,6 +20,8 @@ import com.example.spacelab.repository.TaskRepository;
 import com.example.spacelab.service.TaskService;
 import com.example.spacelab.service.specification.TaskSpecifications;
 import com.example.spacelab.util.FilterForm;
+import com.example.spacelab.util.NumericUtils;
+import com.example.spacelab.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
@@ -33,6 +36,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 @Service
 @Log4j2
@@ -90,6 +94,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    @Transactional
     public Task createNewTask(Task taskIn) {
         Task task = taskRepository.save(taskIn);
         if(task.getCourse() != null) {
@@ -100,6 +105,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    @Transactional
     public Task editTask(Task taskIn) {
         Task task = taskRepository.save(taskIn);
         if(task.getCourse() != null) {
@@ -114,12 +120,17 @@ public class TaskServiceImpl implements TaskService {
     @Transactional
     public void deleteTaskById(Long id) {
         Task task = taskRepository.findById(id).orElseThrow();
-        taskRepository.findTasksByParentTask(task).forEach(subtask -> {
+        List<Task> subtasks = taskRepository.findTasksByParentTask(task);
+        subtasks.forEach(subtask -> {
             subtask.setParentTask(null);
             subtask.setStatus(TaskStatus.INACTIVE);
-            taskRepository.save(subtask);
         });
+        taskRepository.saveAll(subtasks);
+        log.info("subtasks with parent task(id:{}) edited", id);
+        studentTaskRepository.deleteStudentTasksByTaskReference(task);
+        log.info("student tasks with task reference(id:{}) deleted", id);
         taskRepository.deleteById(id);
+        log.info("task(id:{}) deleted", id);
     }
 
     public StudentTask unlockTaskForStudent(Long taskID, Long studentID) {
@@ -146,7 +157,8 @@ public class TaskServiceImpl implements TaskService {
             StudentTask studentTask = new StudentTask()
                     .setStudent(st)
                     .setTaskReference(task);
-            studentTaskRepository.save(studentTask);
+            studentTask = studentTaskRepository.save(studentTask);
+            st.getTasks().add(studentTask);
         });
     }
 
@@ -156,8 +168,28 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    public Page<Task> getTasksWithoutCourse(Specification<Task> spec, Pageable pageable) {
+//        Page<Task> page = taskRepository.findParentTasksWithoutCourse(spec, pageable);
+        Specification<Task> s = spec.and(TaskSpecifications.parentTaskIsNull())
+                .and(TaskSpecifications.courseIsNull());
+        Page<Task> page = taskRepository.findAll(s, pageable);
+        log.info("found available tasks: {}", page);
+        return page;
+    }
+
+    @Override
     public Page<Task> getTasksWithoutCourse(Pageable pageable) {
         Page<Task> page = taskRepository.findParentTasksWithoutCourse(pageable);
+        log.info("found available tasks: {}", page);
+        return page;
+    }
+
+    @Override
+    public Page<Task> getParentTasks(Specification<Task> spec, Pageable pageable) {
+//        Page<Task> page = taskRepository.findParentTasksAny(spec, pageable);
+        Specification<Task> s = spec.and(TaskSpecifications.parentTaskIsNull())
+                .and(TaskSpecifications.noCourseFirst());
+        Page<Task> page = taskRepository.findAll(s, pageable);
         log.info("found available tasks: {}", page);
         return page;
     }
@@ -232,7 +264,7 @@ public class TaskServiceImpl implements TaskService {
     public void createStudentTasksOnStudentCourseTransfer(Student student, Course course) {
         log.info("creating student tasks at the moment of transfering student(id:{}) to course(id:{})", student.getId(), course.getId());
         // clear student tasks which were not completed
-        List<StudentTask> oldStudentTasks = student.getTasks();
+        List<StudentTask> oldStudentTasks = student.getTasks().stream().toList();
         oldStudentTasks.stream()
                 .filter(studentTask -> studentTask.getStatus() != StudentTaskStatus.COMPLETED)
                 .forEach(studentTaskRepository::delete);
@@ -252,10 +284,18 @@ public class TaskServiceImpl implements TaskService {
 
     }
 
+
+    // LOCK TASKS AFTER YOU REMOVE STUDENT FROM COURSE
     @Override
     public void clearStudentTasksOnStudentDeletionFromCourse(Student student) {
-        student.getTasks().stream().filter(task -> task.getStatus() != StudentTaskStatus.COMPLETED)
-                .forEach(studentTaskRepository::delete);
+//        student.getTasks().stream().filter(task -> task.getStatus() != StudentTaskStatus.COMPLETED)
+//                .forEach(studentTaskRepository::delete);
+
+        student.getTasks()
+                .stream()
+                .filter(task -> task.getStatus() == StudentTaskStatus.UNLOCKED || task.getStatus() == StudentTaskStatus.READY)
+                .forEach(task -> {task.setStatus(StudentTaskStatus.LOCKED); studentTaskRepository.save(task);});
+        log.info("locked non-completed student tasks (student id: {})", student.getId());
     }
 
 
@@ -282,14 +322,22 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public List<StudentTaskLessonDTO> getOpenStudentTasks(Student student) {
         return student.getTasks().stream()
-                .filter(task -> task.getStatus().equals(StudentTaskStatus.UNLOCKED))
-                .map(task -> new StudentTaskLessonDTO(
-                        task.getId(),
-                        task.getTaskReference().getTaskIndex(),
-                        task.getTaskReference().getName(),
-                        task.getStatus().name(),
-                        task.getPercentOfCompletion()
-                ))
+                .filter(task -> task.getStatus().equals(StudentTaskStatus.UNLOCKED) || task.getStatus().equals(StudentTaskStatus.READY))
+                .map(task -> {
+                    Integer taskCompletionPercent = null;
+                    try {
+                        taskCompletionPercent = getTaskCompletionPercent(task);
+                    } catch (TeamworkException ex) {
+                        log.warn("could not get task(id:{}) completion percent: {}", task.getId(), ex.getMessage());
+                    }
+                    return new StudentTaskLessonDTO(
+                            task.getId(),
+                            task.getTaskReference().getTaskIndex(),
+                            task.getTaskReference().getName(),
+                            task.getStatus().name(),
+                            taskCompletionPercent
+                    );
+                })
                 .toList();
     }
 
@@ -298,15 +346,32 @@ public class TaskServiceImpl implements TaskService {
     public List<StudentTaskLessonDTO> getNextStudentTasks(Student student) {
         return student.getTasks().stream()
                 .filter(task -> task.getStatus().equals(StudentTaskStatus.LOCKED))
-                .map(task -> new StudentTaskLessonDTO(
-                        task.getId(),
-                        task.getTaskReference().getTaskIndex(),
-                        task.getTaskReference().getName(),
-                        task.getStatus().name(),
-                        task.getPercentOfCompletion()
-                ))
+                .map(task -> {
+                    Integer taskCompletionPercent = null;
+                    try {
+                        taskCompletionPercent = getTaskCompletionPercent(task);
+                    } catch (TeamworkException ex) {
+                        log.warn("could not get task(id:{}) completion percent: {}", task.getId(), ex.getMessage());
+                    }
+                    return new StudentTaskLessonDTO(
+                            task.getId(),
+                            task.getTaskReference().getTaskIndex(),
+                            task.getTaskReference().getName(),
+                            task.getStatus().name(),
+                            taskCompletionPercent
+                    );
+                })
                 .limit(3)
                 .toList();
+    }
+
+    private Integer getTaskCompletionPercent(StudentTask st) {
+        List<TaskResponse> points = trackingService.getAllTasksFromList(st.getTaskTrackingId());
+        return (int) (
+                100.0 * points.stream().filter(p -> p.status().equalsIgnoreCase("completed")).count()
+                /
+                points.size()
+        );
     }
 
     @Override
@@ -330,7 +395,11 @@ public class TaskServiceImpl implements TaskService {
         studentTaskRepository.save(task);
         log.info("task unlocked");
 
-        if(isNull(task.getTaskTrackingId())) {
+        if(
+                isNull(task.getTaskTrackingId())
+                && nonNull(task.getTaskReference().getCourse())
+                && nonNull(task.getTaskReference().getCourse().getTrackingId())
+        ) {
             createTrackingList(task);
         }
     }
@@ -338,6 +407,7 @@ public class TaskServiceImpl implements TaskService {
     private void createTrackingList(StudentTask task) {
         log.info("creating tracking list for task");
         TaskListResponse response = trackingService.createTaskList(new TaskListRequest(
+                task.getTaskReference().getCourse().getTrackingId(),
                 null,
                 false,
                 new TaskListDescription(
@@ -352,7 +422,8 @@ public class TaskServiceImpl implements TaskService {
         log.info("created tracking list for task, creating progress points");
         task.getTaskReference().getTaskProgressPoints().forEach(point -> {
             TaskResponse createdParentTask = trackingService.createTaskInTaskList(
-                    new TaskCreateRequest(
+                    new TaskRequest(
+                            null,
                             point.getName(),
                             point.getName(),
                             null,
@@ -366,7 +437,8 @@ public class TaskServiceImpl implements TaskService {
                     )
             );
             point.getSubpoints().forEach(subpoint -> trackingService.createTaskInTaskList(
-                    new TaskCreateRequest(
+                    new TaskRequest(
+                            null,
                             subpoint.getName(),
                             subpoint.getName(),
                             null,
@@ -385,6 +457,7 @@ public class TaskServiceImpl implements TaskService {
     private void updateTrackingList(StudentTask task) {
         log.info("creating tracking list for task");
         trackingService.updateTaskList(new TaskListRequest(
+                task.getTaskReference().getCourse().getTrackingId(),
                 Long.valueOf(task.getTaskTrackingId()),
                 false,
                 new TaskListDescription(
@@ -422,19 +495,21 @@ public class TaskServiceImpl implements TaskService {
     public Specification<Task> buildSpecificationFromFilters(FilterForm filters) {
         log.info("Building specification from filters: " + filters);
 
+        Long id = filters.getId();
         String name = filters.getName();
         Long courseID = filters.getCourse();
         String levelInput = filters.getLevel();
         String statusInput = filters.getStatus();
 
-        Course course = (courseID == null) ? null : courseRepository.getReferenceById(courseID);
-        TaskStatus status = (statusInput == null) ? null : TaskStatus.valueOf(statusInput);
-        TaskLevel level = (levelInput == null) ? null : TaskLevel.valueOf(levelInput);
+        Course course = NumericUtils.fieldIsEmpty(courseID) ? null : courseRepository.getReferenceById(courseID);
+        TaskStatus status = StringUtils.fieldIsEmpty(statusInput) ? null : TaskStatus.valueOf(statusInput);
+        TaskLevel level = StringUtils.fieldIsEmpty(levelInput) ? null : TaskLevel.valueOf(levelInput);
 
         Specification<Task> spec = Specification.where(TaskSpecifications.hasNameLike(name))
-                .and(TaskSpecifications.hasCourse(course))
-                .and(TaskSpecifications.hasLevel(level))
-                .and(TaskSpecifications.hasStatus(status));
+                                    .and(TaskSpecifications.hasCourse(course))
+                                    .and(TaskSpecifications.hasId(id))
+                                    .and(TaskSpecifications.hasLevel(level))
+                                    .and(TaskSpecifications.hasStatus(status));
 
         return spec;
     }

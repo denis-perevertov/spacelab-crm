@@ -4,5 +4,6 @@ public enum StudentTaskStatus {
     UNLOCKED,
     LOCKED,
     COMPLETED,
-    REMOVED
+    REMOVED,
+    READY
 }

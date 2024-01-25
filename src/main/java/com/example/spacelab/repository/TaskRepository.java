@@ -4,6 +4,7 @@ import com.example.spacelab.model.student.Student;
 import com.example.spacelab.model.task.Task;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -47,10 +48,26 @@ public interface TaskRepository extends JpaRepository<Task, Long>, JpaSpecificat
     @Query("""
            SELECT t
            FROM Task t
+           WHERE t.course IS NULL
+           AND t.parentTask IS NULL
+           """)
+    Page<Task> findParentTasksWithoutCourse(Specification<Task> specification, Pageable pageable);
+
+    @Query("""
+           SELECT t
+           FROM Task t
            WHERE t.parentTask IS NULL
            ORDER BY CASE WHEN t.course IS NULL THEN 0 ELSE 1 END
            """)
     Page<Task> findParentTasksAny(Pageable pageable);
 
     List<Task> findTasksByParentTask(Task parentTask);
+
+    @Query("""
+           SELECT t
+           FROM Task t
+           WHERE t.parentTask IS NULL
+           ORDER BY CASE WHEN t.course IS NULL THEN 0 ELSE 1 END
+           """)
+    Page<Task> findParentTasksAny(Specification<Task> specification, Pageable pageable);
 }

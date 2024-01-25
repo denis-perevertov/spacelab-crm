@@ -1,9 +1,11 @@
 package com.example.spacelab.controller;
 
+import com.example.spacelab.dto.SelectDTO;
 import com.example.spacelab.dto.SelectSearchDTO;
 import com.example.spacelab.dto.admin.AdminAvatarDTO;
 import com.example.spacelab.dto.contact.ContactInfoDTO;
 import com.example.spacelab.dto.role.UserRoleAdminListDTO;
+import com.example.spacelab.dto.student.StudentAvatarDTO;
 import com.example.spacelab.exception.ErrorMessage;
 import com.example.spacelab.exception.ObjectValidationException;
 import com.example.spacelab.mapper.RoleMapper;
@@ -11,7 +13,10 @@ import com.example.spacelab.dto.role.UserRoleDTO;
 import com.example.spacelab.dto.role.UserRoleEditDTO;
 import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.model.role.UserRole;
+import com.example.spacelab.model.student.Student;
 import com.example.spacelab.repository.AdminRepository;
+import com.example.spacelab.service.AdminService;
+import com.example.spacelab.service.StudentService;
 import com.example.spacelab.service.UserRoleService;
 import com.example.spacelab.validator.RoleValidator;
 import com.example.spacelab.exception.ValidationErrorMessage;
@@ -44,6 +49,8 @@ import java.util.stream.Collectors;
 public class RoleController {
 
     private final UserRoleService userRoleService;
+    private final StudentService studentService;
+    private final AdminService adminService;
     private final AdminRepository adminRepository;
     private final RoleMapper roleMapper;
     private final RoleValidator validator;
@@ -156,16 +163,26 @@ public class RoleController {
             @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
-    @GetMapping("/get-all-roles")
-    public List<UserRoleAdminListDTO> getAllRoles() {
+    @GetMapping("/members")
+    public List<UserRoleAdminListDTO> getAllRolesMembers() {
         return userRoleService.getRoles()
                 .stream()
-                .map(role -> new UserRoleAdminListDTO(role.getId(),
+                .map(role -> new UserRoleAdminListDTO(
+                        role.getId(),
                         role.getName(),
-                        role.getUserList().stream().map(user -> {
-                            Admin admin = adminRepository.findById(user.getId()).orElse(new Admin());
-                            return new AdminAvatarDTO(admin.getId(), admin.getFullName(), admin.getAvatar());
-                        }).toList()))
+                        role.getUserList().stream()
+                                .map(user -> new AdminAvatarDTO(user.getId(), user.getUserEntityName(), user.getAvatar()))
+                                .limit(50)
+                                .toList()
+                ))
+                .toList();
+    }
+
+    @GetMapping("/get-roles-list")
+    public List<SelectDTO> getRoleSelect() {
+        return userRoleService.getRoles()
+                .stream()
+                .map(role -> new SelectDTO(role.getId().toString(), role.getName()))
                 .toList();
     }
 

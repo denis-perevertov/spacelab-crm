@@ -1,5 +1,6 @@
 package com.example.spacelab.controller;
 
+import com.example.spacelab.dto.SelectDTO;
 import com.example.spacelab.dto.lesson.LessonInfoDTO;
 import com.example.spacelab.dto.lesson.LessonListDTO;
 import com.example.spacelab.dto.lesson.LessonReportRowSaveDTO;
@@ -20,6 +21,7 @@ import com.example.spacelab.service.LessonService;
 import com.example.spacelab.util.AuthUtil;
 import com.example.spacelab.util.FilterForm;
 import com.example.spacelab.validator.LessonBeforeStartValidator;
+import com.example.spacelab.validator.LessonReportRowValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -38,10 +40,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Tag(name="Lesson", description = "Lesson controller")
 @RestController
@@ -54,6 +53,7 @@ public class LessonController {
     private final LessonService lessonService;
     private final LessonMapper mapper;
     private final LessonBeforeStartValidator lessonBeforeStartValidator;
+    private final LessonReportRowValidator lessonReportRowValidator;
 
     private final AuthUtil authUtil;
 
@@ -78,7 +78,7 @@ public class LessonController {
 
         Admin loggedInAdmin = authUtil.getLoggedInAdmin();
         PermissionType permissionForLoggedInAdmin = loggedInAdmin.getRole().getPermissions().getReadStudents();
-        List<Course> adminCourses = loggedInAdmin.getCourses();
+        Set<Course> adminCourses = loggedInAdmin.getCourses();
 
         if(permissionForLoggedInAdmin == PermissionType.FULL) {
             lessonPage = lessonService.getLessons(filters, pageable);
@@ -260,8 +260,8 @@ public class LessonController {
 
     // Получение списка cтатусов
     @GetMapping("/get-status-list")
-    public List<LessonStatus> getStatusList() {
-        return List.of(LessonStatus.values());
+    public ResponseEntity<?> getStatusList() {
+        return ResponseEntity.ok(Arrays.stream(LessonStatus.values()).map(v -> new SelectDTO(v.name(), v.name())).toList());
     }
 
 
