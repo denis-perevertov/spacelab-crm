@@ -18,6 +18,9 @@ public class LessonReportRow {
     private Long id;
 
     @ManyToOne
+    private Lesson lesson;
+
+    @ManyToOne
     private Student student;
 
     private String currentTaskSnapshot;

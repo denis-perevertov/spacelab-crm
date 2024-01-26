@@ -401,4 +401,26 @@ public class TaskMapper {
                 .setLevel(task.getLevel())
                 .setStatus(task.getStatus());
     }
+
+    public StudentTaskCardDTO studentTaskToCardDTO(StudentTask studentTask) {
+        if(studentTask == null) return null;
+        else return new StudentTaskCardDTO(
+                studentTask.getId(),
+                studentTask.getStatus(),
+                studentTask.getBeginDate(),
+                studentTask.getEndDate(),
+                fromTaskToInfoDTO(studentTask.getTaskReference()),
+                studentTaskToLinkDTO(studentTask.getParentTask()),
+                studentTask.getTaskTrackingId(),
+                studentTask.getTaskReference().getCourse().getTrackingId()
+        );
+    }
+
+    public StudentTaskLinkDTO studentTaskToLinkDTO(StudentTask studentTask) {
+        if(studentTask == null) return null;
+        else return new StudentTaskLinkDTO(
+                studentTask.getId(),
+                studentTask.getTaskReference().getName()
+        );
+    }
 }

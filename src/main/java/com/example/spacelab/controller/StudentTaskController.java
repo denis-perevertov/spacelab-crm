@@ -11,6 +11,7 @@ import com.example.spacelab.service.StudentService;
 import com.example.spacelab.service.TaskService;
 import com.example.spacelab.service.specification.StudentTaskSpecification;
 import com.example.spacelab.util.AuthUtil;
+import com.example.spacelab.util.FilterForm;
 import com.example.spacelab.util.ValidationUtils;
 import com.example.spacelab.validator.StudentValidator;
 import io.swagger.v3.oas.annotations.Operation;
@@ -53,31 +54,14 @@ public class StudentTaskController {
 
     // Получение всех заданий одного студента
     @GetMapping
-    public ResponseEntity<Object> getTasksOfSingleStudent(@RequestParam Long studentID,
-                                                          @RequestParam(required = false) StudentTaskStatus status,
-                                                          @RequestParam(required = false) Long taskID,
-                                                          @RequestParam(required = false) String taskName,
-                                                          @RequestParam(required = false) Long courseID,
-                                                          @RequestParam(required = false) LocalDate beginDate,
-                                                          @RequestParam(required = false) LocalDate endDate,
+    public ResponseEntity<Object> getTasksOfSingleStudent(FilterForm filters,
                                                           @RequestParam(required = false, defaultValue = "0") int page,
                                                           @RequestParam(required = false, defaultValue = "10") int size) {
 
-        if(status == null) status = StudentTaskStatus.UNLOCKED;
-
         Pageable pageable = PageRequest.of(page, size);
-        Specification<StudentTask> spec = new StudentTaskSpecification(
-                studentID,
-                status,
-                taskID,
-                taskName,
-                courseID,
-                beginDate,
-                endDate
-        );
 
         Page<StudentTaskDTO> taskPage = taskService
-                .getStudentTasks(spec, pageable)
+                .getStudentTasks(taskService.buildSpec(filters), pageable)
                 .map(taskMapper::fromStudentTaskToDTO);
 
         return ResponseEntity.ok().body(taskPage);
@@ -95,23 +79,14 @@ public class StudentTaskController {
     @GetMapping("/{taskID}/info")
     public ResponseEntity<?> getStudentTaskInfo(@PathVariable Long taskID) {
 
-        TaskInfoDTO info = taskMapper.fromTaskToInfoDTO(taskService.getStudentTask(taskID).getTaskReference());
-        return ResponseEntity.ok(info);
+        StudentTask st = taskService.getStudentTask(taskID);
+        return ResponseEntity.ok(taskMapper.studentTaskToCardDTO(st));
     }
 
-//    // Создание копии задания для студента ??
-//    @PostMapping("/unlock")
-//    public ResponseEntity<Object> createStudentTask(@RequestBody @Valid StudentTaskUnlockRequest request,
-//                                                    BindingResult bindingResult) {
-//        studentValidator.validateNewTaskForStudent(request, bindingResult);
-//        if(bindingResult.hasErrors()) {
-//            return ResponseEntity.badRequest().body(ValidationUtils.getErrorMessages(bindingResult));
-//        }
-//        StudentTask studentTask = taskService.unlockTaskForStudent(request.taskID(), request.studentID());
-//        return ResponseEntity.ok("New Student Task created, ID: " + studentTask.getId());
-//    }
-
-    // todo check statuses
+    @GetMapping("/{taskID}/points")
+    public ResponseEntity<?> getTaskProgressPoints(@PathVariable Long taskID) {
+        return ResponseEntity.ok(taskService.getStudentTaskProgressPoints(taskID));
+    }
 
     @PostMapping("/complete")
     public ResponseEntity<Object> completeStudentTask(@RequestBody Long taskID) {

@@ -31,7 +31,7 @@ public class LessonReportRowSaveDTO {
     private String note;
 
     @Schema(example = "comment")
-    @Size(max = 500)
+    @Size(max = 1000)
     private String comment;
 
     @Schema(example = "3")

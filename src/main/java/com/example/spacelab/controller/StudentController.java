@@ -327,10 +327,11 @@ public class StudentController {
                                                           @RequestParam(defaultValue = "0") int page,
                                                           @RequestParam(defaultValue = "5") int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.Direction.ASC, "course");
-        Page<Student> studentPage = studentService.getStudents(filters, pageable);
+        Page<Student> studentPage = studentService.getAvailableStudents(filters, pageable);
 
         return studentPage.map(student -> new StudentModalDTO(student.getId(),
                 student.getFullName(),
+                student.getDetails().getAccountStatus().name(),
                 student.getDetails().getEmail(),
                 student.getAvatar(),
                 (student.getCourse() != null) ? student.getCourse().getName() : ""));

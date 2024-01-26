@@ -77,6 +77,14 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
+    public Page<Student> getAvailableStudents(FilterForm filters, Pageable pageable) {
+        log.info("Getting non-blocked students' info with page " + pageable.getPageNumber() +
+                " / size " + pageable.getPageSize() + " and filters: " + filters);
+        Specification<Student> spec = buildSpecificationFromFilters(filters).and(StudentSpecifications.isAvailable());
+        return studentRepository.findAll(spec, pageable);
+    }
+
+    @Override
     public Page<Student> getStudentsWithoutCourses(FilterForm filters, Pageable pageable) {
         log.info("Getting all students without courses with page {} / size {} and filters: {}",
                 pageable.getPageNumber(),

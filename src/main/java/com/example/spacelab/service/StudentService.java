@@ -16,6 +16,7 @@ public interface StudentService extends StudentCardService,
     List<Student> getStudents();
     Page<Student> getStudents(Pageable pageable);
     Page<Student> getStudents(FilterForm filters, Pageable pageable);
+    Page<Student> getAvailableStudents(FilterForm filters, Pageable pageable);
     Page<Student> getStudentsWithoutCourses(FilterForm filters, Pageable pageable);
 
     // filter by allowed courses

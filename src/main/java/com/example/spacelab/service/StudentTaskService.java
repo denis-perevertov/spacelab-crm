@@ -1,11 +1,13 @@
 package com.example.spacelab.service;
 
 import com.example.spacelab.dto.student.StudentTaskLessonDTO;
+import com.example.spacelab.dto.task.StudentTaskPointDTO;
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.student.Student;
 import com.example.spacelab.model.student.StudentTask;
 import com.example.spacelab.model.student.StudentTaskStatus;
 import com.example.spacelab.model.task.Task;
+import com.example.spacelab.util.FilterForm;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -24,6 +26,8 @@ public interface StudentTaskService {
     List<StudentTaskLessonDTO> getOpenStudentTasks(Student student);
     List<StudentTaskLessonDTO> getNextStudentTasks(Student student);
 
+    List<StudentTaskPointDTO> getStudentTaskProgressPoints(Long taskId);
+
     /*
     todo
     - delete old student tasks after task transfer to different course ?
@@ -36,5 +40,7 @@ public interface StudentTaskService {
     void unlockStudentTask(Long taskID);
     void completeStudentTask(Long taskID);
     void resetStudentTask(Long taskID);
+
+    Specification<StudentTask> buildSpec(FilterForm filters);
 
 }

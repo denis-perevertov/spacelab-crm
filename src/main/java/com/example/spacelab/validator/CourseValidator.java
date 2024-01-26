@@ -29,42 +29,43 @@ public class CourseValidator implements Validator {
         CourseEditDTO dto = (CourseEditDTO) target;
 
         if(fieldIsEmpty(dto.getName()))
-            e.rejectValue("name", "name.empty", "Enter name!");
+            e.rejectValue("name", "name.empty", "validation.field.empty");
         else if(fieldMaxLengthIsIncorrect(dto.getName(), 100))
-            e.rejectValue("name", "name.length", "Name length: 1-100");
+            e.rejectValue("name", "name.length", "validation.field.length.max");
         else if(courseExists(dto.getName()) && !courseHasSameId(dto.getId(), courseRepository.findByName(dto.getName()).orElseThrow())) {
-            e.rejectValue("name", "name.exists", "Name already exists");
+            e.rejectValue("name", "name.exists", "validation.course.name.exists");
         }
 
         CourseInfoDTO info = dto.getInfo();
 
         if(fieldIsEmpty(info.getDescription()))
-            e.rejectValue("info.description", "info.description.empty", "Enter description!");
-        else if(info.getDescription().length() > 3000 || info.getDescription().length() < 20)
-            e.rejectValue("info.description", "info.description.length", "Description length: 20-3000");
+            e.rejectValue("info.description", "info.description.empty", "validation.field.empty");
+        else if(info.getDescription().length() > 3000)
+            e.rejectValue("info.description", "info.description.length", "validation.field.length.max");
 
         if(info.getTopics() == null || info.getTopics().size() == 0)
-            e.rejectValue("info.topics", "info.topics.empty", "Enter course topics!");
+            e.rejectValue("info.topics", "info.topics.empty", "validation.course.topics.empty");
         else for(int i = 0; i < info.getTopics().size(); i++) {
             if(info.getTopics().get(i).length() > 250)
-                e.rejectValue("info.topics["+i+"]", "info.topics["+i+"].length", "Field length: 1-250");
+                e.rejectValue("info.topics["+i+"]", "info.topics["+i+"].length", "validation.field.length.max");
         }
 
         CourseSettingsDTO settings = info.getSettings();
-//        if(settings.programDuration().getValue() == null || settings.programDuration().getValue().isEmpty())
-//            e.rejectValue("info.settings.programDuration", "info.settings.programDuration.empty", "Enter program duration!");
-//        else if(settings.programDuration().getValue().length() > 10)
-//                e.rejectValue("info.settings.programDuration", "info.settings.programDuration.length", "Field length: 1-10");
 
         if(settings.groupSize() == null)
-            e.rejectValue("info.settings.groupSize", "info.settings.groupSize.empty", "Enter group size!");
+            e.rejectValue("info.settings.groupSize", "info.settings.groupSize.empty", "validation.field.empty");
         else if(settings.groupSize() < 3 || settings.groupSize() > 30)
-            e.rejectValue("info.settings.groupSize", "info.settings.groupSize.length", "Group size: 3-30!");
+            e.rejectValue("info.settings.groupSize", "info.settings.groupSize.length", "validation.course.group-size");
 
         if(settings.hoursNorm() == null)
-            e.rejectValue("info.settings.hoursNorm", "info.settings.hoursNorm.empty", "Enter hours norm!");
+            e.rejectValue("info.settings.hoursNorm", "info.settings.hoursNorm.empty", "validation.field.empty");
         else if(settings.hoursNorm() < 10 || settings.hoursNorm() > 40)
-            e.rejectValue("info.settings.hoursNorm", "info.settings.hoursNorm.length", "Hours norm: 10-40!");
+            e.rejectValue("info.settings.hoursNorm", "info.settings.hoursNorm.length", "validation.course.hours-norm");
+
+        if(settings.lessonInterval() == null)
+            e.rejectValue("info.settings.lessonInterval", "info.settings.lessonInterval.empty", "validation.field.empty");
+        else if(settings.lessonInterval() < 1 || settings.lessonInterval() > 30)
+            e.rejectValue("info.settings.lessonInterval", "info.settings.lessonInterval.length", "validation.course.lesson-interval");
 
         CourseMembersDTO members = dto.getMembers();
 

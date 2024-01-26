@@ -30,28 +30,22 @@ public class StudentTaskSpecification implements Specification<StudentTask> {
     public Predicate toPredicate(Root<StudentTask> studentTask, CriteriaQuery<?> q, CriteriaBuilder cb) {
 
         List<Predicate> predicates = new ArrayList<>();
-        if(studentID != null)
+        if(studentID != null && courseID > 0)
             predicates.add(cb.equal(studentTask.get("student").get("id"), studentID));
         if(status != null)
             predicates.add(cb.equal(studentTask.get("status"), status));
-        if(taskID != null)
+        if(taskID != null && courseID > 0)
             predicates.add(cb.equal(studentTask.get("id"), taskID));
         if(taskName != null)
             predicates.add(cb.like(cb.lower(studentTask.get("taskReference").get("name")), "%"+taskName.toLowerCase()+"%"));
-        if(courseID != null)
+        if(courseID != null && courseID > 0)
             predicates.add(cb.equal(studentTask.get("taskReference").get("course").get("id"), courseID));
 
         if(beginDate != null && endDate != null)
             predicates.add(
                     cb.or(
-                            cb.and(
-                                    cb.lessThanOrEqualTo(studentTask.get(StudentTask_.BEGIN_DATE), beginDate),
-                                    cb.greaterThanOrEqualTo(studentTask.get(StudentTask_.END_DATE), beginDate)
-                            ),
-                            cb.and(
-                                    cb.lessThanOrEqualTo(studentTask.get(StudentTask_.BEGIN_DATE), endDate),
-                                    cb.greaterThanOrEqualTo(studentTask.get(StudentTask_.END_DATE), endDate)
-                            )
+                            cb.between(studentTask.get(StudentTask_.BEGIN_DATE), beginDate, endDate),
+                            cb.between(studentTask.get(StudentTask_.END_DATE), beginDate, endDate)
                     )
             );
 

@@ -110,7 +110,7 @@ public class LessonServiceImpl implements LessonService {
     @Override
     public List<StudentLessonDisplayDTO> getStudentLessonDisplayData(Long id) {
         Lesson lesson = getLessonById(id);
-        List<Student> courseStudents = lesson.getCourse().getStudents().stream().toList();
+        List<Student> courseStudents = lesson.getCourse().getStudents().stream().filter(Student::isEnabled).toList();
         List<StudentLessonDisplayDTO> lessonDisplayData = new ArrayList<>();
         courseStudents.forEach(st -> lessonDisplayData.add(new StudentLessonDisplayDTO(
                 st.getId(),
@@ -125,11 +125,11 @@ public class LessonServiceImpl implements LessonService {
     @Override
     public void deleteLessonById(Long id) {
         Lesson lesson = lessonRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Lesson with this ID doesn't exist!"));
-        if(lesson.getStatus().equals(LessonStatus.ACTIVE)) {
-            log.warn("Attempt to delete a lesson already in progress");
-            log.warn(lesson.toString());
-            throw new RuntimeException("Cannot delete an active lesson!");
-        }
+//        if(lesson.getStatus().equals(LessonStatus.ACTIVE)) {
+//            log.warn("Attempt to delete a lesson already in progress");
+//            log.warn(lesson.toString());
+//            throw new RuntimeException("Cannot delete an active lesson!");
+//        }
         lessonRepository.delete(lesson);
     }
 

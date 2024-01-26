@@ -214,12 +214,15 @@ public class LessonController {
 //    })
 //    @PreAuthorize("!hasAuthority('lessons.edit.NO_ACCESS')")
     @PostMapping("/save-report-row")
-    public ResponseEntity<?> saveLessonReportRowAfterStart(@RequestBody @Valid LessonReportRowSaveDTO lessonReportRowSTO,
+    public ResponseEntity<?> saveLessonReportRowAfterStart(@RequestBody @Valid LessonReportRowSaveDTO dto,
                                                            BindingResult bindingResult) {
+        lessonReportRowValidator.validate(dto, bindingResult);
         if(bindingResult.hasErrors()) {
-            return ResponseEntity.badRequest().build();
+            Map<String, String> errors = new HashMap<>();
+            bindingResult.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
+            throw new ObjectValidationException(errors);
         }
-        LessonReportRow reportRow = lessonReportRowService.updateLessonReportRow(lessonReportRowSTO);
+        LessonReportRow reportRow = lessonReportRowService.updateLessonReportRow(dto);
         return new ResponseEntity<>(mapper.fromReportRowToDTO(reportRow), HttpStatus.OK);
     }
 

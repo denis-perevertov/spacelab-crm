@@ -35,71 +35,58 @@ public class AdminValidator implements Validator {
         AdminEditDTO dto = (AdminEditDTO) target;
 
         if(dto.getFirstName() == null || dto.getFirstName().isEmpty())
-            e.rejectValue("firstName", "firstName.empty", "Enter first name!");
-        else if(dto.getFirstName().length() < 2 || dto.getFirstName().length() > 50)
-            e.rejectValue("firstName", "firstName.length", "Name length: 2-50");
+            e.rejectValue("firstName", "firstName.empty", "validation.field.empty");
+        else if(dto.getFirstName().length() > 50)
+            e.rejectValue("firstName", "firstName.length", "validation.field.length.max");
 
         if(dto.getLastName() == null || dto.getLastName().isEmpty())
-            e.rejectValue("lastName", "lastName.empty", "Enter last name!");
-        else if(dto.getLastName().length() < 2 || dto.getLastName().length() > 50)
-            e.rejectValue("lastName", "lastName.length", "Name length: 2-50");
+            e.rejectValue("lastName", "lastName.empty", "validation.field.empty");
+        else if(dto.getLastName().length() > 50)
+            e.rejectValue("lastName", "lastName.length", "validation.field.length.max");
 
         if(dto.getPhone() == null || dto.getPhone().isEmpty())
-            e.rejectValue("phone", "phone.empty", "Enter phone!");
+            e.rejectValue("phone", "phone.empty", "validation.field.empty");
         else if(!dto.getPhone().matches(PHONE_PATTERN))
-            e.rejectValue("phone", "phone.no-match", "Incorrect phone format!");
+            e.rejectValue("phone", "phone.no-match", "validation.field.format.allowed");
 
         if(dto.getEmail() == null || dto.getEmail().isEmpty())
-            e.rejectValue("email", "email.empty", "Enter email!");
+            e.rejectValue("email", "email.empty", "validation.field.empty");
         else if(!dto.getEmail().matches(EMAIL_PATTERN))
-            e.rejectValue("email", "email.no-match", "Incorrect email format!");
+            e.rejectValue("email", "email.no-match", "validation.field.format.allowed");
         else if(adminRepository.existsByEmail(dto.getEmail())) {
             if(dto.getId() == null || dto.getId() == 0)
-                e.rejectValue("email", "email.exists", "Admin with this email already exists!");
+                e.rejectValue("email", "email.exists", "validation.admin.email.exists");
             else if(!dto.getId().equals(adminRepository.findByEmail(dto.getEmail()).orElseThrow().getId()))
-                e.rejectValue("email", "email.exists", "Admin with this email already exists!");
+                e.rejectValue("email", "email.exists", "validation.admin.email.exists");
         }
-
 
         if(dto.getId() == null) {
             if(dto.getPassword() == null || dto.getPassword().isEmpty())
-                e.rejectValue("password", "password.empty", "Enter password!");
+                e.rejectValue("password", "password.empty", "validation.field.empty");
             else if(dto.getPassword().length() < 8 || dto.getPassword().length() > 50)
-                e.rejectValue("password", "password.length", "Password length: 8-50");
+                e.rejectValue("password", "password.length", "validation.field.length");
             else if(dto.getConfirmPassword() == null || dto.getConfirmPassword().isEmpty())
-                e.rejectValue("confirmPassword", "password.confirm", "Confirm password!");
+                e.rejectValue("confirmPassword", "password.confirm", "validation.admin.password.confirm");
             else if(!dto.getConfirmPassword().equals(dto.getPassword())) {
-                e.rejectValue("password", "password.no-match", "Passwords don't match!");
-                e.rejectValue("confirmPassword", "password.no-match", "Passwords don't match!");
+                e.rejectValue("password", "password.no-match", "validation.admin.password.no-match");
+                e.rejectValue("confirmPassword", "password.no-match", "validation.admin.password.no-match");
             }
         }
         else if(dto.getPassword() != null && !dto.getPassword().isBlank()) {
             if(dto.getPassword().length() < 8 || dto.getPassword().length() > 50)
-                e.rejectValue("password", "password.length", "Password length: 8-50");
+                e.rejectValue("password", "password.length", "validation.field.length");
             else if(dto.getConfirmPassword() == null || dto.getConfirmPassword().isEmpty())
-                e.rejectValue("confirmPassword", "password.confirm", "Confirm password!");
+                e.rejectValue("confirmPassword", "password.confirm", "validation.admin.password.confirm");
             else if(!dto.getConfirmPassword().equals(dto.getPassword())) {
-                e.rejectValue("password", "password.no-match", "Passwords don't match!");
-                e.rejectValue("confirmPassword", "password.no-match", "Passwords don't match!");
+                e.rejectValue("password", "password.no-match", "validation.admin.password.no-match");
+                e.rejectValue("confirmPassword", "password.no-match", "validation.admin.password.no-match");
             }
         }
 
         if(dto.getRoleID() == null || dto.getRoleID() == 0)
-            e.rejectValue("roleID", "roleID.empty", "No role selected");
+            e.rejectValue("roleID", "roleID.empty", "validation.field.select");
         else if(!roleRepository.existsById(dto.getRoleID()))
-            e.rejectValue("roleID", "roleID.no-match", "No role with this ID exists");
-
-        /*
-
-        пока не сделаны курсы - нет проверки на курсы
-
-        if(dto.getCourseID() == null || dto.getCourseID() == 0)
-            e.rejectValue("courseID", "courseID.empty", "No course selected");
-        else if(!courseRepository.existsById(dto.getCourseID()))
-            e.rejectValue("courseID", "courseID.no-match", "No course with this ID exists");
-
-        */
-
+            e.rejectValue("roleID", "roleID.no-match", "validation.role.id.incorrect");
 
     }
 }

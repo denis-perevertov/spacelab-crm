@@ -1,12 +1,8 @@
 package com.example.spacelab.validator;
 
-import com.example.spacelab.dto.course.CourseSaveUpdatedDTO;
+import com.example.spacelab.dto.task.TaskProgressPointDTO;
 import com.example.spacelab.dto.task.TaskSaveDTO;
-import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.task.Task;
-import com.example.spacelab.repository.AdminRepository;
-import com.example.spacelab.repository.CourseRepository;
-import com.example.spacelab.util.ValidationUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -20,6 +16,7 @@ import static com.example.spacelab.util.ValidationUtils.*;
 @RequiredArgsConstructor
 public class TaskValidator implements Validator {
 
+
     @Override
     public boolean supports(Class<?> clazz) {
         return Task.class.equals(clazz);
@@ -31,9 +28,9 @@ public class TaskValidator implements Validator {
         log.info("dto to validate: {}", dto);
 
         if (fieldIsEmpty(dto.getName()))
-            e.rejectValue("name", "name.empty", "validation.task.name.empty");
-        else if (fieldLengthIsIncorrect(dto.getName(), 3, 100))
-            e.rejectValue("name", "name.length", "validation.task.name.length");
+            e.rejectValue("name", "name.empty", "validation.field.empty");
+        else if (fieldMaxLengthIsIncorrect(dto.getName(),  100))
+            e.rejectValue("name", "name.length", "validation.field.length.max");
 
 //        if (dto.getCourseID() == null || dto.getCourseID() == 0)
 //            e.rejectValue("courseID", "courseID.empty", "Select course!");
@@ -41,34 +38,51 @@ public class TaskValidator implements Validator {
 //            e.rejectValue("courseID", "courseID.no-match", "Course with this ID doesn't exist!");
 
         if (fieldIsEmpty(dto.getLevel()))
-            e.rejectValue("level", "level.empty", "validation.task.level.empty");
+            e.rejectValue("level", "level.empty", "validation.field.select");
 
         if (fieldIsEmpty(dto.getStatus()))
-            e.rejectValue("status", "status.empty", "validation.task.status.empty");
+            e.rejectValue("status", "status.empty", "validation.field.select");
 
         if (fieldIsEmpty(dto.getCompletionTime())) {
-//            e.rejectValue("completionTime", "completionTime.empty", "Enter completion time!");
+            e.rejectValue("completionTime", "completionTime.empty", "validation.field.empty");
         }
         else if (fieldMaxLengthIsIncorrect(dto.getCompletionTime(), 7)) {
-            e.rejectValue("completionTime", "completionTime.length", "validation.task.completionTime.length");
+            e.rejectValue("completionTime", "completionTime.length", "validation.field.length.max");
         }
 
         if(fieldIsNotEmpty(dto.getCompletionTime()) && fieldIsEmpty(dto.getCompletionTimeUnit())) {
-            e.rejectValue("completionTimeUnit", "completionTime.length", "validation.task.completionTimeUnit.empty");
+            e.rejectValue("completionTime", "completionTime.length", "validation.task.completion-time-unit.empty");
         }
-
 
         if (fieldIsEmpty(dto.getSkillsDescription())) {
 //            e.rejectValue("skillsDescription", "skillsDescription.empty", "Enter skills description!");
         }
-        else if (fieldLengthIsIncorrect(dto.getSkillsDescription(), 3, 200)) {
-            e.rejectValue("skillsDescription", "skillsDescription.length", "validation.task.skillsDescription.length");
+        else if (fieldMaxLengthIsIncorrect(dto.getSkillsDescription(), 200)) {
+            e.rejectValue("skillsDescription", "skillsDescription.length", "validation.field.length.max");
         }
 
         if (fieldIsEmpty(dto.getTaskDescription()))
-            e.rejectValue("taskDescription", "taskDescription.empty", "validation.task.taskDescription.empty");
-        else if (fieldLengthIsIncorrect(dto.getTaskDescription(), 3, 4000))
-            e.rejectValue("taskDescription", "taskDescription.length", "validation.task.taskDescription.length");
+            e.rejectValue("taskDescription", "taskDescription.empty", "validation.field.empty");
+        else if (fieldMaxLengthIsIncorrect(dto.getTaskDescription(), 4000))
+            e.rejectValue("taskDescription", "taskDescription.length", "validation.field.length.max");
+
+        // todo validate points
+        if(!dto.getTaskProgressPoints().isEmpty()) {
+            for(int i = 0; i < dto.getTaskProgressPoints().size(); i++) {
+                TaskProgressPointDTO point = dto.getTaskProgressPoints().get(i);
+                if(point.name().length() > 255) {
+                    e.rejectValue("taskProgressPoints["+i+"]", "taskProgressPoints["+i+"].length", "validation.field.length.max");
+                }
+                if(!point.subpoints().isEmpty()) {
+                    for(int j = 0; j < point.subpoints().size(); j++) {
+                        if(point.subpoints().get(j).name().length() > 255) {
+                            e.rejectValue("taskProgressPoints["+i+"].subpoints["+j+"]", "length", "validation.field.length.max");
+                        }
+                    }
+                }
+
+            }
+        }
 
     }
 }

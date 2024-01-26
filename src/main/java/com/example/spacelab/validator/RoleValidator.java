@@ -26,11 +26,11 @@ public class RoleValidator implements Validator {
         UserRoleEditDTO dto = (UserRoleEditDTO) target;
 
         if(dto.getName() == null || dto.getName().isEmpty())
-            e.rejectValue("name", "name.empty", "Enter name!");
-        else if(dto.getName().length() < 2 || dto.getName().length() > 50)
-            e.rejectValue("name", "name.length", "Name length: 2-50");
+            e.rejectValue("name", "name.empty", "validation.field.empty");
+        else if(dto.getName().length() > 50)
+            e.rejectValue("name", "name.length", "validation.field.length.max");
         else if(roleRepository.existsByName(dto.getName()) && !Objects.equals(roleRepository.findByName(dto.getName()).getId(), dto.getId()))
-            e.rejectValue("name", "name.exists", "Role with that name already exists!");
+            e.rejectValue("name", "name.exists", "validation.role.name.exists");
 
     }
 }

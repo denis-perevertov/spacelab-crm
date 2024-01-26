@@ -40,7 +40,7 @@ public class Lesson {
     private LessonStatus status;
 
     @ToString.Exclude
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "lesson", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<LessonReportRow> reportRows = new ArrayList<>();
 
     public Lesson(Long id, LocalDateTime datetime) {

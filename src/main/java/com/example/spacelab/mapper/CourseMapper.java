@@ -425,6 +425,7 @@ public class CourseMapper {
                 task.getId(),
                 task.getTaskIndex(),
                 task.getName(),
+                task.getStatus(),
                 task.getSubtasks().stream().map(this::fromTaskToCourseDTO).toList()
         );
     }

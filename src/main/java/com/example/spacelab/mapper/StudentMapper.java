@@ -7,6 +7,7 @@ import com.example.spacelab.exception.MappingException;
 import com.example.spacelab.exception.ResourceNotFoundException;
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.student.Student;
+import com.example.spacelab.model.student.StudentAccountStatus;
 import com.example.spacelab.model.student.StudentDetails;
 import com.example.spacelab.model.student.StudentInviteRequest;
 import com.example.spacelab.repository.CourseRepository;
@@ -181,9 +182,12 @@ public class StudentMapper {
             studentDetails.setEmail(dto.email());
             studentDetails.setPhone(dto.phone());
             studentDetails.setTelegram(dto.telegram());
-
-            if(dto.courseID() != null && dto.courseID() != 0)
+            if(dto.status() != null && !dto.status().isEmpty()) {
+                studentDetails.setAccountStatus(StudentAccountStatus.valueOf(dto.status()));
+            }
+            if(dto.courseID() != null && dto.courseID() != 0) {
                 student.setCourse(courseRepository.getReferenceById(dto.courseID()));
+            }
 
         } catch (EntityNotFoundException e) {
             log.severe("Error: " + e.getMessage());

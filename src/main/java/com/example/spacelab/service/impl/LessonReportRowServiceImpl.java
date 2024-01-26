@@ -52,7 +52,7 @@ public class LessonReportRowServiceImpl implements LessonReportRowService {
         Student st = studentService.getStudentById(dto.getStudentId());
         String currentTaskSnapshot = String.join(", ", st.getTasks()
                         .stream()
-                        .filter(t -> t.getStatus().equals(StudentTaskStatus.UNLOCKED))
+                        .filter(t -> t.getStatus().equals(StudentTaskStatus.UNLOCKED) || t.getStatus().equals(StudentTaskStatus.READY))
                         .map(t -> t.getTaskReference().getName() + " (" + t.getPercentOfCompletion() + "%)")
                         .toList());
 //                    .reduce("", (a, b) -> String.join(",", a, b));
@@ -65,11 +65,12 @@ public class LessonReportRowServiceImpl implements LessonReportRowService {
                         .setRating(dto.getRating())
                         .setStudent(st)
                         .setCurrentTaskSnapshot(currentTaskSnapshot);
-        lessonReportRow = lessonReportRowRepository.save(lessonReportRow);
-        log.info("saved lesson report row");
+//        lessonReportRow = lessonReportRowRepository.save(lessonReportRow);
+//        log.info("saved lesson report row");
 
         Lesson lesson = lessonService.getLessonById(dto.getLessonId());
         lesson.getReportRows().add(lessonReportRow);
+        lessonReportRow.setLesson(lesson);
         lessonRepository.save(lesson);
         log.info("added report row to lesson entity");
 

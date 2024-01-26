@@ -16,9 +16,11 @@ import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.course.CourseStatus;
 import com.example.spacelab.model.student.Student;
+import com.example.spacelab.model.student.StudentAccountStatus;
 import com.example.spacelab.model.student.StudentTask;
 import com.example.spacelab.model.student.StudentTaskStatus;
 import com.example.spacelab.model.task.Task;
+import com.example.spacelab.model.task.TaskStatus;
 import com.example.spacelab.repository.*;
 import com.example.spacelab.service.CourseService;
 import com.example.spacelab.service.FileService;
@@ -129,7 +131,11 @@ public class CourseServiceImpl implements CourseService {
                 studentCourse.getId(),
                 studentCourse.getName(),
                 studentCourse.getIcon(),
-                student.getTasks().stream().map(taskMapper::fromStudentTaskToDTO).toList()
+                student.getTasks()
+                        .stream()
+                        .filter(st -> st.getTaskReference().getStatus().equals(TaskStatus.ACTIVE))
+                        .map(taskMapper::fromStudentTaskToDTO)
+                        .toList()
         );
     }
 
@@ -213,12 +219,18 @@ public class CourseServiceImpl implements CourseService {
         updateCourseStudents(c, dto);
         updateStudentsCourseTaskList(c);
         Set<Student> newStudentList = c.getStudents();
+
         try {
             updateTrackingCourseProject(c);
-            updateStudentsInProject(oldStudentList, newStudentList, c.getTrackingId());
         } catch (TeamworkException ex) {
             log.error("could not update tracking project: {}", ex.getMessage());
         }
+        try {
+            updateStudentsInProject(oldStudentList, newStudentList, c.getTrackingId());
+        } catch (TeamworkException ex) {
+            log.error("could not update students in project: {}", ex.getMessage());
+        }
+
         return courseRepository.save(c);
     }
 
@@ -327,7 +339,7 @@ public class CourseServiceImpl implements CourseService {
     @Transactional
     private void updateCourseStudents(Course c, CourseEditDTO dto) {
         log.info("updating course students");
-        List<Student> courseStudents = c.getStudents().stream().toList();
+        List<Student> courseStudents = new ArrayList<>(c.getStudents().stream().toList());
 
         List<Long> oldStudentIds = courseStudents.stream().map(Student::getId).toList();
         List<Long> updatedStudentsIds = dto.getMembers().getStudents().stream().map(StudentAvatarDTO::getId).toList();
@@ -335,7 +347,11 @@ public class CourseServiceImpl implements CourseService {
         // ids of old students to remove from course
         courseStudents.stream()
                 .filter(st -> !updatedStudentsIds.contains(st.getId()))
-                .forEach(st -> {st.setCourse(null); studentTaskService.clearStudentTasksOnStudentDeletionFromCourse(st);});
+                .forEach(st -> {
+                    st.setCourse(null);
+                    st.getDetails().setAccountStatus(StudentAccountStatus.INACTIVE);
+                    studentTaskService.clearStudentTasksOnStudentDeletionFromCourse(st);
+                });
 
         // ids of new students to add to course
         updatedStudentsIds.stream()
@@ -344,11 +360,24 @@ public class CourseServiceImpl implements CourseService {
                         studentRepository.findById(newId).ifPresent(foundStudent -> {
                             log.info("adding student(id:{}) to course", newId);
                             foundStudent.setCourse(c);
+                            foundStudent.getDetails().setAccountStatus(StudentAccountStatus.ACTIVE);
                             Student st = studentRepository.save(foundStudent);
                             courseStudents.add(st);
-//                            studentTaskService.createStudentTasksOnStudentCourseTransfer(st, c);
                     });
                 });
+
+        // if course is inactive = disable all its students
+        c.getStudents().forEach(st -> {
+            if(c.getStatus().equals(CourseStatus.ACTIVE) && !st.getDetails().getAccountStatus().equals(StudentAccountStatus.ACTIVE)) {
+                st.getDetails().setAccountStatus(StudentAccountStatus.ACTIVE);
+            }
+            else if(c.getStatus().equals(CourseStatus.INACTIVE) && st.getDetails().getAccountStatus().equals(StudentAccountStatus.ACTIVE)) {
+                st.getDetails().setAccountStatus(StudentAccountStatus.INACTIVE);
+            }
+            else {
+                // in case more course statuses are added
+            }
+        });
 
     }
 

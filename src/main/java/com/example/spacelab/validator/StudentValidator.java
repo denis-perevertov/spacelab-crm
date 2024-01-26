@@ -13,8 +13,6 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.Validator;
 
-import java.util.Objects;
-
 import static com.example.spacelab.util.ValidationUtils.*;
 
 @Component
@@ -38,39 +36,39 @@ public class StudentValidator implements Validator {
         StudentEditDTO dto = (StudentEditDTO) target;
 
         if(fieldIsEmpty(dto.firstName()))
-            e.rejectValue("firstName", "firstName.empty", "Enter first name!");
-        else if(fieldLengthIsIncorrect(dto.firstName(), 2, 50))
-            e.rejectValue("firstName", "firstName.length", "Name length: 2-50");
+            e.rejectValue("firstName", "firstName.empty", "validation.field.empty");
+        else if(fieldMaxLengthIsIncorrect(dto.firstName(), 50))
+            e.rejectValue("firstName", "firstName.length", "validation.field.length.max");
 
         if(fieldIsEmpty(dto.lastName()))
-            e.rejectValue("lastName", "lastName.empty", "Enter last name!");
-        else if(fieldLengthIsIncorrect(dto.lastName(), 2, 50))
-            e.rejectValue("lastName", "lastName.length", "Name length: 2-50");
+            e.rejectValue("lastName", "lastName.empty", "validation.field.empty");
+        else if(fieldMaxLengthIsIncorrect(dto.lastName(), 50))
+            e.rejectValue("lastName", "lastName.length", "validation.field.length.max");
 
 //        if(fieldIsEmpty(dto.fathersName()))
 //            e.rejectValue("fathersName", "fathersName.empty", "Enter fathers name!");
 //        else if(dto.fathersName().length() < 2 || dto.fathersName().length() > 50)
-//            e.rejectValue("fathersName", "fathersName.length", "Name length: 2-50");
+//            e.rejectValue("fathersName", "fathersName.length", "validation.field.length.max");
 
-        if(fieldIsNotEmpty(dto.fathersName()) && fieldLengthIsIncorrect(dto.fathersName(), 2, 50)) {
-            e.rejectValue("fathersName", "fathersName.length", "Name length: 2-50");
+        if(fieldIsNotEmpty(dto.fathersName()) && fieldMaxLengthIsIncorrect(dto.fathersName(), 50)) {
+            e.rejectValue("fathersName", "fathersName.length", "validation.field.length.max");
         }
 
         if(fieldIsEmpty(dto.email()))
-            e.rejectValue("email", "email.empty", "Enter email!");
+            e.rejectValue("email", "email.empty", "validation.field.empty");
         else if(!dto.email().matches(EMAIL_PATTERN))
-            e.rejectValue("email", "email.no-match", "Incorrect email format!");
+            e.rejectValue("email", "email.no-match", "validation.field.format.allowed");
         else if(studentRepository.existsByDetailsEmail(dto.email())) {
             if(dto.id() == null)
-                e.rejectValue("email", "email.taken", "Student with this email already exists!");
+                e.rejectValue("email", "email.taken", "validation.student.email.exists");
             else if(!studentRepository.findById(dto.id()).get().getDetails().getEmail().equals(dto.email()))
-                e.rejectValue("email", "email.taken", "Student with this email already exists!");
+                e.rejectValue("email", "email.taken", "validation.student.email.exists");
         }
 
         if(fieldIsEmpty(dto.phone()))
-            e.rejectValue("phone", "phone.empty", "Enter phone!");
+            e.rejectValue("phone", "phone.empty", "validation.field.empty");
         else if(!dto.phone().matches(PHONE_PATTERN))
-            e.rejectValue("phone", "phone.no-match", "Incorrect phone format!");
+            e.rejectValue("phone", "phone.no-match", "validation.field.format.allowed");
 
 //        if(dto.telegram() == null || dto.telegram().isEmpty())
 //            e.rejectValue("telegram", "telegram.empty", "Enter telegram!");
@@ -85,13 +83,13 @@ public class StudentValidator implements Validator {
             Student student = studentRepository.findById(request.studentID()).orElse(null);
             if(student != null) {
                 if(task.getActiveStudents().contains(student)) {
-                    bindingResult.addError(new FieldError("StudentTaskUnlockRequest", "taskID", "student already has this task"));
+                    bindingResult.addError(new FieldError("StudentTaskUnlockRequest", "taskID", "validation.student.task.already-present"));
                 }
             } else {
-                bindingResult.addError(new FieldError("StudentTaskUnlockRequest", "studentID", "this student doesn't exist"));
+                bindingResult.addError(new FieldError("StudentTaskUnlockRequest", "studentID", "validation.student.task.does-not-exist"));
             }
         } else {
-            bindingResult.addError(new FieldError("StudentTaskUnlockRequest", "taskID", "this task doesn't exist"));
+            bindingResult.addError(new FieldError("StudentTaskUnlockRequest", "taskID", "validation.student.task.does-not-exist"));
         }
     }
 }

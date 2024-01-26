@@ -9,6 +9,7 @@ import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.lesson.Lesson;
 import com.example.spacelab.model.lesson.LessonReport;
 import com.example.spacelab.model.lesson.LessonReportRow;
+import com.example.spacelab.model.student.Student;
 import com.example.spacelab.model.student.StudentTask;
 import com.example.spacelab.service.AdminService;
 import com.example.spacelab.service.CourseService;
@@ -57,19 +58,18 @@ public class LessonMapper {
         dto.setLink(lesson.getLink());
         dto.setStatus(lesson.getStatus().toString());
 
-//        if(lesson.getLessonReport() != null) {
-//            dto.setPresentStudentsQuantity(
-//                    lesson.getLessonReport()
-//                            .getRows()
-//                            .stream()
-//                            .filter(LessonReportRow::getWasPresent)
-//                            .count()
-//                            +
-//                            " / "
-//                            +
-//                            lesson.getLessonReport().getRows().size()
-//            );
-//        }
+        if(!lesson.getReportRows().isEmpty()) {
+            dto.setPresentStudentsQuantity(
+                    lesson.getReportRows()
+                            .stream()
+                            .filter(LessonReportRow::getWasPresent)
+                            .count()
+                    +
+                    " / "
+                    +
+                    lesson.getReportRows().size()
+            );
+        }
 
         return dto;
     }
@@ -118,6 +118,7 @@ public class LessonMapper {
                 .getCourse()
                 .getStudents()
                 .stream()
+                .filter(Student::isEnabled)
                 .map(studentMapper::fromStudentToAvatarDTO)
                 .toList();
 

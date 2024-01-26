@@ -43,21 +43,21 @@ public class LessonBeforeStartValidator implements Validator {
 //        }
 
         if(dto.getCourseID() == null || dto.getCourseID() < 0)
-            e.rejectValue("courseID", "courseID.empty", "Select course!");
+            e.rejectValue("courseID", "courseID.empty", "validation.field.select");
         else if(!courseRepository.existsById(dto.getCourseID()))
             e.rejectValue("courseID", "courseID.no-match", "Course with this ID doesn't exist!");
 
         if(dto.getLink() == null || dto.getLink().isEmpty())
-            e.rejectValue("link", "link.empty", "Enter link!");
+            e.rejectValue("link", "link.empty", "validation.field.empty");
         else if(dto.getLink().length() > 200)
-            e.rejectValue("link", "link.length", "Link length: max 200");
+            e.rejectValue("link", "link.length", "validation.field.length.max");
 
 //        if(dto.getStatus().equals(LessonStatus.ACTIVE) && (dto.getId() != null && dto.getId() != 0)) {
 //            e.rejectValue("status", "status.active", "Cannot create/edit an active lesson!");
 //        }
 
         if(dto.getStatus().equals(LessonStatus.PLANNED) && dto.getLessonStartTime().isBefore(ZonedDateTime.now())) {
-            e.rejectValue("lessonStartTime", "lessonStartTime.past", "Cannot create a planned lesson in the past!");
+            e.rejectValue("lessonStartTime", "lessonStartTime.past", "validation.lesson.time.past");
         }
 
     }

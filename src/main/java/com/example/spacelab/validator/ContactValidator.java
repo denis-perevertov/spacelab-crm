@@ -32,41 +32,41 @@ public class ContactValidator implements Validator {
         ContactInfoEditDTO dto = (ContactInfoEditDTO) target;
 
         if(fieldIsNotEmpty(dto.getEmail())) {
-            if(fieldLengthIsIncorrect(dto.getEmail(), 2, 50)) {
-                e.rejectValue("email", "email.length", "Email length : 2-50");
+            if(fieldMaxLengthIsIncorrect(dto.getEmail(), 50)) {
+                e.rejectValue("email", "email.length", "validation.field.length.max");
             }
             else if(!fieldMatchesPattern(dto.getEmail(), PHONE_PATTERN)) {
-                e.rejectValue("email", "email.no-match", "Incorrect email format!");
+                e.rejectValue("email", "email.no-match", "validation.field.format.allowed");
             }
         }
 
         if(fieldIsNotEmpty(dto.getPhone())) {
             if(fieldLengthIsIncorrect(dto.getPhone(), 9, 20)) {
-                e.rejectValue("phone", "phone.length", "Phone length : 9-20");
+                e.rejectValue("phone", "phone.length", "validation.field.length");
             }
             else if(!fieldMatchesPattern(dto.getPhone(), PHONE_PATTERN)) {
-                e.rejectValue("phone", "phone.no-match", "Incorrect phone format!");
+                e.rejectValue("phone", "phone.no-match", "validation.field.format.allowed");
             }
         }
 
         if(fieldIsNotEmpty(dto.getTelegram()) && !fieldMatchesPattern(dto.getTelegram(), TELEGRAM_PATTERN)) {
-            e.rejectValue("telegram", "telegram.no-match", "Incorrect telegram format!");
+            e.rejectValue("telegram", "telegram.no-match", "validation.field.format.allowed");
         }
 
         if(fieldIsNotEmpty(dto.getTelegram())) {
             if(fieldLengthIsIncorrect(dto.getTelegram(), 2, 50)) {
-                e.rejectValue("telegram", "telegram.length", "Length: 2-50");
+                e.rejectValue("telegram", "telegram.length", "validation.field.length");
             }
             else if(!fieldMatchesPattern(dto.getTelegram(), TELEGRAM_PATTERN)) {
-                e.rejectValue("telegram", "telegram.no-match", "Incorrect telegram format!");
+                e.rejectValue("telegram", "telegram.no-match", "validation.field.format.allowed");
             }
         }
 
         if(fieldIsEmpty(dto.getAdminID())) {
-            e.rejectValue("adminID", "adminID.empty", "Select admin!");
+            e.rejectValue("adminID", "adminID.empty", "validation.admin.select");
         }
         else if(!adminExists(dto.getAdminID()))
-            e.rejectValue("adminID", "adminID.no-match", "Admin with this ID doesn't exist!");
+            e.rejectValue("adminID", "adminID.no-match", "validation.admin.id.incorrect");
 
     }
 

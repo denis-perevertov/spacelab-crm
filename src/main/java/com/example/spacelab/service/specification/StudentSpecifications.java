@@ -68,4 +68,12 @@ public class StudentSpecifications {
         return (root, query, cb) -> cb.equal(root.get(Student_.DETAILS).get(StudentDetails_.ACCOUNT_STATUS), status);
     }
 
+    public static Specification<Student> isAvailable() {
+        return (root, query, cb) -> cb.or(
+                cb.equal(root.get(Student_.DETAILS).get(StudentDetails_.ACCOUNT_STATUS), StudentAccountStatus.ACTIVE),
+                cb.equal(root.get(Student_.DETAILS).get(StudentDetails_.ACCOUNT_STATUS), StudentAccountStatus.INACTIVE),
+                cb.equal(root.get(Student_.DETAILS).get(StudentDetails_.ACCOUNT_STATUS), StudentAccountStatus.HIRED)
+        );
+    }
+
 }

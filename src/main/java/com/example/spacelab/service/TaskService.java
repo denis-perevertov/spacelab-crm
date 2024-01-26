@@ -12,8 +12,7 @@ import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
 
-public interface TaskService extends StudentTaskService,
-                                    EntityFilterService<Task>{
+public interface TaskService extends StudentTaskService, EntityFilterService<Task>{
 
     List<Task> getTasks();
     Page<Task> getTasks(Pageable pageable);

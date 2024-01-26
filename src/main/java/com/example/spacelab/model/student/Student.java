@@ -6,7 +6,11 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.Hibernate;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -17,7 +21,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 @Entity
 @Table(name="students")
-public class Student extends UserEntity {
+public class Student extends UserEntity implements UserDetails {
 
     @Embedded
     private StudentDetails details = new StudentDetails();
@@ -46,6 +50,38 @@ public class Student extends UserEntity {
 
     public String getInitials() {
         return this.details.getFirstName().charAt(0) + "." + this.details.getLastName();
+    }
+
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return this.getRole().getAuthorities().stream().map(SimpleGrantedAuthority::new).toList();
+    }
+
+    @Override
+    public String getUsername() {
+        return this.details.getEmail();
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return !this.details.getAccountStatus().equals(StudentAccountStatus.BLOCKED);
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return (
+                this.details.getAccountStatus().equals(StudentAccountStatus.ACTIVE)
+                || this.details.getAccountStatus().equals(StudentAccountStatus.HIRED)
+        );
     }
 
     @Override

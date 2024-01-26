@@ -10,6 +10,7 @@ import org.hibernate.Hibernate;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -46,11 +47,8 @@ public class StudentTask {
     @OneToMany(cascade = CascadeType.ALL)
     private List<StudentTask> subtasks = new ArrayList<>();
 
-    @DateTimeFormat(pattern = "MM/dd/yyyy")
-    private LocalDate beginDate;
-
-    @DateTimeFormat(pattern = "MM/dd/yyyy")
-    private LocalDate endDate;
+    private ZonedDateTime beginDate;
+    private ZonedDateTime endDate;
 
     @Enumerated(value = EnumType.STRING)
     private StudentTaskStatus status = StudentTaskStatus.LOCKED;
