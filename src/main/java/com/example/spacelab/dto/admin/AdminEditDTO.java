@@ -22,6 +22,7 @@ public class AdminEditDTO {
     private String confirmPassword;
 
     private String avatar;
+    private MultipartFile avatarToSave;
 
     @Schema(example = "1")
     private Long roleID;

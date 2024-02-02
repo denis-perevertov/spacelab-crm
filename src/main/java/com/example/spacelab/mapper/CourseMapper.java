@@ -425,8 +425,21 @@ public class CourseMapper {
                 task.getId(),
                 task.getTaskIndex(),
                 task.getName(),
+                task.getLevel(),
                 task.getStatus(),
                 task.getSubtasks().stream().map(this::fromTaskToCourseDTO).toList()
+        );
+    }
+
+    public CourseAdminIconDTO fromCourseToCourseAdminDTO(Course c) {
+        return new CourseAdminIconDTO(
+                c.getId(),
+                c.getName(),
+                c.getIcon(),
+                c.getMentor().getId(),
+                c.getMentor().getFullName(),
+                c.getManager().getId(),
+                c.getManager().getFullName()
         );
     }
 

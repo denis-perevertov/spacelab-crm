@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 
 public class LessonSpecifications {
 
-    public static Specification<Lesson> hasDatesBetween(LocalDate from, LocalDate to) {
+    public static Specification<Lesson> hasDatesBetween(LocalDateTime from, LocalDateTime to) {
         if(from == null || to == null) return (root, query, cb) -> null;
         return (root, query, cb) -> cb.between(root.get("datetime"), from, to);
     }
@@ -22,9 +22,9 @@ public class LessonSpecifications {
         return (root, query, cb) -> cb.greaterThanOrEqualTo(root.get("datetime"), LocalDateTime.now());
     }
 
-    public static Specification<Lesson> hasCourse(Course course) {
-        if(course == null) return (root, query, cb) -> null;
-        return (root, query, cb) -> cb.equal(root.get("course"), course);
+    public static Specification<Lesson> hasCourseId(Long courseID) {
+        if(courseID == null || courseID < 0) return (root, query, cb) -> null;
+        return (root, query, cb) -> cb.equal(root.get("course").get("id"), courseID);
     }
 
     public static Specification<Lesson> hasCourseIDs(Long... ids) {
@@ -35,14 +35,22 @@ public class LessonSpecifications {
         };
     }
 
-    public static Specification<Lesson> hasMentor(Admin admin) {
-        if(admin == null) return (root, query, cb) -> null;
-        return (root, query, cb) -> cb.equal(root.get("course").get("mentor"), admin);
+    public static Specification<Lesson> hasMentorId(Long adminID) {
+        if(adminID == null || adminID < 0) return (root, query, cb) -> null;
+        return (root, query, cb) -> cb.equal(root.get("course").get("mentor").get("id"), adminID);
     }
 
-    public static Specification<Lesson> hasManager(Admin admin) {
-        if(admin == null) return (root, query, cb) -> null;
-        return (root, query, cb) -> cb.equal(root.get("course").get("manager"), admin);
+    public static Specification<Lesson> hasManagerId(Long adminID) {
+        if(adminID == null || adminID < 0) return (root, query, cb) -> null;
+        return (root, query, cb) -> cb.equal(root.get("course").get("manager").get("id"), adminID);
+    }
+
+    public static Specification<Lesson> hasAdminId(Long adminID) {
+        if(adminID == null || adminID < 0) return (root, query, cb) -> null;
+        return (root, query, cb) -> cb.or(
+                cb.equal(root.get("course").get("mentor").get("id"), adminID),
+                cb.equal(root.get("course").get("manager").get("id"), adminID)
+        );
     }
 
     public static Specification<Lesson> hasStatus(LessonStatus status) {

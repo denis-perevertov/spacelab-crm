@@ -1,7 +1,9 @@
 package com.example.spacelab.service.impl;
 
 import com.amazonaws.services.s3.model.AmazonS3Exception;
+import com.example.spacelab.dto.admin.AdminEditDTO;
 import com.example.spacelab.exception.ResourceNotFoundException;
+import com.example.spacelab.mapper.AdminMapper;
 import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.role.UserRole;
@@ -38,6 +40,9 @@ import java.util.Optional;
 @Slf4j
 @RequiredArgsConstructor
 public class AdminServiceImpl implements AdminService {
+
+    private final AdminMapper adminMapper;
+
 
     private final AdminRepository adminRepository;
     private final UserRoleRepository userRoleRepository;
@@ -108,6 +113,42 @@ public class AdminServiceImpl implements AdminService {
             log.error(e.getMessage());
             throw new RuntimeException("Unknown error during saving");
         }
+    }
+
+    @Override
+    public Admin createAdmin(AdminEditDTO dto) throws IOException {
+        log.info("Creating new admin");
+        Admin admin = adminMapper.fromEditDTOToAdmin(dto);
+        admin = adminRepository.save(admin);
+        MultipartFile avatar = dto.getAvatarToSave();
+        if(!avatar.isEmpty()) {
+            try {
+                String filename = FilenameUtils.generateFileName(avatar);
+                fileService.saveFile(avatar, filename, "admins");
+                admin.setAvatar(filename);
+            } catch (AmazonS3Exception ex) {
+                log.error("could not save file: {}", ex.getMessage());
+            }
+        }
+        return admin;
+    }
+
+    @Override
+    public Admin updateAdmin(AdminEditDTO dto) throws IOException {
+        log.info("Updating admin");
+        Admin admin = adminMapper.fromEditDTOToAdmin(dto);
+        admin = adminRepository.save(admin);
+        MultipartFile avatar = dto.getAvatarToSave();
+        if(!avatar.isEmpty()) {
+            try {
+                String filename = FilenameUtils.generateFileName(avatar);
+                fileService.saveFile(avatar, filename, "admins");
+                admin.setAvatar(filename);
+            } catch (AmazonS3Exception ex) {
+                log.error("could not save file: {}", ex.getMessage());
+            }
+        }
+        return admin;
     }
 
     @Override

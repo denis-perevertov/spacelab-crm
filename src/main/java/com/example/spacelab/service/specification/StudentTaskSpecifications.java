@@ -13,13 +13,18 @@ public class StudentTaskSpecifications {
         return (root, query, cb) -> cb.equal(root.get("id"), id);
     }
 
+    public static Specification<StudentTask> hasStudentId(Long id) {
+        if(id == null) return (root, query, cb) -> null;
+        return (root, query, cb) -> cb.equal(root.get("student").get("id"), id);
+    }
+
     public static Specification<StudentTask> hasNameLike(String name) {
         if(name == null) return (root, query, cb) -> null;
-        return (root, query, cb) -> cb.like(root.get("name"), "%"+name+"%");
+        return (root, query, cb) -> cb.like(root.get("taskReference").get("name"), "%"+name+"%");
     }
 
     public static Specification<StudentTask> hasCourseID(Long id) {
-        if(id == null) return (root, query, cb) -> null;
+        if(id == null || id < 0) return (root, query, cb) -> null;
         return (root, query, cb) -> cb.equal(root.get("taskReference").get("course").get("id"), id);
     }
 

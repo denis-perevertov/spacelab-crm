@@ -1,5 +1,6 @@
 package com.example.spacelab.service;
 
+import com.example.spacelab.dto.admin.AdminEditDTO;
 import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.util.FilterForm;
 import org.springframework.data.domain.Page;
@@ -20,6 +21,8 @@ public interface AdminService extends EntityFilterService<Admin>, UserDetailsSer
     Admin getAdminByEmail(String email);
     Admin createAdmin(Admin admin);
     Admin updateAdmin(Admin admin);
+    Admin createAdmin(AdminEditDTO dto) throws IOException;
+    Admin updateAdmin(AdminEditDTO dto) throws IOException;
 
     boolean canDeleteAdmin(Long id);
     void deleteAdminById(Long id);

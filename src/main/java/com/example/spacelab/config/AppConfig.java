@@ -5,6 +5,7 @@ import com.example.spacelab.service.impl.FileServiceS3Impl;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.http.HttpMethod;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -20,7 +21,6 @@ import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import java.nio.file.Paths;
 
 @Configuration
-@EnableWebMvc
 @EnableScheduling
 public class AppConfig implements WebMvcConfigurer {
 
@@ -33,6 +33,15 @@ public class AppConfig implements WebMvcConfigurer {
                         "classpath:/static/uploads/",
                         "file:/" + Paths.get("uploads").toFile().getAbsolutePath() + "/"
                 );
+    }
+
+    @Bean
+    public MessageSource messageSource() {
+        ReloadableResourceBundleMessageSource messageSource
+                = new ReloadableResourceBundleMessageSource();
+        messageSource.setBasename("classpath:messages");
+        messageSource.setDefaultEncoding("UTF-8");
+        return messageSource;
     }
 
 }

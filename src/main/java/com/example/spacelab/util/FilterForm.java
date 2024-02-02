@@ -12,6 +12,7 @@ public class FilterForm {
 //    @Schema(defaultValue = "Test")
     private String name;
 //    @Schema(defaultValue = "0")
+    private Long student;
     private Long course;
 //    @Schema(defaultValue = "test@gmail.com")
     private String email;
@@ -39,11 +40,19 @@ public class FilterForm {
     private Long mentor;
 //    @Schema(defaultValue = "0", description = "Manager's ID")
     private Long manager;
+    private Long admin;
     private String combined;
     private Boolean active;
 
     private String nameAndAuthor;
     private Boolean verified;
+
+    private Boolean present;
+    private Long task;
+    private Integer hoursFrom;
+    private Integer hoursTo;
+    private String note;
+    private String comment;
 
     public static FilterBuilder with() { return new FilterBuilder(); }
 //

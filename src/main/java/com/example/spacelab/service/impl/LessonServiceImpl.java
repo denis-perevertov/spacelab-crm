@@ -7,17 +7,18 @@ import com.example.spacelab.job.LessonMonitor;
 import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.lesson.Lesson;
+import com.example.spacelab.model.lesson.LessonReportRow;
 import com.example.spacelab.model.lesson.LessonStatus;
 import com.example.spacelab.model.settings.Settings;
 import com.example.spacelab.model.student.Student;
+import com.example.spacelab.model.student.StudentAccountStatus;
 import com.example.spacelab.model.task.Task;
 import com.example.spacelab.model.task.TaskLevel;
 import com.example.spacelab.model.task.TaskStatus;
-import com.example.spacelab.repository.AdminRepository;
-import com.example.spacelab.repository.CourseRepository;
-import com.example.spacelab.repository.LessonRepository;
+import com.example.spacelab.repository.*;
 import com.example.spacelab.service.LessonService;
 import com.example.spacelab.service.SettingsService;
+import com.example.spacelab.service.StudentService;
 import com.example.spacelab.service.TaskService;
 import com.example.spacelab.service.specification.LessonSpecifications;
 import com.example.spacelab.service.specification.TaskSpecifications;
@@ -40,6 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Service
@@ -48,11 +50,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class LessonServiceImpl implements LessonService {
 
-    private final CourseRepository courseRepository;
-    private final AdminRepository adminRepository;
-
     private final LessonRepository lessonRepository;
 
+    private final StudentService studentService;
     private final TaskService taskService;
     private final SettingsService settingsService;
 
@@ -82,6 +82,11 @@ public class LessonServiceImpl implements LessonService {
     @Override
     public Page<Lesson> getLessonsByAllowedCourses(Pageable pageable, Long... ids) {
         return lessonRepository.findAllByAllowedCoursePage(pageable, ids);
+    }
+
+    @Override
+    public long getCompletedLessonsCount() {
+        return lessonRepository.getCompletedLessonsCount();
     }
 
     @Override
@@ -125,11 +130,12 @@ public class LessonServiceImpl implements LessonService {
     @Override
     public void deleteLessonById(Long id) {
         Lesson lesson = lessonRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Lesson with this ID doesn't exist!"));
-//        if(lesson.getStatus().equals(LessonStatus.ACTIVE)) {
-//            log.warn("Attempt to delete a lesson already in progress");
-//            log.warn(lesson.toString());
-//            throw new RuntimeException("Cannot delete an active lesson!");
-//        }
+
+        // recalculate average student rating after lesson delete
+        if(!lesson.getStatus().equals(LessonStatus.PLANNED)) {
+            studentService.recalculateAvgStudentRating(lesson.getCourse().getStudents());
+        }
+
         lessonRepository.delete(lesson);
     }
 
@@ -154,6 +160,9 @@ public class LessonServiceImpl implements LessonService {
         if(!lesson.getStatus().equals(LessonStatus.ACTIVE)) throw new LessonException("Can't complete a completed/planned lesson!");
         lesson.setStatus(LessonStatus.COMPLETED);
         lessonRepository.save(lesson);
+
+        // for every student on this lesson - recalculate avg rating
+        studentService.recalculateAvgStudentRating(lesson.getCourse().getStudents());
 
         Settings settings = settingsService.getSettingsForAdmin(authUtil.getLoggedInAdmin());
         if(settings.isAutomaticLessonCreationSetting()) {
@@ -191,28 +200,27 @@ public class LessonServiceImpl implements LessonService {
 
         String begin = filters.getBegin();
         String end = filters.getEnd();
-        Long courseID = filters.getCourse();
+        Long course = filters.getCourse();
         String statusInput = filters.getStatus();
-        Long mentorID = filters.getMentor();
-        Long managerID = filters.getManager();
+        Long mentor = filters.getMentor();
+        Long manager = filters.getManager();
+        Long admin = filters.getAdmin();
 
-        LocalDate beginDate = null, endDate = null;
+        LocalDateTime beginDate = null, endDate = null;
 
         if(begin != null && !begin.isEmpty() && end != null && !end.isEmpty()) {
-            beginDate = LocalDate.parse(begin, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-            endDate = LocalDate.parse(end, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            beginDate = LocalDate.parse(begin, DateTimeFormatter.ofPattern("yyyy-MM-dd")).atStartOfDay();
+            endDate = LocalDate.parse(end, DateTimeFormatter.ofPattern("yyyy-MM-dd")).atTime(LocalTime.MAX);
         }
 
-        Course course = NumericUtils.fieldIsEmpty(courseID) ? null : courseRepository.getReferenceById(courseID);
         LessonStatus status = StringUtils.fieldIsEmpty(statusInput) ? null : LessonStatus.valueOf(statusInput);
-        Admin mentor = NumericUtils.fieldIsEmpty(mentorID) ? null : adminRepository.findById(mentorID).orElseThrow();
-        Admin manager = NumericUtils.fieldIsEmpty(managerID) ? null : adminRepository.findById(managerID).orElseThrow();
 
         Specification<Lesson> spec = LessonSpecifications.hasDatesBetween(beginDate, endDate)
-                                    .and(LessonSpecifications.hasCourse(course))
+                                    .and(LessonSpecifications.hasCourseId(course))
                                     .and(LessonSpecifications.hasStatus(status))
-                                    .and(LessonSpecifications.hasManager(manager))
-                                    .and(LessonSpecifications.hasMentor(mentor));
+                                    .and(LessonSpecifications.hasAdminId(admin))
+                                    .and(LessonSpecifications.hasManagerId(manager))
+                                    .and(LessonSpecifications.hasMentorId(mentor));
 
         return spec;
     }

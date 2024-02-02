@@ -4,6 +4,7 @@ import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.example.spacelab.dto.course.CourseEditDTO;
 import com.example.spacelab.dto.course.CourseIconDTO;
 import com.example.spacelab.dto.course.StudentCourseTaskInfoDTO;
+import com.example.spacelab.dto.statistics.CourseStatisticsDTO;
 import com.example.spacelab.dto.student.StudentAvatarDTO;
 import com.example.spacelab.dto.task.TaskCourseDTO;
 import com.example.spacelab.exception.ResourceNotFoundException;
@@ -20,6 +21,7 @@ import com.example.spacelab.model.student.StudentAccountStatus;
 import com.example.spacelab.model.student.StudentTask;
 import com.example.spacelab.model.student.StudentTaskStatus;
 import com.example.spacelab.model.task.Task;
+import com.example.spacelab.model.task.TaskLevel;
 import com.example.spacelab.model.task.TaskStatus;
 import com.example.spacelab.repository.*;
 import com.example.spacelab.service.CourseService;
@@ -37,20 +39,20 @@ import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.comparator.Comparators;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Data
@@ -68,6 +70,7 @@ public class CourseServiceImpl implements CourseService {
 
     private final AdminRepository adminRepository;
     private final CourseRepository courseRepository;
+    private final LessonRepository lessonRepository;
 
     private final CourseMapper mapper;
     private final TaskMapper taskMapper;
@@ -134,6 +137,7 @@ public class CourseServiceImpl implements CourseService {
                 student.getTasks()
                         .stream()
                         .filter(st -> st.getTaskReference().getStatus().equals(TaskStatus.ACTIVE))
+                        .sorted((o1, o2) -> Comparators.comparable().compare(o1.getTaskReference().getTaskIndex(), o2.getTaskReference().getTaskIndex()))
                         .map(taskMapper::fromStudentTaskToDTO)
                         .toList()
         );
@@ -181,8 +185,8 @@ public class CourseServiceImpl implements CourseService {
         Course c = mapper.fromEditDTOToCourse(dto);
         c.setStatus(CourseStatus.ACTIVE);
         c = courseRepository.save(c);
-        c.getMentor().getCourses().add(c);
-        c.getManager().getCourses().add(c);
+        if(c.getMentor() != null) c.getMentor().getCourses().add(c);
+        if(c.getManager() != null) c.getManager().getCourses().add(c);
         updateCourseTaskList(c, dto);
         updateCourseStudents(c, dto);
         updateStudentsCourseTaskList(c);
@@ -208,13 +212,8 @@ public class CourseServiceImpl implements CourseService {
         Set<Student> oldStudentList = c.getStudents();
         Admin mentor = c.getMentor();
         Admin manager = c.getManager();
-//        log.info(mentor.toString());
-//        log.info(manager.toString());
-        mentor.getCourses().add(c);
-        manager.getCourses().add(c);
-//        log.info("after adding courses");
-//        log.info(mentor.getCourses().stream().map(Course::getId).map(Object::toString).collect(Collectors.joining(",")));
-//        log.info(manager.getCourses().stream().map(Course::getId).map(Object::toString).collect(Collectors.joining(",")));
+        if(mentor != null) mentor.getCourses().add(c);
+        if(manager != null) manager.getCourses().add(c);
         updateCourseTaskList(c, dto);
         updateCourseStudents(c, dto);
         updateStudentsCourseTaskList(c);
@@ -252,6 +251,111 @@ public class CourseServiceImpl implements CourseService {
         adminRepository.save(mentor);
         adminRepository.save(manager);
         courseRepository.save(oldCourse);
+    }
+
+    @Override
+    public List<Course> getAdminCourses(Long adminId) {
+        return courseRepository.findAllAdminCourses(adminId);
+    }
+
+
+    //fixme
+    @Override
+    @Transactional
+    public List<CourseStatisticsDTO> getCoursesByStudentRating(int limit, Sort.Direction direction) {
+//        Comparator<Course> studentRatingComparator = (c1, c2) -> {
+//            double avg1 = c1.getStudents().stream().mapToInt(Student::getRating).average().orElse(0.0);
+//            double avg2 = c2.getStudents().stream().mapToInt(Student::getRating).average().orElse(0.0);
+//            return (int) (direction.isAscending() ? avg1 - avg2 : avg2 - avg1);
+//        };
+        return courseRepository.findAll()
+                .stream()
+                .map(c -> new CourseStatisticsDTO(c.getName(), new Object[]{c.getStudents().stream().mapToInt(Student::getRating).average().orElse(0.0)}))
+                .sorted((c1,c2) -> direction.isAscending() ? (int) ((double)c1.values()[0] - (double)c2.values()[0]) : (int)((double)c2.values()[0] - (double)c1.values()[0]))
+                .limit(limit)
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public List<CourseStatisticsDTO> getCoursesByHiredStudents(int limit, Sort.Direction direction) {
+        return courseRepository.findAll()
+                .stream()
+                .map(c -> {
+                    int hiredCount = 0;
+                    int blockedCount = 0;
+                    int expelledCount = 0;
+                    int inactiveCount = 0;
+                    int activeCount = 0;
+                    for(Student s : c.getStudents()) {
+                        switch (s.getDetails().getAccountStatus()) {
+                            case ACTIVE -> activeCount++;
+                            case INACTIVE -> inactiveCount++;
+                            case EXPELLED -> expelledCount++;
+                            case BLOCKED -> blockedCount++;
+                            case HIRED -> hiredCount++;
+                        }
+                    }
+                    return new CourseStatisticsDTO(
+                            c.getName(),
+                            new Object[]{hiredCount, blockedCount, expelledCount, inactiveCount, activeCount}
+                    );
+                })
+                .sorted((c1,c2) -> direction.isAscending() ? (int)c1.values()[0] - (int)c2.values()[0] : (int)c2.values()[0] - (int)c1.values()[0])
+                .limit(limit)
+                .toList();
+    }
+
+    /*
+    Difficulty Rating
+    ADVANCED - 3 points
+    INTERMEDIATE - 2 points
+    BEGINNER - 1 point
+     */
+
+    @Override
+    @Transactional
+    public List<CourseStatisticsDTO> getCoursesByDifficulty(int limit, Sort.Direction direction) {
+        return courseRepository.findAll()
+                .stream()
+                .map(c -> {
+                    int beginnerTasks = 0;
+                    int intermediateTasks = 0;
+                    int advancedTasks = 0;
+                    for(Task t : c.getTasks()) {
+                        switch (t.getLevel()) {
+                            case BEGINNER -> beginnerTasks++;
+                            case INTERMEDIATE -> intermediateTasks++;
+                            case ADVANCED -> advancedTasks++;
+                        }
+                    }
+                    return new CourseStatisticsDTO(
+                            c.getName(),
+                            new Object[]{advancedTasks, intermediateTasks, beginnerTasks}
+                    );
+                })
+                .sorted((c1,c2) -> {
+                    int totalRating1 = (int)c1.values()[0]*3 + (int)c1.values()[1]*2 + (int)c1.values()[2];
+                    int totalRating2 = (int)c2.values()[0]*3 + (int)c2.values()[1]*2 + (int)c2.values()[2];
+                    return direction.isAscending() ? totalRating1 - totalRating2 : totalRating2 - totalRating1;
+                })
+                .limit(limit)
+                .toList();
+    }
+
+    @Override
+    public List<CourseStatisticsDTO> getCoursesByLessonCount(int limit, Sort.Direction direction) {
+        return courseRepository.findAll()
+                .stream()
+                .map(c -> new CourseStatisticsDTO(c.getName(), new Object[]{lessonRepository.countByCourse(c)}))
+                .sorted((c1,c2) -> direction.isAscending() ?  ((int)c1.values()[0] - (int)c2.values()[0]) : ((int)c2.values()[0] - (int)c1.values()[0]))
+                .limit(limit)
+                .toList();
+    }
+
+    @Override
+    public long getActiveCoursesCount() {
+        return courseRepository.countActiveCourses();
     }
 
     @Async

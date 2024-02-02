@@ -6,6 +6,7 @@ import com.example.spacelab.model.student.Student;
 import com.example.spacelab.model.task.Task;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.Accessors;
 import org.hibernate.Hibernate;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -19,6 +20,7 @@ import java.util.Set;
 @ToString
 @Entity
 @Table(name="courses")
+@Accessors(chain = true)
 public class Course {
 
     @Id

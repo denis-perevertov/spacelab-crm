@@ -24,4 +24,19 @@ public interface CourseRepository extends JpaRepository<Course, Long>, JpaSpecif
     Page<Course> findAllowedCoursesPage(Pageable pageable, @Param("ids") Long... ids);
 
     Optional<Course> findByName(String name);
+
+    @Query("""
+            SELECT c
+            FROM Course c
+            WHERE c.mentor.id = :adminId
+            OR c.manager.id = :adminId
+            """)
+    List<Course> findAllAdminCourses(Long adminId);
+
+    @Query("""
+            SELECT COUNT(c)
+            FROM Course c
+            WHERE c.status = ACTIVE
+            """)
+    long countActiveCourses();
 }

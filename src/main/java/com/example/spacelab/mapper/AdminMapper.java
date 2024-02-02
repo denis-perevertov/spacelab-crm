@@ -120,6 +120,10 @@ public class AdminMapper {
 
             if(dto.getRoleID() != null) admin.setRole(userRoleRepository.getReferenceById(dto.getRoleID()));
 
+            if(!dto.getAvatarToSave().isEmpty()) {
+                admin.setAvatar(dto.getAvatarToSave().getOriginalFilename());
+            }
+
         } catch (EntityNotFoundException e) {
             log.severe("Mapping error: " + e.getMessage());
             throw new ResourceNotFoundException(e.getMessage());

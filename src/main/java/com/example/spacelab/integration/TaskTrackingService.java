@@ -51,4 +51,10 @@ public interface TaskTrackingService {
         TagResponse getTagById(String tagId);
         String getRecommendedTagName();
 
+        AccountTimeTotalResponse getTotalLearningTimeForPlatform();
+        AccountTimeTotalResponse getRecentLearningTimeForPlatform();
+
+        TimeTotalResponse getUserTotalTime(String userId);
+        TimeTotalResponse getUserTotalTimeRecent(String userId);
+
 }

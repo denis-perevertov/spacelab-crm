@@ -43,6 +43,10 @@ public interface FilenameUtils {
         );
     }
 
+    static String trimNameString(String string) {
+        return string.trim().replaceAll("[- ,.]", "_");
+    }
+
 
 
 }

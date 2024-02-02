@@ -539,5 +539,61 @@ public class TeamworkService implements TaskTrackingService {
         return "recommended";
     }
 
+    @Override
+    public AccountTimeTotalResponse getTotalLearningTimeForPlatform() {
+        ApiResponse<TeamworkAccountTimeTotalResponse> response = client.getAccountTimeTotal();
+        return Optional.ofNullable(response.getData())
+                .map(t -> new AccountTimeTotalResponse(
+                        t.timeTotals().minutes(),
+                        t.timeTotals().hours()
+                ))
+                .orElseThrow(() -> new TeamworkException(response.getErrors()));
+    }
+
+    @Override
+    public AccountTimeTotalResponse getRecentLearningTimeForPlatform() {
+        ApiResponse<TeamworkAccountTimeTotalResponse> response = client.getAccountTimeThisMonth();
+        return Optional.ofNullable(response.getData())
+                .map(t -> new AccountTimeTotalResponse(
+                        t.timeTotals().minutes(),
+                        t.timeTotals().hours()
+                ))
+                .orElseThrow(() -> new TeamworkException(response.getErrors()));
+    }
+
+    @Override
+    public TimeTotalResponse getUserTotalTime(String userId) {
+        ApiResponse<TeamworkTimeTotalResponse> response = client.getUserTimeTotal(userId);
+        return Optional.ofNullable(response.getData())
+                .map(timeTotal -> new TimeTotalResponse(
+                        new TimeTotal(
+                                timeTotal.taskTimeTotal().minutes(),
+                                timeTotal.taskTimeTotal().estimatedMinutes()
+                        ),
+                        new TimeTotal(
+                                timeTotal.subtaskTimeTotal().minutes(),
+                                timeTotal.subtaskTimeTotal().estimatedMinutes()
+                        )
+                ))
+                .orElseThrow(() -> new TeamworkException(response.getErrors()));
+    }
+
+    @Override
+    public TimeTotalResponse getUserTotalTimeRecent(String userId) {
+        ApiResponse<TeamworkTimeTotalResponse> response = client.getUserTimeTotalThisMonth(userId);
+        return Optional.ofNullable(response.getData())
+                .map(timeTotal -> new TimeTotalResponse(
+                        new TimeTotal(
+                                timeTotal.taskTimeTotal().minutes(),
+                                timeTotal.taskTimeTotal().estimatedMinutes()
+                        ),
+                        new TimeTotal(
+                                timeTotal.subtaskTimeTotal().minutes(),
+                                timeTotal.subtaskTimeTotal().estimatedMinutes()
+                        )
+                ))
+                .orElseThrow(() -> new TeamworkException(response.getErrors()));
+    }
+
 
 }

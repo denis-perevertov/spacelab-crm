@@ -30,7 +30,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.*;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -38,11 +41,17 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.util.*;
 
 @Tag(name="Task", description = "Task controller")
 @RestController
-@Log
+@Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/api/tasks")
 public class TaskController {
@@ -201,12 +210,13 @@ public class TaskController {
 
         task.setId(id);
         Task t = taskService.getTaskById(id);
+        Course c = t.getCourse();
         // check access to editing tasks of current course
-        if(t.getCourse() != null) {
-            authUtil.checkAccessToCourse(t.getCourse().getId(), "tasks.edit");
+        if(c != null) {
+            authUtil.checkAccessToCourse(c.getId(), "tasks.edit");
         }
         // check access to editing tasks of new course
-        if(t.getCourse() != null && !t.getCourse().getId().equals(task.getCourseID())) {
+        if(c != null && !c.getId().equals(task.getCourseID())) {
             authUtil.checkAccessToCourse(task.getCourseID(), "tasks.edit");
         }
 
@@ -243,6 +253,28 @@ public class TaskController {
         return ResponseEntity.ok("Task with ID:"+id+" deleted");
     }
 
+    // Экспорт в PDF
+    @GetMapping("/{id}/export/pdf")
+    public ResponseEntity<?> exportTaskToPDF(@PathVariable Long id,
+                                             @RequestParam(required = false, defaultValue = "ua") String locale) throws IOException {
+        File file;
+        try {
+            file = taskService.generatePDF(id, locale);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return ResponseEntity.unprocessableEntity().body("Could not generate pdf file");
+        }
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData(file.getName(), file.getName());
+        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+        return new ResponseEntity<>(
+                new InputStreamResource(Files.newInputStream(file.getAbsoluteFile().toPath(), StandardOpenOption.DELETE_ON_CLOSE)),
+                headers,
+                HttpStatus.OK
+        );
+    }
+
     // Получение подзадач для какой-то 1 задачи
     @GetMapping("/{id}/subtasks")
     public ResponseEntity<?> getSubtasks(@PathVariable Long id) {
@@ -261,6 +293,14 @@ public class TaskController {
                                               @RequestBody TaskSubtaskListDTO dto) {
         List<Task> subtasks = taskService.addSubtasksToTask(taskId, dto);
         return ResponseEntity.ok(mapper.fromSubtaskToDTOList(subtasks));
+    }
+
+    // перемешивание подзадач
+    @PostMapping("/{taskId}/subtasks/shuffle")
+    public ResponseEntity<?> shuffleSubtasks(@PathVariable Long taskId,
+                                             @RequestBody SubtaskShuffleRequest request) {
+        taskService.shuffleSubtasks(request);
+        return ResponseEntity.ok().build();
     }
 
     // Удаление подзадачи из списка (не удаление задания целиком)

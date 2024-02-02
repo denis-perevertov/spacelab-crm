@@ -6,6 +6,7 @@ import com.example.spacelab.model.literature.Literature;
 import com.example.spacelab.model.student.Student;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.Accessors;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -20,6 +21,7 @@ import java.util.Objects;
 @ToString
 @Entity
 @Table(name="tasks")
+@Accessors(chain = true)
 public class Task {
 
     @Id
@@ -39,6 +41,7 @@ public class Task {
     private Course course;
 
     private int taskIndex;  // это просто дикая хрень, я хз
+    private int subtaskIndex;
 
     private String name;
 

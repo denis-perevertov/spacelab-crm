@@ -7,12 +7,14 @@ import com.example.spacelab.exception.ErrorMessage;
 import com.example.spacelab.exception.ObjectValidationException;
 import com.example.spacelab.exception.ResourceNotFoundException;
 import com.example.spacelab.mapper.AdminMapper;
+import com.example.spacelab.mapper.CourseMapper;
 import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.dto.admin.AdminEditDTO;
 import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.dto.admin.AdminDTO;
 import com.example.spacelab.dto.admin.AdminEditDTO;
 import com.example.spacelab.service.AdminService;
+import com.example.spacelab.service.CourseService;
 import com.example.spacelab.util.AuthUtil;
 import com.example.spacelab.util.FilterForm;
 import com.example.spacelab.validator.AdminValidator;
@@ -55,6 +57,9 @@ public class AdminController {
     private final AdminMapper adminMapper;
     private final AdminValidator adminValidator;
 
+    private final CourseService courseService;
+    private final CourseMapper courseMapper;
+
     private final PasswordEncoder passwordEncoder;
 
     // Получение админов (с фильтрами и страницами)
@@ -67,7 +72,7 @@ public class AdminController {
     })
     @PreAuthorize("!hasAuthority('settings.read.NO_ACCESS')")
     @GetMapping
-    public ResponseEntity<Page<AdminDTO>> getAdmins(@Parameter(name = "Filter object", description = "Collection of all filters for search results", required = false, example = "{}") FilterForm filters,
+    public ResponseEntity<?> getAdmins(@Parameter(name = "Filter object", description = "Collection of all filters for search results", required = false, example = "{}") FilterForm filters,
                                                     @RequestParam(required = false, defaultValue = "0") Integer page,
                                                     @RequestParam(required = false, defaultValue = "10") Integer size) {
         Page<AdminDTO> adminList;
@@ -90,9 +95,14 @@ public class AdminController {
     })
     @PreAuthorize("!hasAuthority('settings.read.NO_ACCESS')")
     @GetMapping("/{id}")
-    public ResponseEntity<AdminDTO> getAdmin(@PathVariable @Parameter(example = "1") Long id) {
+    public ResponseEntity<?> getAdmin(@PathVariable @Parameter(example = "1") Long id) {
         Admin admin = adminService.getAdminById(id);
         return new ResponseEntity<>(adminMapper.fromAdminToDTO(admin), HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/courses")
+    public ResponseEntity<?> getAdminCourses(@PathVariable @Parameter(example = "1") Long id) {
+        return ResponseEntity.ok(courseService.getAdminCourses(id).stream().map(courseMapper::fromCourseToCourseAdminDTO).toList());
     }
 
     // Создание нового админа
@@ -106,8 +116,8 @@ public class AdminController {
     })
     @PreAuthorize("!hasAuthority('settings.write.NO_ACCESS')")
     @PostMapping
-    public ResponseEntity<AdminDTO> createNewAdmin(@RequestBody AdminEditDTO admin,
-                                                    BindingResult bindingResult) {
+    public ResponseEntity<?> createNewAdmin(@ModelAttribute AdminEditDTO admin,
+                                                    BindingResult bindingResult) throws IOException {
 
         admin.setId(null);
         adminValidator.validate(admin, bindingResult);
@@ -119,13 +129,13 @@ public class AdminController {
         }
 
         admin.setPassword(passwordEncoder.encode(admin.getPassword()));
-        Admin savedAdmin = adminService.createAdmin(adminMapper.fromEditDTOToAdmin(admin));
-        return new ResponseEntity<>(adminMapper.fromAdminToDTO(savedAdmin), HttpStatus.CREATED);
+        adminService.createAdmin(admin);
+        return ResponseEntity.ok().build();
     }
 
     // Получение формы админа на редактирование
     @GetMapping("/{id}/edit")
-    public ResponseEntity<AdminEditDTO> getAdminForEdit(@PathVariable Long id) {
+    public ResponseEntity<?> getAdminForEdit(@PathVariable Long id) {
         return new ResponseEntity<>(adminMapper.fromAdminToEditDTO(adminService.getAdminById(id)), HttpStatus.OK);
     }
 
@@ -140,9 +150,9 @@ public class AdminController {
     })
     @PreAuthorize("!hasAuthority('settings.edit.NO_ACCESS')")
     @PutMapping("/{id}")
-    public ResponseEntity<AdminDTO> updateAdmin(@PathVariable @Parameter(example = "1") Long id,
-                                                @RequestBody @io.swagger.v3.oas.annotations.parameters.RequestBody AdminEditDTO admin,
-                                                BindingResult bindingResult) {
+    public ResponseEntity<?> updateAdmin(@PathVariable @Parameter(example = "1") Long id,
+                                                @ModelAttribute @io.swagger.v3.oas.annotations.parameters.RequestBody AdminEditDTO admin,
+                                                BindingResult bindingResult) throws IOException {
 
         admin.setId(id);
 
@@ -155,9 +165,8 @@ public class AdminController {
         }
 
         if(admin.getPassword() != null && !admin.getPassword().isEmpty()) admin.setPassword(passwordEncoder.encode(admin.getPassword()));
-
-        Admin savedAdmin = adminService.updateAdmin(adminMapper.fromEditDTOToAdmin(admin));
-        return new ResponseEntity<>(adminMapper.fromAdminToDTO(savedAdmin), HttpStatus.OK);
+        adminService.updateAdmin(admin);
+        return ResponseEntity.ok().build();
     }
 
     // Удаление админа

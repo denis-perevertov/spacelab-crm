@@ -30,4 +30,6 @@ public interface LessonService extends EntityFilterService<Lesson>{
     void completeLesson(Long id);
 
     void checkAutomaticLessonStart();
+
+    long getCompletedLessonsCount();
 }

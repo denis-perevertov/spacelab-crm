@@ -3,6 +3,7 @@ package com.example.spacelab.service.impl;
 import com.example.spacelab.dto.student.StudentTaskLessonDTO;
 import com.example.spacelab.dto.task.StudentTaskPointDTO;
 import com.example.spacelab.dto.task.StudentTaskTagDTO;
+import com.example.spacelab.dto.task.SubtaskShuffleRequest;
 import com.example.spacelab.dto.task.TaskSubtaskListDTO;
 import com.example.spacelab.exception.BlockedEntityException;
 import com.example.spacelab.exception.ResourceNotFoundException;
@@ -20,6 +21,7 @@ import com.example.spacelab.repository.CourseRepository;
 import com.example.spacelab.repository.StudentRepository;
 import com.example.spacelab.repository.StudentTaskRepository;
 import com.example.spacelab.repository.TaskRepository;
+import com.example.spacelab.service.PDFService;
 import com.example.spacelab.service.StudentTaskService;
 import com.example.spacelab.service.TaskService;
 import com.example.spacelab.service.specification.StudentTaskSpecification;
@@ -28,6 +30,8 @@ import com.example.spacelab.service.specification.TaskSpecifications;
 import com.example.spacelab.util.FilterForm;
 import com.example.spacelab.util.NumericUtils;
 import com.example.spacelab.util.StringUtils;
+import com.example.spacelab.util.TranslationService;
+import com.itextpdf.text.DocumentException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
@@ -36,11 +40,16 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.comparator.Comparators;
 
 import javax.swing.text.html.Option;
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -56,6 +65,7 @@ public class TaskServiceImpl implements TaskService {
     private final StudentTaskRepository studentTaskRepository;
     private final StudentRepository studentRepository;
     private final CourseRepository courseRepository;
+    private final PDFService pdfService;
 
     private final TaskTrackingService trackingService;
 
@@ -117,11 +127,10 @@ public class TaskServiceImpl implements TaskService {
     @Transactional
     public Task editTask(Task taskIn) {
         Task task = taskRepository.save(taskIn);
+        // fixme CATCH TRANSFER correctly
         if(task.getCourse() != null) {
-            // create student task for every student of the course
             createStudentTasksOnTaskCourseTransfer(task);
         }
-        // todo update task list name ?
         return task;
     }
 
@@ -163,17 +172,27 @@ public class TaskServiceImpl implements TaskService {
     private void createStudentTasksOnTaskCourseTransfer(Task task) {
         log.info("creating new student tasks on course transfer (task ref ID: {})", task.getId());
         task.getCourse().getStudents().forEach(st -> {
-            StudentTask studentTask = new StudentTask()
-                    .setStudent(st)
-                    .setTaskReference(task);
-            studentTask = studentTaskRepository.save(studentTask);
-            st.getTasks().add(studentTask);
+            st.getTasks()
+                    .stream()
+                    .map(t -> t.getTaskReference().getId())
+                    .filter(id -> id.equals(task.getId()))
+                    .findAny()
+                    .ifPresentOrElse((id) -> {}, () -> {
+                        StudentTask studentTask = new StudentTask()
+                                .setStudent(st)
+                                .setTaskReference(task);
+                        studentTask = studentTaskRepository.save(studentTask);
+                        st.getTasks().add(studentTask);
+                    });
         });
     }
 
     @Override
     public List<Task> getTaskSubtasks(Long id) {
-        return taskRepository.findTaskSubtasks(id);
+        return taskRepository.findTaskSubtasks(id)
+                .stream()
+                .sorted(Comparator.comparing(Task::getSubtaskIndex))
+                .toList();
     }
 
     @Override
@@ -235,6 +254,34 @@ public class TaskServiceImpl implements TaskService {
         Task subtask = getTaskById(subtaskId);
         subtask.setParentTask(null);
         taskRepository.save(subtask);
+    }
+
+    @Override
+    public void shuffleSubtasks(SubtaskShuffleRequest request) {
+        log.info("request: {}", request);
+        Task task = getTaskById(request.taskId());
+        List<Task> subtasks = task.getSubtasks();
+        log.info("old subtask order: {}", subtasks.stream().map(Task::getSubtaskIndex).toList().toString());
+        Long[] subtaskIds = request.subtaskIds();
+        for (int i = 0; i < subtaskIds.length; i++) {
+            Long subtaskId = subtaskIds[i];
+//            subtasks.set(i, copy.stream().filter(subtask -> subtask.getId().equals(subtaskId)).findAny().orElseThrow());
+            subtasks.stream().filter(subtask -> subtask.getId().equals(subtaskId)).findAny().orElseThrow().setSubtaskIndex(i);
+        }
+        log.info("new subtask order: {}", subtasks.stream().map(Task::getSubtaskIndex).toList().toString());
+        log.info("saving");
+        taskRepository.saveAll(subtasks);
+    }
+
+    @Override
+    public File generatePDF(Long taskId, String localeCode) throws DocumentException, IOException, URISyntaxException {
+        Task task = getTaskById(taskId);
+        return pdfService.generatePDF(task, TranslationService.getLocale(localeCode));
+    }
+
+    @Override
+    public long getActiveTasksCount() {
+        return taskRepository.getActiveTasksCount();
     }
 
     @Override
@@ -332,6 +379,7 @@ public class TaskServiceImpl implements TaskService {
     public List<StudentTaskLessonDTO> getOpenStudentTasks(Student student) {
         return student.getTasks().stream()
                 .filter(task -> task.getStatus().equals(StudentTaskStatus.UNLOCKED) || task.getStatus().equals(StudentTaskStatus.READY))
+                .sorted((o1,o2) -> Comparators.comparable().compare(o1.getTaskReference().getTaskIndex(), o2.getTaskReference().getTaskIndex()))
                 .map(task -> {
                     Integer taskCompletionPercent = null;
                     try {
@@ -355,6 +403,8 @@ public class TaskServiceImpl implements TaskService {
     public List<StudentTaskLessonDTO> getNextStudentTasks(Student student) {
         return student.getTasks().stream()
                 .filter(task -> task.getStatus().equals(StudentTaskStatus.LOCKED))
+                .sorted((o1,o2) -> Comparators.comparable().compare(o1.getTaskReference().getTaskIndex(), o2.getTaskReference().getTaskIndex()))
+                .limit(3)
                 .map(task -> {
                     Integer taskCompletionPercent = null;
                     try {
@@ -370,7 +420,6 @@ public class TaskServiceImpl implements TaskService {
                             taskCompletionPercent
                     );
                 })
-                .limit(3)
                 .toList();
     }
 
@@ -587,17 +636,22 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public Specification<StudentTask> buildSpec(FilterForm filters) {
         Long id = filters.getId();
+        Long student = filters.getStudent();
         String name = filters.getName();
-        Long courseID = filters.getCourse();
+        Long courseID = Optional.ofNullable(filters.getCourse()).orElse(-1L);
         String statusInput = filters.getStatus();
         // todo add dates
 
         StudentTaskStatus status = statusInput == null ? StudentTaskStatus.UNLOCKED : StudentTaskStatus.valueOf(statusInput);
 
-        return StudentTaskSpecifications.hasCourseID(courseID <= 0 ? null : courseID)
+        Specification<StudentTask> spec =
+                StudentTaskSpecifications.hasCourseID(courseID <= 0 ? null : courseID)
+                .and(StudentTaskSpecifications.hasStudentId(student))
                 .and(StudentTaskSpecifications.hasNameLike(name))
                 .and(StudentTaskSpecifications.hasId(id))
                 .and(StudentTaskSpecifications.hasStatus(status));
+
+        return spec;
     }
 
     @Override

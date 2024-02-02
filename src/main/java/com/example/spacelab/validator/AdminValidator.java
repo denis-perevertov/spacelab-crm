@@ -72,7 +72,7 @@ public class AdminValidator implements Validator {
                 e.rejectValue("confirmPassword", "password.no-match", "validation.admin.password.no-match");
             }
         }
-        else if(dto.getPassword() != null && !dto.getPassword().isBlank()) {
+        else if(dto.getPassword() != null && !dto.getPassword().isEmpty()) {
             if(dto.getPassword().length() < 8 || dto.getPassword().length() > 50)
                 e.rejectValue("password", "password.length", "validation.field.length");
             else if(dto.getConfirmPassword() == null || dto.getConfirmPassword().isEmpty())

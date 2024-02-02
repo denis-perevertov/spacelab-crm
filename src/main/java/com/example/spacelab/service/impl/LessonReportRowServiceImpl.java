@@ -14,14 +14,29 @@ import com.example.spacelab.model.student.StudentTaskStatus;
 import com.example.spacelab.service.LessonService;
 import com.example.spacelab.service.StudentService;
 import com.example.spacelab.service.TaskService;
+import com.example.spacelab.service.specification.LessonReportSpecifications;
+import com.example.spacelab.util.FilterForm;
+import com.example.spacelab.util.ValidationUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Map;
 
+import static com.example.spacelab.service.specification.LessonReportSpecifications.*;
+
 @Service
-@Log
+@Slf4j
 @RequiredArgsConstructor
 public class LessonReportRowServiceImpl implements LessonReportRowService {
 
@@ -49,6 +64,7 @@ public class LessonReportRowServiceImpl implements LessonReportRowService {
 
     @Override
     public LessonReportRow updateLessonReportRow(LessonReportRowSaveDTO dto) {
+        log.info("ROW: {}", dto.toString());
         Student st = studentService.getStudentById(dto.getStudentId());
         String currentTaskSnapshot = String.join(", ", st.getTasks()
                         .stream()
@@ -57,7 +73,8 @@ public class LessonReportRowServiceImpl implements LessonReportRowService {
                         .toList());
 //                    .reduce("", (a, b) -> String.join(",", a, b));
         LessonReportRow lessonReportRow =
-                lessonReportRowRepository.findById(dto.getId()).orElse(new LessonReportRow())
+//                lessonReportRowRepository.findById(dto.getId()).orElse(new LessonReportRow())
+                        new LessonReportRow()
                         .setWasPresent(dto.getWasPresent())
                         .setHours(dto.getHours())
                         .setHoursNote(dto.getNote())
@@ -83,4 +100,40 @@ public class LessonReportRowServiceImpl implements LessonReportRowService {
         return lessonReportRow;
     }
 
+    @Override
+    public Page<LessonReportRow> getStudentLessonReports(FilterForm filters, Pageable pageable) {
+        Specification<LessonReportRow> spec = buildSpecificationFromFilters(filters);
+        Page<LessonReportRow> page = lessonReportRowRepository.findAll(spec, pageable);
+        log.info("fetched lesson report rows for student(id:{}) - page {} / {}", filters.getStudent(), pageable.getPageNumber(), page.getTotalPages());
+        return page;
+    }
+
+    @Override
+    public Specification<LessonReportRow> buildSpecificationFromFilters(FilterForm filters) {
+        Long student = filters.getStudent();
+        Boolean present = filters.getPresent();
+        String beginDatetime = filters.getBegin();
+        String endDatetime = filters.getEnd();
+        Long task = filters.getTask();
+        Integer hoursFrom = filters.getHoursFrom();
+        Integer hoursTo = filters.getHoursTo();
+        String note = filters.getNote();
+        String comment = filters.getComment();
+        Integer ratingFrom = filters.getRatingFrom();
+        Integer ratingTo = filters.getRatingTo();
+
+        LocalDateTime begin = (ValidationUtils.fieldIsEmpty(beginDatetime)) ? null : LocalDate.parse(beginDatetime, DateTimeFormatter.ofPattern("yyyy-MM-dd")).atStartOfDay();
+        LocalDateTime end = (ValidationUtils.fieldIsEmpty(endDatetime)) ? null : LocalDate.parse(endDatetime, DateTimeFormatter.ofPattern("yyyy-MM-dd")).atTime(LocalTime.MAX);
+
+        Specification<LessonReportRow> spec =
+                hasStudentId(student)
+                .and(hasDatesBetween(begin, end))
+                .and(wasPresent(present))
+                .and(hasHoursBetween(hoursFrom, hoursTo))
+                .and(hasRatingBetween(ratingFrom, ratingTo))
+                .and(hasNoteLike(note))
+                .and(hasCommentLike(comment));
+
+        return spec;
+    }
 }

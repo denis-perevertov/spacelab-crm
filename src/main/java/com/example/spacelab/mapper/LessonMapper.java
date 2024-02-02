@@ -159,6 +159,8 @@ public class LessonMapper {
     public LessonReportRowDTO fromReportRowToDTO(LessonReportRow row) {
         return new LessonReportRowDTO(
                 row.getId(),
+                row.getLesson().getId(),
+                row.getLesson().getDatetime().atZone(ZoneId.of("UTC")),
                 row.getStudent().getId(),
                 row.getStudent().getFullName(),
                 row.getWasPresent(),
@@ -172,5 +174,13 @@ public class LessonMapper {
 
     public List<LessonReportRowDTO> fromReportRowListToDTOList(List<LessonReportRow> list) {
         return list.stream().map(this::fromReportRowToDTO).toList();
+    }
+
+    public LessonLinkDTO fromLessonToLinkDTO(Lesson lesson) {
+        if(lesson == null) return null;
+        else return new LessonLinkDTO(
+                lesson.getId(),
+                lesson.getDatetime().atZone(ZoneId.of("UTC"))
+        );
     }
 }

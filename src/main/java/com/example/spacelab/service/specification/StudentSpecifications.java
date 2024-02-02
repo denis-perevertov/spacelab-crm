@@ -7,6 +7,7 @@ import com.example.spacelab.model.student.StudentAccountStatus;
 import com.example.spacelab.model.student.StudentDetails_;
 import com.example.spacelab.model.student.Student_;
 import jakarta.persistence.criteria.Join;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.jpa.domain.Specification;
 
 public class StudentSpecifications {
@@ -20,9 +21,13 @@ public class StudentSpecifications {
         if(input == null) return (root, query, cb) -> null;
         return (root, query, cb) ->
             cb.or(
-                    cb.like(root.get(Student_.DETAILS).get(StudentDetails_.FIRST_NAME), "%"+input+"%"),
-                    cb.like(root.get(Student_.DETAILS).get(StudentDetails_.FATHERS_NAME), "%"+input+"%"),
-                    cb.like(root.get(Student_.DETAILS).get(StudentDetails_.LAST_NAME), "%"+input+"%"),
+                    cb.like(
+                            cb.concat(
+                                    cb.concat(root.get(Student_.DETAILS).get(StudentDetails_.FIRST_NAME), StringUtils.SPACE),
+                                    cb.lower(root.get(Student_.DETAILS).get(StudentDetails_.LAST_NAME))
+                            ),
+                            "%"+input+"%"
+                    ),
                     cb.like(root.get(Student_.DETAILS).get(StudentDetails_.EMAIL),"%"+input+"%")
             );
 

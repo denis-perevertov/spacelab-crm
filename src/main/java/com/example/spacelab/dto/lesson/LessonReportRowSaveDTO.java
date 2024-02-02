@@ -11,8 +11,8 @@ import java.util.Map;
 @Data
 public class LessonReportRowSaveDTO {
 
-    @Schema(example = "3")
-    private Long id;
+//    @Schema(example = "3")
+//    private Long id;
 
     @Min(0)
     private Long lessonId;

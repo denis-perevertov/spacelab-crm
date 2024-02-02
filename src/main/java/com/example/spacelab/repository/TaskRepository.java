@@ -70,4 +70,11 @@ public interface TaskRepository extends JpaRepository<Task, Long>, JpaSpecificat
            ORDER BY CASE WHEN t.course IS NULL THEN 0 ELSE 1 END
            """)
     Page<Task> findParentTasksAny(Specification<Task> specification, Pageable pageable);
+
+    @Query("""
+            SELECT COUNT(t)
+            FROM Task t
+            WHERE t.status = ACTIVE
+            """)
+    long getActiveTasksCount();
 }

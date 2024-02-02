@@ -1,7 +1,9 @@
 package com.example.spacelab.repository;
 
+import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.lesson.Lesson;
 import com.example.spacelab.model.lesson.LessonStatus;
+import com.example.spacelab.model.student.Student;
 import com.example.spacelab.model.task.Task;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +18,10 @@ import java.util.List;
 @Repository
 public interface LessonRepository extends JpaRepository<Lesson, Long>, JpaSpecificationExecutor<Lesson> {
 
+    int countByCourse(Course course);
+
+    List<Lesson> findAllByCourse(Course course);
+
     @Query("SELECT l FROM Lesson l WHERE l.course.id IN :ids")
     List<Lesson> findAllByAllowedCourse(@Param("ids") Long... ids);
 
@@ -29,5 +35,12 @@ public interface LessonRepository extends JpaRepository<Lesson, Long>, JpaSpecif
            AND l.status = 'PLANNED'
            """)
     List<Lesson> findLessonsForAutomaticStart();
+
+    @Query("""
+            SELECT COUNT(l)
+            FROM Lesson l
+            WHERE l.status = COMPLETED
+            """)
+    long getCompletedLessonsCount();
 
 }

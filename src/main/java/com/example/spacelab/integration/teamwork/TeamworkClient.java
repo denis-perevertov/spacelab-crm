@@ -12,7 +12,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 
 @Slf4j
@@ -1213,7 +1215,170 @@ public class TeamworkClient {
     }
 
 
+    // fixme change endpoints from api v1 to api v3
+    public ApiResponse<TeamworkAccountTimeTotalResponse> getAccountTimeTotal() {
+        WebClient client = clientBuilder
+                .baseUrl(properties.getBaseUrl())
+                .build();
 
+        ApiResponse<TeamworkAccountTimeTotalResponse> response = client.get()
+                .uri(builder -> builder
+                        .path("/time/total.json")
+                        .build())
+                .headers(headers -> {
+                    headers.setBasicAuth(properties.getToken(), "");
+                })
+                .exchangeToMono(res -> {
+                    if(res.statusCode().is2xxSuccessful()) {
+                        return res.bodyToMono(TeamworkAccountTimeTotalResponse.class)
+                                .map(data -> new ApiResponse<>(
+                                        data,
+                                        null,
+                                        res.statusCode().toString()
+                                ));
+                    }
+                    else {
+                        return res.bodyToMono(ErrorResponse.class)
+                                .map(errors -> new ApiResponse<TeamworkAccountTimeTotalResponse>(
+                                        null,
+                                        errors.errors(),
+                                        res.statusCode().toString()
+                                ));
+                    }
+                })
+                .block();
+
+        log.info("client response: {}", response);
+
+        return response;
+    }
+
+    // fixme change endpoints from api v1 to api v3
+    public ApiResponse<TeamworkAccountTimeTotalResponse> getAccountTimeThisMonth() {
+
+        String thisMonthBeginString = LocalDateTime.now().withDayOfMonth(1).format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        String nextMonthBeginString = LocalDateTime.now().plusMonths(1).withDayOfMonth(1).format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+
+        WebClient client = clientBuilder
+                .baseUrl(properties.getBaseUrl())
+                .build();
+
+        ApiResponse<TeamworkAccountTimeTotalResponse> response = client.get()
+                .uri(builder -> builder
+                        .path("/time/total.json")
+                        .queryParam("fromDate", thisMonthBeginString)
+                        .queryParam("toDate", nextMonthBeginString)
+                        .build())
+                .headers(headers -> {
+                    headers.setBasicAuth(properties.getToken(), "");
+                })
+                .exchangeToMono(res -> {
+                    if(res.statusCode().is2xxSuccessful()) {
+                        return res.bodyToMono(TeamworkAccountTimeTotalResponse.class)
+                                .map(data -> new ApiResponse<>(
+                                        data,
+                                        null,
+                                        res.statusCode().toString()
+                                ));
+                    }
+                    else {
+                        return res.bodyToMono(ErrorResponse.class)
+                                .map(errors -> new ApiResponse<TeamworkAccountTimeTotalResponse>(
+                                        null,
+                                        errors.errors(),
+                                        res.statusCode().toString()
+                                ));
+                    }
+                })
+                .block();
+
+        log.info("client response: {}", response);
+
+        return response;
+    }
+
+    public ApiResponse<TeamworkTimeTotalResponse> getUserTimeTotal(String userId) {
+
+        WebClient client = clientBuilder
+                .baseUrl(properties.getBaseUrl())
+                .build();
+
+        ApiResponse<TeamworkTimeTotalResponse> response = client.get()
+                .uri(builder -> builder
+                        .path("/projects/api/v3/time/total.json")
+                        .queryParam("assignedToUserIds", userId)
+                        .build())
+                .headers(headers -> {
+                    headers.setBasicAuth(properties.getToken(), "");
+                })
+                .exchangeToMono(res -> {
+                    if(res.statusCode().is2xxSuccessful()) {
+                        return res.bodyToMono(TeamworkTimeTotalResponse.class)
+                                .map(data -> new ApiResponse<>(
+                                        data,
+                                        null,
+                                        res.statusCode().toString()
+                                ));
+                    }
+                    else {
+                        return res.bodyToMono(ErrorResponse.class)
+                                .map(errors -> new ApiResponse<TeamworkTimeTotalResponse>(
+                                        null,
+                                        errors.errors(),
+                                        res.statusCode().toString()
+                                ));
+                    }
+                })
+                .block();
+
+        log.info("client response: {}", response);
+
+        return response;
+    }
+
+    public ApiResponse<TeamworkTimeTotalResponse> getUserTimeTotalThisMonth(String userId) {
+
+        String thisMonthBeginString = LocalDateTime.now().withDayOfMonth(1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        String nextMonthBeginString = LocalDateTime.now().plusMonths(1).withDayOfMonth(1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
+        WebClient client = clientBuilder
+                .baseUrl(properties.getBaseUrl())
+                .build();
+
+        ApiResponse<TeamworkTimeTotalResponse> response = client.get()
+                .uri(builder -> builder
+                        .path("/projects/api/v3/time/total.json")
+                        .queryParam("assignedToUserIds", userId)
+                        .queryParam("startDate", thisMonthBeginString)
+                        .queryParam("endDate", nextMonthBeginString)
+                        .build())
+                .headers(headers -> {
+                    headers.setBasicAuth(properties.getToken(), "");
+                })
+                .exchangeToMono(res -> {
+                    if(res.statusCode().is2xxSuccessful()) {
+                        return res.bodyToMono(TeamworkTimeTotalResponse.class)
+                                .map(data -> new ApiResponse<>(
+                                        data,
+                                        null,
+                                        res.statusCode().toString()
+                                ));
+                    }
+                    else {
+                        return res.bodyToMono(ErrorResponse.class)
+                                .map(errors -> new ApiResponse<TeamworkTimeTotalResponse>(
+                                        null,
+                                        errors.errors(),
+                                        res.statusCode().toString()
+                                ));
+                    }
+                })
+                .block();
+
+        log.info("client response: {}", response);
+
+        return response;
+    }
 
 
 

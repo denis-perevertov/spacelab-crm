@@ -26,7 +26,10 @@ public class Literature {
     private LiteratureType type;
 
     private String keywords;
+
+    @Column(length = 1000)
     private String description;
+
     private String resource_link;  // filename for files, URL for links
 
     private String thumbnail;

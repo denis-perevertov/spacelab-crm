@@ -3,10 +3,16 @@ package com.example.spacelab.util;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 public interface ValidationUtils {
+
+    List<String> ALLOWED_IMAGE_FORMATS = List.of("jpg", "jpeg", "png");
+    Long MAX_FILE_SIZE = 20_971_520L;
+    Long MAX_IMAGE_SIZE = 5_242_880L;
+
     static Map<String, String> getErrorMessages(BindingResult bindingResult) {
         return bindingResult.getFieldErrors()
                 .stream()

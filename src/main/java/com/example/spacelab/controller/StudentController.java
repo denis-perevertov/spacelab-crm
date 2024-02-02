@@ -1,14 +1,12 @@
 package com.example.spacelab.controller;
 
 import com.example.spacelab.dto.SelectDTO;
-import com.example.spacelab.dto.SelectSearchDTO;
 import com.example.spacelab.dto.course.StudentCourseTaskInfoDTO;
-import com.example.spacelab.dto.student.StudentTaskDTO;
 import com.example.spacelab.dto.student.*;
-import com.example.spacelab.dto.task.TaskCourseDTO;
 import com.example.spacelab.exception.ErrorMessage;
 import com.example.spacelab.exception.ObjectValidationException;
 import com.example.spacelab.mapper.CourseMapper;
+import com.example.spacelab.mapper.LessonMapper;
 import com.example.spacelab.mapper.StudentMapper;
 import com.example.spacelab.mapper.TaskMapper;
 import com.example.spacelab.model.admin.Admin;
@@ -17,9 +15,8 @@ import com.example.spacelab.model.lesson.LessonReportRow;
 import com.example.spacelab.model.role.PermissionType;
 import com.example.spacelab.model.student.Student;
 import com.example.spacelab.model.student.StudentAccountStatus;
-import com.example.spacelab.model.student.StudentInviteRequest;
-import com.example.spacelab.model.student.StudentTaskStatus;
 import com.example.spacelab.service.CourseService;
+import com.example.spacelab.service.LessonReportRowService;
 import com.example.spacelab.service.StudentService;
 import com.example.spacelab.util.AuthUtil;
 import com.example.spacelab.util.FilterForm;
@@ -33,13 +30,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -55,10 +50,12 @@ public class StudentController {
 
     private final CourseService courseService;
     private final StudentService studentService;
+    private final LessonReportRowService lessonReportRowService;
     private final StudentMapper studentMapper;
     private final StudentValidator studentValidator;
     private final TaskMapper taskMapper;
     private final CourseMapper courseMapper;
+    private final LessonMapper lessonMapper;
 
     private final AuthUtil authUtil;
 
@@ -155,22 +152,25 @@ public class StudentController {
         return new ResponseEntity<>(studentLessonData, HttpStatus.OK);
     }
 
-    // получить задания текущего курса студента
-//    @GetMapping("/{studentID}/course/tasks")
-//    public ResponseEntity<?> getStudentCourseTasks(@PathVariable Long studentID) {
-//        List<TaskCourseDTO> courseTaskList =
-//                courseService.getCourseTasks(studentService.getStudentCourseID(studentID))
-//                        .stream()
-//                        .map(courseMapper::fromTaskToCourseDTO)
-//                        .toList();
-//        return ResponseEntity.ok(courseTaskList);
-//    }
-
     // получить имя, иконку и информацию текущего курса студента
     @GetMapping("/{studentID}/course")
     public ResponseEntity<?> getStudentCourseInfo(@PathVariable Long studentID) {
         StudentCourseTaskInfoDTO studentCourseTaskInfo = courseService.getStudentCourseInfo(studentID);
         return ResponseEntity.ok(studentCourseTaskInfo);
+    }
+
+    @GetMapping("/{studentID}/lesson-data")
+    public ResponseEntity<?> getStudentLessonData(@PathVariable Long studentID,
+                                                  FilterForm filters,
+                                                  @RequestParam(required = false, defaultValue = "0") Integer page,
+                                                  @RequestParam(required = false, defaultValue = "10") Integer size) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "id");
+        filters.setStudent(studentID);
+        return ResponseEntity.ok(
+                lessonReportRowService.getStudentLessonReports(filters, pageable)
+                        .map(lessonMapper::fromReportRowToDTO)
+        );
     }
 
     // Создание нового студента (не регистрация)

@@ -8,10 +8,15 @@ import com.example.spacelab.model.literature.LiteratureType;
 import com.example.spacelab.repository.AdminRepository;
 import com.example.spacelab.repository.CourseRepository;
 import com.example.spacelab.repository.LiteratureRepository;
+import com.example.spacelab.util.ValidationUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -31,7 +36,7 @@ public class LiteratureValidator implements Validator {
     public void validate(Object target, Errors e) {
         LiteratureSaveDTO dto = (LiteratureSaveDTO) target;
 
-        System.out.println("dto: " + dto.toString());
+        System.out.println("dto: " + dto);
 
         if(dto.getName() == null || dto.getName().isEmpty())
             e.rejectValue("name", "name.empty", "validation.field.empty");
@@ -61,7 +66,7 @@ public class LiteratureValidator implements Validator {
 
         if(dto.getDescription() == null || dto.getDescription().isEmpty())
             e.rejectValue("description", "description.empty", "validation.field.empty");
-        else if(dto.getDescription().length() > 300)
+        else if(dto.getDescription().length() > 1000)
             e.rejectValue("description", "description.length", "validation.field.length");
 
         if(dto.getType() == LiteratureType.LINK) {
@@ -76,19 +81,42 @@ public class LiteratureValidator implements Validator {
             String extension = filename.substring(filename.lastIndexOf(".")+1);
             System.out.println("Size: " + dto.getResource_file().getSize());
             System.out.println("FileName: " + filename);
-            if(dto.getResource_file().getSize() < 1) {
+            if(dto.getResource_file().isEmpty()) {
                 if(
                     dto.getId() == null
-                    || literatureRepository.findById(dto.getId()).orElse(new Literature()).getResource_link().isEmpty()
+                    || Optional.ofNullable(literatureRepository.findById(dto.getId()).orElse(new Literature()).getResource_link()).isEmpty()
                 ) {
                     e.rejectValue("resource_file", "resource_file.empty", "validation.file.upload");
                 }
             }
+            else if(dto.getResource_file().getSize() > ValidationUtils.MAX_FILE_SIZE) {
+                e.rejectValue("resource_file", "resource_file.max-size", "validation.file.max-size");
+            }
             else if(!extension.equalsIgnoreCase(ALLOWED_FORMAT)) {
-                e.rejectValue("resource_file", "resource_file.extension", "validation.file.extension.allowed");
+                e.rejectValue("resource_file", "resource_file.max-size", "validation.file.max-size");
             }
         }
 
-        // todo add image thumbnail validation
+        MultipartFile thumbnail = dto.getThumbnail();
+        if(thumbnail == null || thumbnail.isEmpty()) {
+            if(
+                    dto.getId() == null
+                    || Optional.ofNullable(literatureRepository.findById(dto.getId()).orElse(new Literature()).getThumbnail()).isEmpty()
+            ) {
+                e.rejectValue("thumbnail", "thumbnail.empty", "validation.file.upload");
+            }
+        }
+        else if(thumbnail.getSize() > ValidationUtils.MAX_IMAGE_SIZE) {
+            e.rejectValue("thumbnail", "thumbnail.max-size", "validation.file.max-size");
+        }
+        else {
+            String filename = dto.getThumbnail().getOriginalFilename();
+            assert filename != null;
+            String extension = filename.substring(filename.lastIndexOf(".")+1);
+            if(!ValidationUtils.ALLOWED_IMAGE_FORMATS.contains(extension)) {
+                e.rejectValue("thumbnail", "thumbnail.extension", "validation.file.extension.allowed");
+            }
+        }
+
     }
 }

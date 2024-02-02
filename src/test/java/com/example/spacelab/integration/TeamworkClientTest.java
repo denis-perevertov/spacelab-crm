@@ -42,7 +42,7 @@ public class TeamworkClientTest {
                         "TestTaskName"
                 )
         );
-        ApiResponse<TeamworkTaskListCreateResponse> response = client.createTaskList(request);
+        ApiResponse<TeamworkTaskListCreateResponse> response = client.createTaskList("1", request);
         assertThat(response.getData()).isNotNull();
         assertThat(response.getData().taskListId()).isNotNull();
     }
@@ -126,7 +126,7 @@ public class TeamworkClientTest {
     @Test
     void getRecommendedTagTest() {
         String tagName = "recommended";
-        ApiResponse<TeamworkTagResponse> response = client.getTagBySearchTerm(tagName);
+        ApiResponse<TeamworkTagListResponse> response = client.getTagBySearchTerm(tagName);
         assertThat(response.getErrors()).isNull();
         assertThat(response.getData()).isNotNull();
     }
@@ -187,12 +187,10 @@ public class TeamworkClientTest {
         Long userId = (long) 472016;
         TeamworkTimeEntryCreateRequest request = new TeamworkTimeEntryCreateRequest(
                 new TimeEntry (
-                        null,
                         LocalDate.now(),
                         LocalTime.now(),
-                        "TimeEntryDescription",
-                        6,
-                        25,
+                        100,
+                        6L,
                         taskId,
                         userId
                 ),
@@ -211,12 +209,10 @@ public class TeamworkClientTest {
         Long userId = (long) 472016;
         TeamworkTimeEntryCreateRequest request = new TeamworkTimeEntryCreateRequest(
                 new TimeEntry(
-                        timelogId,
                         LocalDate.now(),
                         LocalTime.now(),
-                        "TimeEntryDescription",
-                        3,
-                        11,
+                        100,
+                        6L,
                         taskId,
                         userId
                 ),
