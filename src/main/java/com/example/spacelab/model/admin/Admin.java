@@ -60,6 +60,11 @@ public class Admin extends UserEntity implements UserDetails {
     }
 
     @Override
+    public String getUserEntityName() {
+        return this.getFullName();
+    }
+
+    @Override
     public String getUsername() {
         return this.email;
     }
@@ -97,4 +102,6 @@ public class Admin extends UserEntity implements UserDetails {
     public int hashCode() {
         return Objects.hash(super.hashCode(), firstName, lastName, phone, email, password, confirmPassword);
     }
+
+
 }

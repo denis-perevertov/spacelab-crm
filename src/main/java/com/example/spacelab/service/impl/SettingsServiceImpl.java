@@ -21,6 +21,7 @@ public class SettingsServiceImpl implements SettingsService {
 
     private final SettingsRepository settingsRepository;
 
+
     @Override
     public Long getSettingsIdForAdmin(Admin admin) {
         return settingsRepository.findByAdmin(admin).orElse(new Settings()).getId();
@@ -55,4 +56,20 @@ public class SettingsServiceImpl implements SettingsService {
     public List<Integer> getIntervalOptions() {
         return Arrays.stream(IntervalSetting.values()).map(IntervalSetting::getValue).toList();
     }
+
+    @Override
+    public Settings createDefaultSettings(Admin admin) {
+        Settings settings =
+                new Settings()
+                        .setAdmin(admin)
+                        .setTheme(ThemeSetting.DARK)
+                        .setLanguage(LanguageSetting.UK)
+                        .setWeeklyHoursNormSetting(35)
+                        .setStandardIntervalSetting(7)
+                        .setAutomaticLessonStartSetting(true)
+                        .setAutomaticLessonCreationSetting(true)
+                        .setSoundNotificationSetting(true);
+        return settingsRepository.save(settings);
+    }
+
 }

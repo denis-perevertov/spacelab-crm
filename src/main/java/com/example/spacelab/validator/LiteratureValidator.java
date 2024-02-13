@@ -93,7 +93,7 @@ public class LiteratureValidator implements Validator {
                 e.rejectValue("resource_file", "resource_file.max-size", "validation.file.max-size");
             }
             else if(!extension.equalsIgnoreCase(ALLOWED_FORMAT)) {
-                e.rejectValue("resource_file", "resource_file.max-size", "validation.file.max-size");
+                e.rejectValue("resource_file", "resource_file.max-size", "validation.file.extension.allowed");
             }
         }
 

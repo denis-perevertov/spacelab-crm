@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
+import org.springframework.web.multipart.MultipartFile;
 
 import static com.example.spacelab.util.ValidationUtils.*;
 
@@ -40,31 +41,47 @@ public class CourseValidator implements Validator {
 
         if(fieldIsEmpty(info.getDescription()))
             e.rejectValue("info.description", "info.description.empty", "validation.field.empty");
-        else if(info.getDescription().length() > 3000)
+        else if(fieldMaxLengthIsIncorrect(dto.getInfo().getDescription(), 3000))
             e.rejectValue("info.description", "info.description.length", "validation.field.length.max");
 
         if(info.getTopics() == null || info.getTopics().size() == 0)
             e.rejectValue("info.topics", "info.topics.empty", "validation.course.topics.empty");
         else for(int i = 0; i < info.getTopics().size(); i++) {
-            if(info.getTopics().get(i).length() > 250)
+            String topic = info.getTopics().get(i);
+            if(fieldIsEmpty(topic)) {
+                e.rejectValue("info.topics["+i+"]", "info.topics["+i+"].empty", "validation.field.empty");
+            }
+            else if(fieldMaxLengthIsIncorrect(info.getTopics().get(i), 250)) {
                 e.rejectValue("info.topics["+i+"]", "info.topics["+i+"].length", "validation.field.length.max");
+            }
         }
 
         CourseSettingsDTO settings = info.getSettings();
 
+        if(fieldIsEmpty(settings.completionTime())) {
+            e.rejectValue("info.settings.completionTime", "info.settings.completionTime.empty", "validation.field.empty");
+        }
+        else if(fieldMaxLengthIsIncorrect(settings.completionTime(), 7)) {
+            e.rejectValue("info.settings.completionTime", "info.settings.completionTime.empty", "validation.field.length.max");
+        }
+
+        if(settings.completionTimeUnit() == null) {
+            e.rejectValue("info.settings.completionTimeUnit", "info.settings.completionTimeUnit.empty", "validation.field.empty");
+        }
+
         if(settings.groupSize() == null)
             e.rejectValue("info.settings.groupSize", "info.settings.groupSize.empty", "validation.field.empty");
-        else if(settings.groupSize() < 3 || settings.groupSize() > 30)
+        else if(fieldIntValueIsIncorrect(settings.groupSize(), MIN_GROUP_SIZE, MAX_GROUP_SIZE))
             e.rejectValue("info.settings.groupSize", "info.settings.groupSize.length", "validation.course.group-size");
 
         if(settings.hoursNorm() == null)
             e.rejectValue("info.settings.hoursNorm", "info.settings.hoursNorm.empty", "validation.field.empty");
-        else if(settings.hoursNorm() < 10 || settings.hoursNorm() > 40)
+        else if(fieldIntValueIsIncorrect(settings.hoursNorm(), MIN_HOURS_NORM, MAX_HOURS_NORM))
             e.rejectValue("info.settings.hoursNorm", "info.settings.hoursNorm.length", "validation.course.hours-norm");
 
         if(settings.lessonInterval() == null)
             e.rejectValue("info.settings.lessonInterval", "info.settings.lessonInterval.empty", "validation.field.empty");
-        else if(settings.lessonInterval() < 1 || settings.lessonInterval() > 30)
+        else if(fieldIntValueIsIncorrect(settings.lessonInterval(), MIN_LESSON_INTERVAL, MAX_LESSON_INTERVAL))
             e.rejectValue("info.settings.lessonInterval", "info.settings.lessonInterval.length", "validation.course.lesson-interval");
 
         CourseMembersDTO members = dto.getMembers();
@@ -76,6 +93,23 @@ public class CourseValidator implements Validator {
 
         //structure validation
 
+    }
+
+    public void validateIcon(CourseIconDTO dto, Errors e) {
+        MultipartFile icon = dto.icon();
+        if(icon.isEmpty()) {
+            e.rejectValue("icon", "icon.empty", "validation.file.upload");
+        }
+        else if(icon.getSize() > MAX_IMAGE_SIZE) {
+            e.rejectValue("icon", "icon.max-size", "validation.file.max-size");
+        }
+        else {
+            String filename = icon.getOriginalFilename();
+            String extension = filename.substring(filename.lastIndexOf(".")+1);
+            if(!ALLOWED_IMAGE_FORMATS.contains(extension)) {
+                e.rejectValue("icon", "icon.format", "validation.file.formats.allowed");
+            }
+        }
     }
 
     private boolean courseExists(String courseName) {

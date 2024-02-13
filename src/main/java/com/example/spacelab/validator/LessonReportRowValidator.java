@@ -40,7 +40,7 @@ public class LessonReportRowValidator implements Validator {
         if(dto.getRating() == null) {
             e.rejectValue("rating", "rating.empty", "validation.field.empty");
         }
-        else if(dto.getRating() < 0 || dto.getRating() > 100) {
+        else if(dto.getRating() < 1 || dto.getRating() > 100) {
             e.rejectValue("rating", "rating.length", "validation.lesson.rating.incorrect");
         }
     }

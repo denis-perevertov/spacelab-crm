@@ -238,18 +238,14 @@ public class CourseServiceImpl implements CourseService {
         Course oldCourse = getCourseById(courseId);
         Admin mentor = oldCourse.getMentor();
         Admin manager = oldCourse.getManager();
-        log.info(mentor.toString());
-        log.info(manager.toString());
-        log.info("before deleting courses");
-        log.info(mentor.getCourses().stream().map(Course::getId).map(Object::toString).collect(Collectors.joining(",")));
-        log.info(manager.getCourses().stream().map(Course::getId).map(Object::toString).collect(Collectors.joining(",")));
-        mentor.getCourses().remove(oldCourse);
-        manager.getCourses().remove(oldCourse);
-        log.info("after deleting courses");
-        log.info(mentor.getCourses().stream().map(Course::getId).map(Object::toString).collect(Collectors.joining(",")));
-        log.info(manager.getCourses().stream().map(Course::getId).map(Object::toString).collect(Collectors.joining(",")));
-        adminRepository.save(mentor);
-        adminRepository.save(manager);
+        Optional.ofNullable(mentor).ifPresent(m -> {
+            m.getCourses().remove(oldCourse);
+            adminRepository.save(m);
+        });
+        Optional.ofNullable(manager).ifPresent(m -> {
+            m.getCourses().remove(oldCourse);
+            adminRepository.save(m);
+        });
         courseRepository.save(oldCourse);
     }
 
@@ -524,8 +520,8 @@ public class CourseServiceImpl implements CourseService {
     @Transactional
     public void deleteCourseById(Long id) {
         Course c = getCourseById(id);
-        c.getMentor().getCourses().remove(c);
-        c.getManager().getCourses().remove(c);
+        Optional.ofNullable(c.getMentor()).ifPresent(mentor -> mentor.getCourses().remove(c));
+        Optional.ofNullable(c.getManager()).ifPresent(manager -> manager.getCourses().remove(c));
         c.setManager(null);
         c.setMentor(null);
         c.getStudents().forEach(st -> st.setCourse(null));

@@ -9,4 +9,5 @@ import lombok.experimental.Accessors;
 public class CourseLinkDTO {
     private Long id;
     private String name;
+    private String icon;
 }

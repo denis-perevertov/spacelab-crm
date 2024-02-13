@@ -3,6 +3,9 @@ package com.example.spacelab.service.specification;
 import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.role.UserRole;
+import com.example.spacelab.model.student.StudentDetails_;
+import com.example.spacelab.model.student.Student_;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDate;
@@ -16,11 +19,13 @@ public class AdminSpecifications {
 
     public static Specification<Admin> hasNameLike(String input) {
         if(input == null) return (root, query, cb) -> null;
-        return (root, query, cb) ->
-                cb.or(
-                        cb.like(root.get("firstName"), "%"+input+"%"),
-                        cb.like(root.get("lastName"), "%"+input+"%")
-                );
+        return (root, query, cb) -> cb.like(
+                cb.concat(
+                        cb.concat(root.get("firstName"), StringUtils.SPACE),
+                        cb.lower(root.get("lastName"))
+                ),
+                "%"+input+"%"
+        );
     }
 
     public static Specification<Admin> hasRole(UserRole role) {

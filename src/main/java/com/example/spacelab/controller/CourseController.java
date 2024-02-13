@@ -242,7 +242,15 @@ public class CourseController {
     // Загрузка иконки
     @PostMapping("/{id}/icon")
     @ResponseBody
-    public ResponseEntity<?> uploadIcon(@PathVariable Long id, @ModelAttribute CourseIconDTO dto) throws IOException {
+    public ResponseEntity<?> uploadIcon(@PathVariable Long id,
+                                        @ModelAttribute CourseIconDTO dto,
+                                        BindingResult bindingResult) throws IOException {
+        courseValidator.validateIcon(dto, bindingResult);
+        if(bindingResult.hasErrors()) {
+            Map<String, String> errors = new HashMap<>();
+            bindingResult.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
+            return ResponseEntity.badRequest().body(errors);
+        }
         courseService.saveIcon(id, dto);
         return ResponseEntity.ok("Created");
     }

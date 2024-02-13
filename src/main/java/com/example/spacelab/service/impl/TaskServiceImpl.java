@@ -27,10 +27,7 @@ import com.example.spacelab.service.TaskService;
 import com.example.spacelab.service.specification.StudentTaskSpecification;
 import com.example.spacelab.service.specification.StudentTaskSpecifications;
 import com.example.spacelab.service.specification.TaskSpecifications;
-import com.example.spacelab.util.FilterForm;
-import com.example.spacelab.util.NumericUtils;
-import com.example.spacelab.util.StringUtils;
-import com.example.spacelab.util.TranslationService;
+import com.example.spacelab.util.*;
 import com.itextpdf.text.DocumentException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -55,6 +52,8 @@ import java.util.Optional;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+
+import static com.example.spacelab.service.specification.StudentTaskSpecifications.*;
 
 @Service
 @Log4j2
@@ -642,14 +641,32 @@ public class TaskServiceImpl implements TaskService {
         String statusInput = filters.getStatus();
         // todo add dates
 
-        StudentTaskStatus status = statusInput == null ? StudentTaskStatus.UNLOCKED : StudentTaskStatus.valueOf(statusInput);
+//        List<StudentTaskStatus> statusList = new ArrayList<>();
+//        if(statusInput == null) {
+//            statusList.add(StudentTaskStatus.UNLOCKED);
+//            statusList.add(StudentTaskStatus.READY);
+//        }
+//        else if(statusInput.contains(",")) {
+//            for(String statusString : statusInput.split(",")) {
+//                statusList.add(StudentTaskStatus.valueOf(statusString));
+//            }
+//        }
+//        else statusList.add(StudentTaskStatus.valueOf(statusInput));
+
+        StudentTaskStatus status = ValidationUtils.fieldIsEmpty(statusInput)
+                ? StudentTaskStatus.UNLOCKED
+                : StudentTaskStatus.valueOf(statusInput);
 
         Specification<StudentTask> spec =
-                StudentTaskSpecifications.hasCourseID(courseID <= 0 ? null : courseID)
-                .and(StudentTaskSpecifications.hasStudentId(student))
-                .and(StudentTaskSpecifications.hasNameLike(name))
-                .and(StudentTaskSpecifications.hasId(id))
-                .and(StudentTaskSpecifications.hasStatus(status));
+                hasCourseID(courseID <= 0 ? null : courseID)
+                .and(hasStudentId(student))
+                .and(hasNameLike(name))
+                .and(hasId(id))
+                .and(
+                        status.equals(StudentTaskStatus.UNLOCKED)
+                        ? hasStatus(status).or(hasStatus(StudentTaskStatus.READY))
+                        : hasStatus(status)
+                );
 
         return spec;
     }

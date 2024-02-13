@@ -186,8 +186,13 @@ public class TaskMapper {
             dto.setId(task.getId());
             dto.setName(task.getName());
             dto.setStatus(task.getStatus());
-            if(Objects.nonNull(task.getCourse())) {
-                dto.setCourse(new CourseLinkDTO().setId(task.getCourse().getId()).setName(task.getCourse().getName()));
+
+            Course course = task.getCourse();
+            if(Objects.nonNull(course)) {
+                dto.setCourse(new CourseLinkDTO()
+                        .setId(course.getId())
+                        .setName(course.getName())
+                        .setIcon(course.getIcon()));
             }
 
             if(task.getParentTask() != null) {

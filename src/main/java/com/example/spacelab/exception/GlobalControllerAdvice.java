@@ -66,7 +66,7 @@ public class GlobalControllerAdvice {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ResponseEntity<ErrorMessage> badCredentialsInTokenHandler(BadCredentialsException ex) {
         return new ResponseEntity<>(
-                new ErrorMessage("Bad credentials in JWT token!", HttpStatus.UNAUTHORIZED.value(), Map.of("msg", ex.getMessage())),
+                new ErrorMessage("Bad credentials!", HttpStatus.UNAUTHORIZED.value(), Map.of("msg", ex.getMessage())),
                 HttpStatus.UNAUTHORIZED
         );
     }

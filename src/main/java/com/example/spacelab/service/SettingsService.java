@@ -10,6 +10,7 @@ public interface SettingsService {
 
     Long getSettingsIdForAdmin(Admin admin);
     Settings getSettingsForAdmin(Admin admin);
+    Settings createDefaultSettings(Admin admin);
     Settings saveSettingsForAdmin(Settings settingsToSave);
 
     List<EnumResponse> getThemeOptions();

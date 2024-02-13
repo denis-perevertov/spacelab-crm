@@ -67,9 +67,6 @@ public class StudentServiceImpl implements StudentService {
     private final StudentMapper studentMapper;
     private final TaskMapper taskMapper;
 
-    @Value("${application.frontend-admin-panel.port}")
-    private String port;
-
     @Override
     public List<Student> getStudents() {
         log.info("Getting all students' info without filters or pages...");

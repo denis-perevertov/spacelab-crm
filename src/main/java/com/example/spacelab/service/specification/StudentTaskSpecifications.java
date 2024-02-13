@@ -42,4 +42,9 @@ public class StudentTaskSpecifications {
         if(status == null) return (root, query, cb) -> null;
         return (root, query, cb) -> cb.equal(root.get("status"), status);
     }
+
+    public static Specification<StudentTask> hasStatusOneOf(StudentTaskStatus... statusList) {
+        if(statusList == null || statusList.length < 1) return (root, query, cb) -> null;
+        return (root, query, cb) -> root.in("status", statusList);
+    }
 }

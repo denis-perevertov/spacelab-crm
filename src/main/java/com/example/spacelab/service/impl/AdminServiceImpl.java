@@ -164,6 +164,16 @@ public class AdminServiceImpl implements AdminService {
     public void deleteAdminById(Long id) {
         Admin admin = adminRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Admin not found!", Admin.class));
         log.info("Deleting admin with ID: " + id);
+        admin.getCourses().forEach(c -> {
+            if(c.getManager() != null && c.getManager().getId().equals(admin.getId())) {
+                c.setManager(null);
+            }
+            if(c.getMentor() != null && c.getMentor().getId().equals(admin.getId())) {
+                c.setMentor(null);
+            }
+        });
+        admin.getCourses().clear();
+        admin.getLessons().clear();
         adminRepository.delete(admin);
     }
 
