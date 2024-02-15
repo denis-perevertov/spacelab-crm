@@ -87,12 +87,12 @@ public class TaskController {
         Set<Course> adminCourses = loggedInAdmin.getCourses();
 
         if(permissionForLoggedInAdmin == PermissionType.FULL) {
-            taskPage = taskService.getTasks(filters, pageable);
+            taskPage = taskService.getTasks(filters.trim(), pageable);
             tasks = new PageImpl<>(taskPage.getContent().stream().map(mapper::fromTaskToListDTO).toList(), pageable, taskPage.getTotalElements());
         }
         else if(permissionForLoggedInAdmin == PermissionType.PARTIAL) {
-            Long[] allowedCoursesIDs = (Long[]) adminCourses.stream().map(Course::getId).toArray();
-            taskPage = taskService.getTasksByAllowedCourses(filters, pageable, allowedCoursesIDs);
+            Long[] allowedCoursesIDs = adminCourses.stream().map(Course::getId).toArray(Long[]::new);
+            taskPage = taskService.getTasksByAllowedCourses(filters.trim(), pageable, allowedCoursesIDs);
             tasks = new PageImpl<>(taskPage.getContent().stream().map(mapper::fromTaskToListDTO).toList(), pageable, taskPage.getTotalElements());
         }
 
@@ -317,7 +317,7 @@ public class TaskController {
                                                    @RequestParam(defaultValue = "0") int page,
                                                    @RequestParam(defaultValue = "5") int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Task> availableTasks = taskService.getTasksWithoutCourse(taskService.buildSpecificationFromFilters(filters), pageable);
+        Page<Task> availableTasks = taskService.getTasksWithoutCourse(taskService.buildSpecificationFromFilters(filters.trim()), pageable);
         return ResponseEntity.ok(
                 new PageImpl<>(
                         availableTasks.stream().map(mapper::fromTaskToModalDTO).toList(),
@@ -333,7 +333,7 @@ public class TaskController {
                                                @RequestParam(defaultValue = "0") int page,
                                                @RequestParam(defaultValue = "5") int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Task> availableTasks = taskService.getParentTasks(taskService.buildSpecificationFromFilters(filters), pageable);
+        Page<Task> availableTasks = taskService.getParentTasks(taskService.buildSpecificationFromFilters(filters.trim()), pageable);
         return ResponseEntity.ok(
                 new PageImpl<>(
                         availableTasks.stream().map(mapper::fromTaskToModalDTO).toList(),

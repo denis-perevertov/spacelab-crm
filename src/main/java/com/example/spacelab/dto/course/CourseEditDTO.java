@@ -3,12 +3,15 @@ package com.example.spacelab.dto.course;
 import com.example.spacelab.dto.admin.AdminAvatarDTO;
 import com.example.spacelab.dto.student.StudentAvatarDTO;
 import com.example.spacelab.model.course.CourseStatus;
+import com.example.spacelab.util.StringUtils;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 @Data
+@NoArgsConstructor
 public class CourseEditDTO {
 
     private Long id;
@@ -18,4 +21,14 @@ public class CourseEditDTO {
     private CourseInfoDTO info;
     private CourseMembersDTO members;
     private CourseTaskStructureDTO structure;
+
+    public CourseEditDTO(Long id, String name, String icon, CourseStatus status, CourseInfoDTO info, CourseMembersDTO members, CourseTaskStructureDTO structure) {
+        this.id = id;
+        this.name = StringUtils.trimString(name);
+        this.icon = StringUtils.trimString(icon);
+        this.status = status;
+        this.info = info;
+        this.members = members;
+        this.structure = structure;
+    }
 }

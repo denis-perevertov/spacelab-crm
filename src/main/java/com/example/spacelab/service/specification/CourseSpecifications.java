@@ -12,7 +12,7 @@ public class CourseSpecifications {
 
     public static Specification<Course> hasCourseIDs(Long... ids) {
         if(ids == null) return (root, query, cb) -> null;
-        return (root, query, cb) -> root.in(Course_.ID, ids);
+        return (root, query, cb) -> root.get(Course_.ID).in(ids);
     }
 
     public static Specification<Course> hasNameLike(String name) {

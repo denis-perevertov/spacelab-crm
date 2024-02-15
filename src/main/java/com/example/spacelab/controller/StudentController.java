@@ -28,6 +28,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Value;
@@ -85,12 +86,12 @@ public class StudentController {
         Set<Course> adminCourses = loggedInAdmin.getCourses();
 
         if(permissionForLoggedInAdmin == PermissionType.FULL) {
-            studentPage = studentService.getStudents(filters, pageable);
+            studentPage = studentService.getStudents(filters.trim(), pageable);
             students = new PageImpl<>(studentPage.getContent().stream().map(studentMapper::fromStudentToDTO).toList(), pageable, studentPage.getTotalElements());
         }
         else if(permissionForLoggedInAdmin == PermissionType.PARTIAL) {
             Long[] allowedCoursesIDs = adminCourses.stream().map(Course::getId).toList().toArray(new Long[adminCourses.size()]);
-            studentPage = studentService.getStudentsByAllowedCourses(filters, pageable, allowedCoursesIDs);
+            studentPage = studentService.getStudentsByAllowedCourses(filters.trim(), pageable, allowedCoursesIDs);
             students = new PageImpl<>(studentPage.getContent().stream().map(studentMapper::fromStudentToDTO).toList(), pageable, studentPage.getTotalElements());
         }
 
@@ -168,7 +169,7 @@ public class StudentController {
         Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "id");
         filters.setStudent(studentID);
         return ResponseEntity.ok(
-                lessonReportRowService.getStudentLessonReports(filters, pageable)
+                lessonReportRowService.getStudentLessonReports(filters.trim(), pageable)
                         .map(lessonMapper::fromReportRowToDTO)
         );
     }
@@ -211,10 +212,17 @@ public class StudentController {
     })
     @PreAuthorize("!hasAuthority('students.invite.NO_ACCESS')")
     @PostMapping("/invite")
-    public ResponseEntity<String> createStudentInviteLink(@RequestBody StudentInviteRequestDTO inviteRequest,
+    public ResponseEntity<String> createStudentInviteLink(@RequestBody @Valid StudentInviteRequestDTO inviteRequest,
+                                                          BindingResult bindingResult,
                                                           HttpServletRequest servletRequest) {
 
         authUtil.checkAccessToCourse(inviteRequest.getCourseID(), "students.invite");
+
+        if(bindingResult.hasErrors()) {
+            Map<String, String> errors = new HashMap<>();
+            bindingResult.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
+            throw new ObjectValidationException(errors);
+        }
 
         String token = studentService.createInviteStudentToken(studentMapper.fromDTOToInviteRequest(inviteRequest));
         String url = "http://" + hostname + "/register?invite_key=" + token;
@@ -327,7 +335,7 @@ public class StudentController {
                                                           @RequestParam(defaultValue = "0") int page,
                                                           @RequestParam(defaultValue = "5") int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.Direction.ASC, "course");
-        Page<Student> studentPage = studentService.getAvailableStudents(filters, pageable);
+        Page<Student> studentPage = studentService.getAvailableStudents(filters.trim(), pageable);
 
         return studentPage.map(student -> new StudentModalDTO(student.getId(),
                 student.getFullName(),

@@ -61,7 +61,7 @@ public class StudentTaskController {
         Pageable pageable = PageRequest.of(page, size);
 
         Page<StudentTaskDTO> taskPage = taskService
-                .getStudentTasks(taskService.buildSpec(filters), pageable)
+                .getStudentTasks(taskService.buildSpec(filters.trim()), pageable)
                 .map(taskMapper::fromStudentTaskToDTO);
 
         return ResponseEntity.ok().body(taskPage);

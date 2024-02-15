@@ -2,9 +2,11 @@ package com.example.spacelab.util;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
 
+@Slf4j
 @Data
 public class FilterForm {
 
@@ -55,6 +57,23 @@ public class FilterForm {
     private String comment;
 
     public static FilterBuilder with() { return new FilterBuilder(); }
+
+    public FilterForm trim() {
+        try {
+            for(Field field : this.getClass().getDeclaredFields()) {
+                field.setAccessible(true);
+                if(field.getType().equals(String.class)) {
+                    field.set(this, field.get(this) != null ? field.get(this).toString().trim() : null);
+                }
+                field.setAccessible(false);
+            }
+        } catch (Exception e) {
+            log.error("Could not trim filters");
+            log.error(e.getMessage());
+        }
+
+        return this;
+    }
 //
 //    @Override
 //    public String toString() {

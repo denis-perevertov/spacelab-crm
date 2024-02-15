@@ -6,4 +6,8 @@ public interface StringUtils {
         return filter == null || filter.isEmpty() || filter.equalsIgnoreCase("-1");
     }
 
+    static String trimString(String str) {
+        return (str == null || str.isEmpty()) ? str : str.trim();
+    }
+
 }

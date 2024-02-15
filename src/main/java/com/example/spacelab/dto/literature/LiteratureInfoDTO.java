@@ -23,6 +23,8 @@ public class LiteratureInfoDTO {
     @Schema(example = "CourseName")
     private String courseName;
 
+    private String courseIcon;
+
     @Schema(example = "BOOK")
     private LiteratureType type;
 

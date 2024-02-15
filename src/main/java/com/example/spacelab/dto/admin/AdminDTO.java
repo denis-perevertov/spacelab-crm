@@ -4,11 +4,13 @@ package com.example.spacelab.dto.admin;
 import com.example.spacelab.dto.course.CourseListDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
+@NoArgsConstructor
 public class AdminDTO {
 
     private Long id;
@@ -26,4 +28,15 @@ public class AdminDTO {
     private String avatar;
     private List<CourseListDTO> courses = new ArrayList<>();
 
+    public AdminDTO(Long id, String fullName, String firstName, String lastName, String phone, String email, String role, String avatar, List<CourseListDTO> courses) {
+        this.id = id;
+        this.fullName = fullName.trim();
+        this.firstName = firstName.trim();
+        this.lastName = lastName.trim();
+        this.phone = phone.trim();
+        this.email = email.trim();
+        this.role = role.trim();
+        this.avatar = avatar.trim();
+        this.courses = courses;
+    }
 }

@@ -28,7 +28,7 @@ public class TaskSpecifications {
         if(ids == null) return (root, query, cb) -> null;
         return (root, query, cb) -> {
             Join<Course, Task> ctj = root.join("course");
-            return ctj.in("id", ids);
+            return ctj.get("id").in(ids);
         };
     }
 

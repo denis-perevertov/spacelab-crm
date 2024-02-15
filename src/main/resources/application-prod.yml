@@ -1,4 +1,25 @@
-datasource:
-  url: jdbc:mysql://localhost:3333/spacelab2?createDatabaseIfNotExist=true
-  username: root
-  password: root
+server:
+  servlet:
+    context-path: /spacelab/admin
+
+spring:
+  datasource:
+    url: jdbc:mysql://mysql:3306/spacelab2?createDatabaseIfNotExist=true
+    username: root
+    password: root
+
+application:
+  frontend-admin-panel:
+    hostname: denis-perevertov.com/spacelab/admin
+  frontend-personal-cabinet:
+    hostname: denis-perevertov.com/spacelab/cabinet
+  teamwork:
+    apiVersion: v3
+    baseUrl: https://denisscompany18.teamwork.com
+    projectId: 641861
+    token: twp_QrGASGXS0eiIr83897z18EQXoWzV
+  aws:
+    bucket:
+      name: spacelab-dp-bucket
+    accessKey: AKIAZ6H5HK6QAOMKNFFW
+    secretKey: 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

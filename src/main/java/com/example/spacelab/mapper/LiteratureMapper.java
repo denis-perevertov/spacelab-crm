@@ -36,6 +36,7 @@ public class LiteratureMapper {
             if (course != null) {
                 dto.setCourseId(course.getId());
                 dto.setCourseName(course.getName());
+                dto.setCourseIcon(course.getIcon());
             }
 
             dto.setType(literature.getType());
@@ -119,6 +120,7 @@ public class LiteratureMapper {
             dto.setName(literature.getName());
             dto.setCourseID(literature.getCourse().getId());
             dto.setCourseName(literature.getCourse().getName());
+            dto.setCourseIcon(literature.getCourse().getIcon());
             dto.setType(literature.getType());
             dto.setAuthor(literature.getAuthor());
             dto.setKeywords(literature.getKeywords());

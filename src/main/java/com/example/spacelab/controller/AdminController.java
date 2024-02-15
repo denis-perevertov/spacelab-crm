@@ -2,16 +2,14 @@ package com.example.spacelab.controller;
 
 import com.example.spacelab.dto.SelectDTO;
 import com.example.spacelab.dto.SelectSearchDTO;
-import com.example.spacelab.dto.admin.AdminContactDTO;
+import com.example.spacelab.dto.admin.*;
 import com.example.spacelab.exception.ErrorMessage;
 import com.example.spacelab.exception.ObjectValidationException;
 import com.example.spacelab.exception.ResourceNotFoundException;
 import com.example.spacelab.mapper.AdminMapper;
 import com.example.spacelab.mapper.CourseMapper;
 import com.example.spacelab.model.admin.Admin;
-import com.example.spacelab.dto.admin.AdminEditDTO;
 import com.example.spacelab.model.admin.Admin;
-import com.example.spacelab.dto.admin.AdminDTO;
 import com.example.spacelab.dto.admin.AdminEditDTO;
 import com.example.spacelab.service.AdminService;
 import com.example.spacelab.service.CourseService;
@@ -78,7 +76,7 @@ public class AdminController {
         Page<AdminDTO> adminList;
         Page<Admin> adminPage;
         Pageable pageable = PageRequest.of(page, size, Sort.Direction.ASC, "id");
-        adminPage = adminService.getAdmins(filters, pageable);
+        adminPage = adminService.getAdmins(filters.trim(), pageable);
         adminList = new PageImpl<>(adminPage.stream().map(adminMapper::fromAdminToDTO).toList(), pageable, adminPage.getTotalElements());
 
         return new ResponseEntity<>(adminList, HttpStatus.OK);
@@ -251,10 +249,11 @@ public class AdminController {
         FilterForm filters = FilterForm.with()
                 .role(role)
                 .build();
-        List<SelectDTO> adminList = adminService.getAdmins(filters).stream()
-                                                        .map(a -> new SelectDTO(a.getId().toString(), a.getFullName()))
-                                                        .toList();
-        return ResponseEntity.ok(adminList);
+        return ResponseEntity.ok(
+                adminService.getAdmins(filters).stream()
+                        .map(a -> new AdminAvatarDTO(a.getId(), a.getFullName(), a.getAvatar()))
+                        .toList()
+        );
     }
 
     // Получение списка незанятых админов (админов без назначенных курсов)
@@ -270,6 +269,6 @@ public class AdminController {
                                                   @RequestParam(defaultValue = "0") int page,
                                                   @RequestParam(defaultValue = "5") int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return adminService.getAdmins(filters, pageable).map(adminMapper::fromAdminToDTO);
+        return adminService.getAdmins(filters.trim(), pageable).map(adminMapper::fromAdminToDTO);
     }
 }

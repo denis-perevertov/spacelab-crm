@@ -1,6 +1,7 @@
 package com.example.spacelab.dto.course;
 
 import com.example.spacelab.util.ProgramDuration;
+import com.example.spacelab.util.StringUtils;
 import com.example.spacelab.util.TimeUnit;
 import lombok.Data;
 
@@ -14,5 +15,8 @@ public record CourseSettingsDTO(
         Integer hoursNorm,
         Integer lessonInterval
 ) {
+    public CourseSettingsDTO {
+        completionTime = StringUtils.trimString(completionTime);
+    }
 
 }

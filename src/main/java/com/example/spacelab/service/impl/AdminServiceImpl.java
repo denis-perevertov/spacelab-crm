@@ -119,7 +119,6 @@ public class AdminServiceImpl implements AdminService {
     public Admin createAdmin(AdminEditDTO dto) throws IOException {
         log.info("Creating new admin");
         Admin admin = adminMapper.fromEditDTOToAdmin(dto);
-        admin = adminRepository.save(admin);
         MultipartFile avatar = dto.getAvatarToSave();
         if(!avatar.isEmpty()) {
             try {
@@ -130,14 +129,13 @@ public class AdminServiceImpl implements AdminService {
                 log.error("could not save file: {}", ex.getMessage());
             }
         }
-        return admin;
+        return adminRepository.save(admin);
     }
 
     @Override
     public Admin updateAdmin(AdminEditDTO dto) throws IOException {
         log.info("Updating admin");
         Admin admin = adminMapper.fromEditDTOToAdmin(dto);
-        admin = adminRepository.save(admin);
         MultipartFile avatar = dto.getAvatarToSave();
         if(!avatar.isEmpty()) {
             try {
@@ -148,7 +146,7 @@ public class AdminServiceImpl implements AdminService {
                 log.error("could not save file: {}", ex.getMessage());
             }
         }
-        return admin;
+        return adminRepository.save(admin);
     }
 
     @Override

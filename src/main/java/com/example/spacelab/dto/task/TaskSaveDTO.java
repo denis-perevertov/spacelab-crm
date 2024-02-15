@@ -49,5 +49,19 @@ public class TaskSaveDTO {
 
     private List<TaskProgressPointDTO> taskProgressPoints;
 
-
+    public TaskSaveDTO(Long id, String name, Long parentTaskID, Long courseID, String level, String status, String completionTime, String completionTimeUnit, String skillsDescription, String taskDescription, List<Long> subtasksIDs, List<TaskLiteratureDTO> literatureList, List<TaskProgressPointDTO> taskProgressPoints) {
+        this.id = id;
+        this.name = name.trim();
+        this.parentTaskID = parentTaskID;
+        this.courseID = courseID;
+        this.level = level.trim();
+        this.status = status.trim();
+        this.completionTime = completionTime.trim();
+        this.completionTimeUnit = completionTimeUnit.trim();
+        this.skillsDescription = skillsDescription.trim();
+        this.taskDescription = taskDescription.trim();
+        this.subtasksIDs = subtasksIDs;
+        this.literatureList = literatureList;
+        this.taskProgressPoints = taskProgressPoints;
+    }
 }

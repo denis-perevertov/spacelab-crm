@@ -84,11 +84,11 @@ public class LiteratureController {
         Set<Course> adminCourses = loggedInAdmin.getCourses();
 
         if(permissionForLoggedInAdmin == PermissionType.FULL) {
-            litPage = literatureService.getLiterature(filters, pageable);
+            litPage = literatureService.getLiterature(filters.trim(), pageable);
         }
         else if(permissionForLoggedInAdmin == PermissionType.PARTIAL) {
-            Long[] allowedCoursesIDs = (Long[]) adminCourses.stream().map(Course::getId).toArray();
-            litPage = literatureService.getLiteratureByAllowedCourses(filters, pageable, allowedCoursesIDs);
+            Long[] allowedCoursesIDs = adminCourses.stream().map(Course::getId).toArray(Long[]::new);
+            litPage = literatureService.getLiteratureByAllowedCourses(filters.trim(), pageable, allowedCoursesIDs);
         }
         literatures = new PageImpl<>(litPage.getContent().stream().map(mapper::fromLiteratureToListDTO).toList(), pageable, litPage.getTotalElements());
 

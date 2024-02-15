@@ -81,11 +81,11 @@ public class LessonController {
         Set<Course> adminCourses = loggedInAdmin.getCourses();
 
         if(permissionForLoggedInAdmin == PermissionType.FULL) {
-            lessonPage = lessonService.getLessons(filters, pageable);
+            lessonPage = lessonService.getLessons(filters.trim(), pageable);
         }
         else if(permissionForLoggedInAdmin == PermissionType.PARTIAL) {
-            Long[] allowedCoursesIDs = adminCourses.stream().map(Course::getId).toList().toArray(new Long[adminCourses.size()]);
-            lessonPage = lessonService.getLessonsByAllowedCourses(filters, pageable, allowedCoursesIDs);
+            Long[] allowedCoursesIDs = adminCourses.stream().map(Course::getId).toList().toArray(Long[]::new);
+            lessonPage = lessonService.getLessonsByAllowedCourses(filters.trim(), pageable, allowedCoursesIDs);
         }
         lessons = new PageImpl<>(lessonPage.getContent().stream().map(mapper::fromLessonToLessonListDTO).toList(), pageable, lessonPage.getTotalElements());
 

@@ -31,6 +31,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -65,25 +66,26 @@ public class CourseController {
     })
     @PreAuthorize("!hasAuthority('courses.read.NO_ACCESS')")
     @GetMapping
-    public ResponseEntity<Page<CourseListDTO>> getCourses(@AuthenticationPrincipal Admin loggedInAdmin,
-                                                           @Parameter(name = "Filter object", description = "Collection of all filters for search results", example = "{}") FilterForm filters,
-                                                           @RequestParam(required = false, defaultValue = "0") Integer page,
-                                                           @RequestParam(required = false, defaultValue = "10") Integer size) {
+    @Transactional
+    public ResponseEntity<Page<CourseListDTO>> getCourses(@Parameter(name = "Filter object", description = "Collection of all filters for search results", example = "{}") FilterForm filters,
+                                                          @RequestParam(required = false, defaultValue = "0") Integer page,
+                                                          @RequestParam(required = false, defaultValue = "10") Integer size) {
 
         Page<CourseListDTO> courseListDTO = new PageImpl<>(new ArrayList<>());
         Page<Course> coursePage;
         Pageable pageable = PageRequest.of(page, size, Sort.Direction.DESC, "id");
 
+        Admin loggedInAdmin = authUtil.getLoggedInAdmin();
         PermissionType permissionForLoggedInAdmin = loggedInAdmin.getRole().getPermissions().getReadCourses();
         Set<Course> adminCourses = loggedInAdmin.getCourses();
 
         if(permissionForLoggedInAdmin == PermissionType.FULL) {
-            coursePage = courseService.getCourses(filters, pageable);
+            coursePage = courseService.getCourses(filters.trim(), pageable);
             courseListDTO = new PageImpl<>(coursePage.getContent().stream().map(mapper::fromCourseToListDTO).toList(), pageable, coursePage.getTotalElements());
         }
         else if(permissionForLoggedInAdmin == PermissionType.PARTIAL) {
-            Long[] allowedCoursesIDs = adminCourses.stream().map(Course::getId).toList().toArray(new Long[adminCourses.size()]);
-            coursePage = courseService.getAllowedCourses(filters, pageable, allowedCoursesIDs);
+            Long[] allowedCoursesIDs = adminCourses.stream().map(Course::getId).toList().toArray(Long[]::new);
+            coursePage = courseService.getAllowedCourses(filters.trim(), pageable, allowedCoursesIDs);
             courseListDTO = new PageImpl<>(coursePage.getContent().stream().map(mapper::fromCourseToListDTO).toList(), pageable, coursePage.getTotalElements());
         }
 

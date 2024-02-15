@@ -41,7 +41,7 @@ public class LiteratureValidator implements Validator {
         if(dto.getName() == null || dto.getName().isEmpty())
             e.rejectValue("name", "name.empty", "validation.field.empty");
         else if(dto.getName().length() > 100)
-            e.rejectValue("name", "name.length", "validation.field.length");
+            e.rejectValue("name", "name.length", "validation.field.length.max");
 
         if(dto.getType() == null)
             e.rejectValue("type", "type.empty", "validation.field.select");
@@ -50,7 +50,7 @@ public class LiteratureValidator implements Validator {
             e.rejectValue("author", "author.empty", "validation.field.empty");
         }
         else if(dto.getAuthor().length() > 100) {
-            e.rejectValue("author", "author.length", "validation.field.length");
+            e.rejectValue("author", "author.length", "validation.field.length.max");
         }
 
         if(dto.getCourseID() == null || dto.getCourseID() <= 0) {
@@ -61,13 +61,13 @@ public class LiteratureValidator implements Validator {
         }
 
         if(dto.getKeywords() != null && dto.getKeywords().length() > 200) {
-            e.rejectValue("keywords", "keywords.length", "validation.field.length");
+            e.rejectValue("keywords", "keywords.length", "validation.field.length.max");
         }
 
         if(dto.getDescription() == null || dto.getDescription().isEmpty())
             e.rejectValue("description", "description.empty", "validation.field.empty");
         else if(dto.getDescription().length() > 1000)
-            e.rejectValue("description", "description.length", "validation.field.length");
+            e.rejectValue("description", "description.length", "validation.field.length.max");
 
         if(dto.getType() == LiteratureType.LINK) {
             if(dto.getResource_link() == null || dto.getResource_link().isEmpty())

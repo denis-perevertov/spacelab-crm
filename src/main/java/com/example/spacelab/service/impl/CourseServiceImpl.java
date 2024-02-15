@@ -190,14 +190,19 @@ public class CourseServiceImpl implements CourseService {
         updateCourseTaskList(c, dto);
         updateCourseStudents(c, dto);
         updateStudentsCourseTaskList(c);
+
         try {
             createTrackingCourseProject(c);
+        } catch (Exception ex) {
+            log.error("could not update tracking project: {}", ex.getMessage());
+        }
+        try {
             addStudentsToProject(
                     c.getStudents().stream().map(Student::getTaskTrackingProfileId).filter(Objects::nonNull).toList(),
                     c.getTrackingId()
             );
-        } catch (TeamworkException ex) {
-            log.error("could not update tracking project: {}", ex.getMessage());
+        } catch (Exception ex) {
+            log.error("could not add students to project: {}", ex.getMessage());
         }
         return courseRepository.save(c);
     }
@@ -221,12 +226,12 @@ public class CourseServiceImpl implements CourseService {
 
         try {
             updateTrackingCourseProject(c);
-        } catch (TeamworkException ex) {
+        } catch (Exception ex) {
             log.error("could not update tracking project: {}", ex.getMessage());
         }
         try {
             updateStudentsInProject(oldStudentList, newStudentList, c.getTrackingId());
-        } catch (TeamworkException ex) {
+        } catch (Exception ex) {
             log.error("could not update students in project: {}", ex.getMessage());
         }
 

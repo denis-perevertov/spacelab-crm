@@ -19,6 +19,7 @@ public class LiteratureListDTO {
     private Long courseId;
     @Schema(example = "CourseName")
     private String courseName;
+    private String courseIcon;
 
     @Schema(example = "BOOK")
     private LiteratureType type;

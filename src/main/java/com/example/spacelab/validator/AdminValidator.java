@@ -2,23 +2,28 @@ package com.example.spacelab.validator;
 
 import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.dto.admin.AdminEditDTO;
+import com.example.spacelab.model.literature.Literature;
 import com.example.spacelab.repository.AdminRepository;
 import com.example.spacelab.repository.CourseRepository;
 import com.example.spacelab.repository.UserRoleRepository;
+import com.example.spacelab.util.ValidationUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Objects;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
 @Log
 public class AdminValidator implements Validator {
 
-    private final static String PHONE_PATTERN = "^([+]?[\\s0-9]+)?(\\d{3}|[(]?[0-9]+[)])?([-]?[\\s]?[0-9])+$";
+//    private final static String PHONE_PATTERN = "^([+]?[\\s0-9]+)?(\\d{3}|[(]?[0-9]+[)])?([-]?[\\s]?[0-9])+$";
+    private final static String PHONE_PATTERN = "^(38)?0(99|50|66|97|96|98)\\d{7}$";
     private final static String EMAIL_PATTERN = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$";
 
     private final AdminRepository adminRepository;
@@ -87,6 +92,21 @@ public class AdminValidator implements Validator {
             e.rejectValue("roleID", "roleID.empty", "validation.field.select");
         else if(!roleRepository.existsById(dto.getRoleID()))
             e.rejectValue("roleID", "roleID.no-match", "validation.role.id.incorrect");
+
+        MultipartFile avatar = dto.getAvatarToSave();
+        if(avatar != null && !avatar.isEmpty()) {
+            if(avatar.getSize() > ValidationUtils.MAX_IMAGE_SIZE) {
+                e.rejectValue("avatarToSave", "avatarToSave.max-size", "validation.file.max-size");
+            }
+            else {
+                String filename = avatar.getOriginalFilename();
+                assert filename != null;
+                String extension = filename.substring(filename.lastIndexOf(".")+1);
+                if(!ValidationUtils.ALLOWED_IMAGE_FORMATS.contains(extension)) {
+                    e.rejectValue("avatarToSave", "avatarToSave.extension", "validation.file.extension.allowed");
+                }
+            }
+        }
 
     }
 }

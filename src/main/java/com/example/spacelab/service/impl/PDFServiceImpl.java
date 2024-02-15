@@ -36,8 +36,14 @@ public class PDFServiceImpl implements PDFService {
 
     @Override
     public File generatePDF(Task task, Locale locale) throws IOException, DocumentException, URISyntaxException {
-        FontFactory.register(resourceLoader.getResource("classpath:/fonts/arial.ttf").getURL().getPath(), "my_font");
-        FontFactory.register(resourceLoader.getResource("classpath:/fonts/arialbd.ttf").getURL().getPath(), "my_font_bold");
+        try {
+            FontFactory.register(resourceLoader.getResource("classpath:/fonts/arial.ttf").getURL().getPath(), "my_font");
+            FontFactory.register(resourceLoader.getResource("classpath:/fonts/arialbd.ttf").getURL().getPath(), "my_font_bold");
+        } catch (Exception e) {
+            log.error("could not register pdf fonts");
+            log.error(e.getMessage());
+        }
+
 
         Document document = new Document();
         File file = new File(String.format("%s_%s.pdf", FilenameUtils.trimNameString(task.getName()), locale.getLanguage()));
@@ -64,6 +70,7 @@ public class PDFServiceImpl implements PDFService {
 
     private Paragraph generateTaskHeader(Task task) {
         Font font = FontFactory.getFont("my_font_bold", "Cp1251", true, 22);
+//        Font font = FontFactory.getFont(FontFactory.TIMES, "Cp1251", true, 22);
         Paragraph paragraph = new Paragraph(new Chunk(task.getName(), font));
         paragraph.setAlignment(1);
         return paragraph;
@@ -72,6 +79,8 @@ public class PDFServiceImpl implements PDFService {
     private PdfPTable generateTaskSecondaryInfoTable(Task task, Locale locale) throws IOException, DocumentException {
         Font font = FontFactory.getFont("my_font", "Cp1251", true);
         Font boldFont = FontFactory.getFont("my_font_bold", "Cp1251", true);
+//        Font font = FontFactory.getFont(FontFactory.TIMES, "Cp1251", true);
+//        Font boldFont = FontFactory.getFont(FontFactory.TIMES_BOLD, "Cp1251", true);
 
         PdfPTable table = new PdfPTable(2);
         if(task.getParentTask() != null) {

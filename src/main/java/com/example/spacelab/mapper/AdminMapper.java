@@ -90,6 +90,7 @@ public class AdminMapper {
             dto.setPhone(admin.getPhone());
             dto.setEmail(admin.getEmail());
             dto.setRoleID(admin.getRole().getId());
+            dto.setRoleName(admin.getRole().getName());
 
             dto.setAvatar(admin.getAvatar());
 

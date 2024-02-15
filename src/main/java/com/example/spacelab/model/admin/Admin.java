@@ -47,7 +47,7 @@ public class Admin extends UserEntity implements UserDetails {
 
     @ToString.Exclude
     @JsonIgnore
-    @OneToOne(mappedBy = "admin")
+    @OneToOne(mappedBy = "admin", cascade = CascadeType.ALL, orphanRemoval = true)
     private Settings settings;
 
     @Override
