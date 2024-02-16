@@ -98,6 +98,7 @@ public class AdminController {
         return new ResponseEntity<>(adminMapper.fromAdminToDTO(admin), HttpStatus.OK);
     }
 
+    @PreAuthorize("!hasAuthority('settings.read.NO_ACCESS')")
     @GetMapping("/{id}/courses")
     public ResponseEntity<?> getAdminCourses(@PathVariable @Parameter(example = "1") Long id) {
         return ResponseEntity.ok(courseService.getAdminCourses(id).stream().map(courseMapper::fromCourseToCourseAdminDTO).toList());
@@ -132,6 +133,7 @@ public class AdminController {
     }
 
     // Получение формы админа на редактирование
+    @PreAuthorize("!hasAuthority('settings.read.NO_ACCESS')")
     @GetMapping("/{id}/edit")
     public ResponseEntity<?> getAdminForEdit(@PathVariable Long id) {
         return new ResponseEntity<>(adminMapper.fromAdminToEditDTO(adminService.getAdminById(id)), HttpStatus.OK);
@@ -191,6 +193,7 @@ public class AdminController {
     // ==================================
 
     // Загрузка аватарки
+    @PreAuthorize("!hasAuthority('settings.edit.NO_ACCESS')")
     @PostMapping("/{id}/avatar")
     public ResponseEntity<?> uploadAvatar(@PathVariable Long id,
                                           @RequestPart MultipartFile avatar) throws IOException {
@@ -199,51 +202,20 @@ public class AdminController {
     }
 
     // Удаление аватарки
+    @PreAuthorize("!hasAuthority('settings.edit.NO_ACCESS')")
     @DeleteMapping("/{id}/avatar")
     public ResponseEntity<?> deleteAvatar(@PathVariable Long id) {
         adminService.deleteAvatarForAdmin(id);
         return ResponseEntity.ok().build();
     }
 
-    // Получение списка админов по ролям (для Select2)
-//    @Operation(description = "Get list of admins with a specified role (by its ID) - For Select2",
-//                summary = "Get Admins By Role ID - For Select2", tags = {"Admin"})
-//    @ApiResponses(value = {
-//            @ApiResponse(responseCode = "200", description = "Successful Operation"),
-//            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
-//            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
-//            @ApiResponse(responseCode = "404", description = "Role Not Found", content = @Content),
-//            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
-//    })
-//    @GetMapping("/get-admins-by-role")
-//    public Map<String, Object> getAdminsByRole(@RequestParam(required=false) @Parameter(example = "1", name = "Role ID") Long roleID,
-//                                               @RequestParam(required=false) String roleName,
-//                                               @RequestParam @Parameter(example = "1") Integer page) {
-//
-//        FilterForm form = FilterForm.with()
-//                                    .role(roleID)
-//                                    .build();
-//        Pageable pageable = PageRequest.of(page, 10);
-//
-//        Page<Admin> adminPage =  adminService.getAdmins(form, pageable);
-//
-//        List<SelectSearchDTO> adminList = adminPage.getContent()
-//                                                    .stream()
-//                                                    .map(admin -> new SelectSearchDTO(admin.getId(),
-//                                                            admin.getFirstName() + " " + admin.getLastName()))
-//                                                    .toList();
-//        Map<String, Object> selectMap = new HashMap<>();
-//        selectMap.put("results", adminList);
-//        selectMap.put("pagination", Map.of("more", adminPage.getNumber() < adminPage.getTotalPages()));
-//
-//        return selectMap;
-//    }
-
+    @PreAuthorize("!hasAuthority('settings.read.NO_ACCESS')")
     @GetMapping("/select")
     public ResponseEntity<?> getAdminSelect() {
         return ResponseEntity.ok(adminService.getAdmins().stream().map(a -> new SelectDTO(a.getId().toString(), a.getFullName())).toList());
     }
 
+    @PreAuthorize("!hasAuthority('settings.read.NO_ACCESS')")
     @GetMapping("/get-admins-list-by-role")
     public ResponseEntity<?> getAdminsListByRole(@RequestParam Long role) {
         FilterForm filters = FilterForm.with()
@@ -264,6 +236,7 @@ public class AdminController {
             @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
     })
+    @PreAuthorize("!hasAuthority('settings.read.NO_ACCESS')")
     @GetMapping("/available")
     public Page<AdminDTO> getAdminsWithoutCourses(FilterForm filters,
                                                   @RequestParam(defaultValue = "0") int page,

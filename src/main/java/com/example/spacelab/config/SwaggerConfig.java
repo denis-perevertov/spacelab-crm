@@ -32,10 +32,10 @@ public class SwaggerConfig {
                                             .version("1.0")
                                             .contact(new Contact()
                                                                 .name("Denis Perevertov & Evgeniy Shevchenko")
-                                                                .email("testemail@gmail.com")
-                                                                .url("http://www.test.com"))
+                                                                .email("regicuinte@gmail.com")
+                                                                .url("http://denis-perevertov.com"))
                                             .license(new License()
-                                                                .name("License of API")
-                                                                .url("API license URL")));
+                                                                .name("CC License")
+                                                                .url("https://creativecommons.org/share-your-work/cclicenses/")));
     }
 }

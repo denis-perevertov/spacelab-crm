@@ -9,6 +9,7 @@ import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.student.Student;
 import com.example.spacelab.model.task.Task;
 import com.example.spacelab.util.FilterForm;
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.Data;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,7 +17,7 @@ import org.springframework.data.domain.Sort;
 
 import java.io.IOException;
 import java.util.List;
-
+@Hidden
 public interface CourseService extends EntityFilterService<Course> {
 
     List<Course> getCourses();

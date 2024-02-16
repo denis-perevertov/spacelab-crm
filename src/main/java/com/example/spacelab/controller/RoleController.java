@@ -163,6 +163,7 @@ public class RoleController {
             @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
+    @PreAuthorize("!hasAuthority('roles.read.NO_ACCESS')")
     @GetMapping("/members")
     public List<UserRoleAdminListDTO> getAllRolesMembers() {
         return userRoleService.getRoles()
@@ -178,6 +179,7 @@ public class RoleController {
                 .toList();
     }
 
+    @PreAuthorize("!hasAuthority('roles.read.NO_ACCESS')")
     @GetMapping("/get-roles-list")
     public List<SelectDTO> getRoleSelect() {
         return userRoleService.getRoles()

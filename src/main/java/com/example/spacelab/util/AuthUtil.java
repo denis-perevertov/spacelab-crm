@@ -38,9 +38,9 @@ public class AuthUtil {
         if(permissionToCheck == PermissionType.FULL) return;
         else if(permissionToCheck == PermissionType.PARTIAL) {
             if(!admin.getCourses().stream().map(Course::getId).toList().contains(courseID))
-                throw new AccessDeniedException("No access to creating new students for this course! (courseID: "+courseID+") !");
+                throw new AccessDeniedException("No access for this course! (courseID: "+courseID+") !");
         }
-        else throw new AccessDeniedException("No access to creating new students for this course! (courseID: "+courseID+") !");
+        else throw new AccessDeniedException("No access for this course! (courseID: "+courseID+") !");
     }
 
     public void checkPermissionToCreateCourse() {

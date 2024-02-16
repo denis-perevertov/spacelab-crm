@@ -64,8 +64,6 @@ public class LiteratureController {
 
     private final AuthUtil authUtil;
 
-
-
     // Получение списка литературы с фильтрацией и пагинацией
     @PreAuthorize("!hasAuthority('literatures.read.NO_ACCESS')")
     @GetMapping
@@ -94,8 +92,6 @@ public class LiteratureController {
 
         return new ResponseEntity<>(literatures, HttpStatus.OK);
     }
-
-
 
     // Получение литературы по id
     @PreAuthorize("!hasAuthority('literatures.read.NO_ACCESS')")
@@ -147,9 +143,11 @@ public class LiteratureController {
         }
     }
 
+    @PreAuthorize("!hasAuthority('literatures.read.NO_ACCESS')")
     @GetMapping("/{id}/download")
     public ResponseEntity<?> downloadLiteratureResource(@PathVariable Long id,
                                            HttpServletResponse response) throws IOException {
+        authUtil.checkAccessToCourse(literatureService.getLiteratureById(id).getCourse().getId(), "literatures.read");
         File file = literatureService.getLiteratureFileById(id);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);
@@ -205,8 +203,6 @@ public class LiteratureController {
 
     }
 
-
-
     // Удаление литературы
     @PreAuthorize("!hasAuthority('literatures.delete.NO_ACCESS')")
     @DeleteMapping("/{id}")
@@ -217,8 +213,6 @@ public class LiteratureController {
         literatureService.deleteLiteratureById(id);
         return new ResponseEntity<>("Deleted", HttpStatus.OK);
     }
-
-
 
     // Select2
     @PreAuthorize("!hasAuthority('literatures.read.NO_ACCESS')")

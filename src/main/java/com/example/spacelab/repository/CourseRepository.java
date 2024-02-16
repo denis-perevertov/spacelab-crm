@@ -2,6 +2,7 @@ package com.example.spacelab.repository;
 
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.student.Student;
+import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,7 +13,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-
+@Hidden
 @Repository
 public interface CourseRepository extends JpaRepository<Course, Long>, JpaSpecificationExecutor<Course> {
     boolean existsByName(String name);

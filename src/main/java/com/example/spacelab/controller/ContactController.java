@@ -86,6 +86,7 @@ public class ContactController {
     }
 
     // Получение дто контакта для создания/редактирования
+    @PreAuthorize("!hasAuthority('settings.read.NO_ACCESS')")
     @GetMapping("/{id}/edit")
     public ResponseEntity<ContactInfoEditDTO> getContactForEdit(@PathVariable Long id) {
         return new ResponseEntity<>(contactMapper.fromContactToEditDTO(contactService.getContact(id)), HttpStatus.OK);

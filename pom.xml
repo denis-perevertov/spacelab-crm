@@ -175,7 +175,15 @@
 			<version>1.76</version>
 		</dependency>
 
-    </dependencies>
+		<!-- https://mvnrepository.com/artifact/com.twilio.sdk/twilio -->
+		<dependency>
+			<groupId>com.twilio.sdk</groupId>
+			<artifactId>twilio</artifactId>
+			<version>10.0.0</version>
+		</dependency>
+
+
+	</dependencies>
 
 
 	<build>

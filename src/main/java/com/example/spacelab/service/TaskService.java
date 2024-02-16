@@ -8,6 +8,7 @@ import com.example.spacelab.model.student.StudentTask;
 import com.example.spacelab.model.task.Task;
 import com.example.spacelab.util.FilterForm;
 import com.itextpdf.text.DocumentException;
+import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -16,7 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
-
+@Hidden
 public interface TaskService extends StudentTaskService, EntityFilterService<Task>{
 
     List<Task> getTasks();

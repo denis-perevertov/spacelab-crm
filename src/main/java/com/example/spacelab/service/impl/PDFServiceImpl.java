@@ -21,6 +21,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Locale;
@@ -37,8 +38,10 @@ public class PDFServiceImpl implements PDFService {
     @Override
     public File generatePDF(Task task, Locale locale) throws IOException, DocumentException, URISyntaxException {
         try {
-            FontFactory.register(resourceLoader.getResource("classpath:/fonts/arial.ttf").getURL().getPath(), "my_font");
-            FontFactory.register(resourceLoader.getResource("classpath:/fonts/arialbd.ttf").getURL().getPath(), "my_font_bold");
+            FontFactory.register(resourceLoader.getResource("classpath:fonts/arial.ttf").getURL().getPath(), "my_font");
+            FontFactory.register(resourceLoader.getResource("classpath:fonts/arialbd.ttf").getURL().getPath(), "my_font_bold");
+//            FontFactory.register(Thread.currentThread().getContextClassLoader().getResource("fonts/arial.ttf").toString(), "my_font");
+//            FontFactory.register("/resources/fonts/arialbd.ttf", "my_font_bold");
         } catch (Exception e) {
             log.error("could not register pdf fonts");
             log.error(e.getMessage());

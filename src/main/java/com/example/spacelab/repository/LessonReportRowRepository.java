@@ -2,6 +2,7 @@ package com.example.spacelab.repository;
 
 import com.example.spacelab.model.lesson.LessonReportRow;
 import com.example.spacelab.model.student.Student;
+import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,7 +14,7 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-
+@Hidden
 @Repository
 public interface LessonReportRowRepository extends JpaRepository<LessonReportRow, Long>, JpaSpecificationExecutor<LessonReportRow> {
 //    Page<LessonReportRow> findAllByStudentId(Long studentId, Pageable pageable);

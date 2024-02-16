@@ -113,6 +113,7 @@ public class CourseController {
         return new ResponseEntity<>(course, HttpStatus.OK);
     }
 
+    @PreAuthorize("!hasAuthority('courses.read.NO_ACCESS')")
     @GetMapping("/{id}/tasks")
     public ResponseEntity<?> getCourseTasks(@PathVariable Long id) {
         authUtil.checkAccessToCourse(id, "courses.read");
@@ -242,11 +243,15 @@ public class CourseController {
     }
 
     // Загрузка иконки
+    @PreAuthorize("!hasAuthority('courses.edit.NO_ACCESS')")
     @PostMapping("/{id}/icon")
     @ResponseBody
     public ResponseEntity<?> uploadIcon(@PathVariable Long id,
                                         @ModelAttribute CourseIconDTO dto,
                                         BindingResult bindingResult) throws IOException {
+
+        authUtil.checkAccessToCourse(id, "courses.write");
+
         courseValidator.validateIcon(dto, bindingResult);
         if(bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
@@ -258,6 +263,7 @@ public class CourseController {
     }
 
     // Очистка иконки
+    @PreAuthorize("!hasAuthority('courses.edit.NO_ACCESS')")
     @DeleteMapping("/{id}/icon")
     public ResponseEntity<?> deleteIcon(@PathVariable Long id) throws IOException {
         courseService.deleteIcon(id);
@@ -284,10 +290,21 @@ public class CourseController {
         return ownerPage;
     }
 
+    @PreAuthorize("!hasAuthority('courses.read.NO_ACCESS')")
     @GetMapping("/get-all-courses")
     @ResponseBody
     public List<CourseSelectDTO> getCoursesIdAndNames() {
-        return courseService.getCourses().stream().map(mapper::fromCourseToSelectDTO).toList();
+
+//        return courseService
+//                .getCourses()
+//                .stream()
+//                .map(mapper::fromCourseToSelectDTO)
+//                .toList();
+        return courseService
+                .getAllowedCourses(authUtil.getLoggedInAdmin().getCourses().stream().map(Course::getId).toArray(Long[]::new))
+                .stream()
+                .map(mapper::fromCourseToSelectDTO)
+                .toList();
     }
 
     @GetMapping("/get-status-list")

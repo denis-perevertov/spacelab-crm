@@ -432,14 +432,16 @@ public class CourseMapper {
     }
 
     public CourseAdminIconDTO fromCourseToCourseAdminDTO(Course c) {
+        Admin mentor = c.getMentor();
+        Admin manager = c.getManager();
         return new CourseAdminIconDTO(
                 c.getId(),
                 c.getName(),
                 c.getIcon(),
-                c.getMentor().getId(),
-                c.getMentor().getFullName(),
-                c.getManager().getId(),
-                c.getManager().getFullName()
+                mentor != null ? mentor.getId() : null,
+                mentor != null ? mentor.getFullName() : null,
+                manager != null ? manager.getId() : null,
+                manager != null ? manager.getFullName() : null
         );
     }
 

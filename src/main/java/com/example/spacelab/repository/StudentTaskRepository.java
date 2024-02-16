@@ -12,7 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-
+@Hidden
 @Repository
 public interface StudentTaskRepository extends JpaRepository<StudentTask, Long>, JpaSpecificationExecutor<StudentTask> {
 

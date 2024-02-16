@@ -31,7 +31,7 @@ public class LessonSpecifications {
         if(ids == null) return (root, query, cb) -> null;
         return (root, query, cb) -> {
             Join<Course, Lesson> clj = root.join("course");
-            return clj.in("id", ids);
+            return clj.get("id").in(ids);
         };
     }
 

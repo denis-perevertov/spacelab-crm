@@ -21,6 +21,18 @@ spring:
           lob:
             non_contextual_creation: true
         show-sql: true
+  mail:
+    debug: true
+    host: smtp.gmail.com
+    port: 587
+    username: arrow8086527denis@gmail.com
+    password: "pwup vcdq mcpx ntbr"
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
   security:
     user:
       name: user
@@ -35,8 +47,8 @@ spring:
       enabled: ALWAYS
 
 springdoc:
-  packages-to-scan: com.example.spacelab.controller, com.example.spacelab.model
-  packages-to-exclude: com.example.spacelab.repository
+  packages-to-scan: com.example.spacelab.controller
+  packages-to-exclude: com.example.spacelab.repository, com.example.spacelab.service
   paths-to-match: /api/**
   override-with-generic-response: false
   api-docs:
@@ -71,6 +83,8 @@ application:
       name: spacelab-dp-bucket
     accessKey: AKIAZ6H5HK6QAOMKNFFW
     secretKey: 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
+  email:
+    forgot-password-code-length: 5
 
 logging:
   level:
