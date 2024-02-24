@@ -1,8 +1,6 @@
 package com.example.spacelab.service.specification;
 
 import com.example.spacelab.model.admin.Admin;
-import com.example.spacelab.model.course.Course;
-import com.example.spacelab.model.role.UserRole;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;

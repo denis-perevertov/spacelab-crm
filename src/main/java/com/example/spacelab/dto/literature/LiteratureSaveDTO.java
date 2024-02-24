@@ -3,7 +3,6 @@ package com.example.spacelab.dto.literature;
 import com.example.spacelab.model.literature.LiteratureType;
 import com.example.spacelab.util.StringUtils;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;

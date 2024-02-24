@@ -1,13 +1,13 @@
 package com.example.spacelab.service;
 
 import com.example.spacelab.dto.task.SubtaskShuffleRequest;
+import com.example.spacelab.dto.task.TaskSaveDTO;
 import com.example.spacelab.dto.task.TaskSubtaskListDTO;
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.student.Student;
 import com.example.spacelab.model.student.StudentTask;
 import com.example.spacelab.model.task.Task;
 import com.example.spacelab.util.FilterForm;
-import com.itextpdf.text.DocumentException;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,7 +30,9 @@ public interface TaskService extends StudentTaskService, EntityFilterService<Tas
 
     Task getTaskById(Long id);
     Task createNewTask(Task task);
+    Task createNewTask(TaskSaveDTO dto);
     Task editTask(Task task);
+    Task editTask(TaskSaveDTO dto);
     void deleteTaskById(Long id);
 
     List<Student> getTaskStudents(Long taskId);
@@ -51,5 +53,5 @@ public interface TaskService extends StudentTaskService, EntityFilterService<Tas
 
     long getActiveTasksCount();
 
-    File generatePDF(Long taskId, String localeCode) throws DocumentException, IOException, URISyntaxException;
+    File generatePDF(Long taskId, String localeCode) throws IOException, URISyntaxException;
 }

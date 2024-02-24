@@ -3,34 +3,21 @@ package com.example.spacelab.service.impl;
 import com.example.spacelab.dto.student.StudentLessonDisplayDTO;
 import com.example.spacelab.exception.LessonException;
 import com.example.spacelab.exception.ResourceNotFoundException;
-import com.example.spacelab.job.LessonMonitor;
-import com.example.spacelab.model.admin.Admin;
-import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.lesson.Lesson;
-import com.example.spacelab.model.lesson.LessonReportRow;
 import com.example.spacelab.model.lesson.LessonStatus;
 import com.example.spacelab.model.settings.Settings;
 import com.example.spacelab.model.student.Student;
-import com.example.spacelab.model.student.StudentAccountStatus;
-import com.example.spacelab.model.task.Task;
-import com.example.spacelab.model.task.TaskLevel;
-import com.example.spacelab.model.task.TaskStatus;
-import com.example.spacelab.repository.*;
+import com.example.spacelab.repository.LessonRepository;
 import com.example.spacelab.service.LessonService;
 import com.example.spacelab.service.SettingsService;
 import com.example.spacelab.service.StudentService;
 import com.example.spacelab.service.TaskService;
 import com.example.spacelab.service.specification.LessonSpecifications;
-import com.example.spacelab.service.specification.TaskSpecifications;
 import com.example.spacelab.util.AuthUtil;
 import com.example.spacelab.util.FilterForm;
-import com.example.spacelab.util.NumericUtils;
 import com.example.spacelab.util.StringUtils;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -41,7 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 @Service
@@ -187,7 +173,7 @@ public class LessonServiceImpl implements LessonService {
 
         LocalDateTime now = LocalDateTime.ofInstant(Instant.now(), ZoneId.of("UTC"));
         lessonRepository.findLessonsForAutomaticStart().forEach(lesson -> {
-            if(Duration.between(lesson.getDatetime(), now).toMinutes() == 0) {
+            if(Duration.between(lesson.getDatetime(), now).toMinutes() >= 0) {
                 startLesson(lesson);
             }
         });

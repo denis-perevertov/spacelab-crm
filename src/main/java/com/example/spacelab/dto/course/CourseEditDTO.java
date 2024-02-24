@@ -1,14 +1,9 @@
 package com.example.spacelab.dto.course;
 
-import com.example.spacelab.dto.admin.AdminAvatarDTO;
-import com.example.spacelab.dto.student.StudentAvatarDTO;
 import com.example.spacelab.model.course.CourseStatus;
 import com.example.spacelab.util.StringUtils;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 @Data
 @NoArgsConstructor

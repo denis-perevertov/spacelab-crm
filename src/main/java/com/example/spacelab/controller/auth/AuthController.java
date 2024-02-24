@@ -1,9 +1,7 @@
 package com.example.spacelab.controller.auth;
 
 import com.example.spacelab.config.JwtService;
-import com.example.spacelab.dto.admin.AdminDTO;
 import com.example.spacelab.dto.admin.AdminLoginInfoDTO;
-import com.example.spacelab.exception.ErrorMessage;
 import com.example.spacelab.exception.ResourceNotFoundException;
 import com.example.spacelab.exception.TokenException;
 import com.example.spacelab.mapper.AdminMapper;
@@ -15,7 +13,6 @@ import com.example.spacelab.service.RefreshTokenService;
 import com.example.spacelab.util.AuthRequest;
 import com.example.spacelab.util.AuthResponse;
 import com.example.spacelab.util.RefreshTokenRequest;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -31,9 +28,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;

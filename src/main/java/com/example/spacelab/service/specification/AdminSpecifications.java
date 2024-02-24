@@ -3,8 +3,6 @@ package com.example.spacelab.service.specification;
 import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.role.UserRole;
-import com.example.spacelab.model.student.StudentDetails_;
-import com.example.spacelab.model.student.Student_;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.jpa.domain.Specification;
 

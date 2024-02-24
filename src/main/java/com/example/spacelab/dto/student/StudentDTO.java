@@ -1,13 +1,10 @@
 package com.example.spacelab.dto.student;
 
 import com.example.spacelab.dto.course.CourseLinkIconDTO;
-import com.example.spacelab.dto.course.CourseListDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
-
-import java.util.Map;
 
 @Data
 public class StudentDTO {

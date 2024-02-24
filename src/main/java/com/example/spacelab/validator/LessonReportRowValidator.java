@@ -6,8 +6,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
-import static com.example.spacelab.util.ValidationUtils.*;
-
 @Component
 @RequiredArgsConstructor
 public class LessonReportRowValidator implements Validator {

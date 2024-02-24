@@ -19,27 +19,18 @@ import com.example.spacelab.model.course.CourseStatus;
 import com.example.spacelab.model.student.Student;
 import com.example.spacelab.model.student.StudentAccountStatus;
 import com.example.spacelab.model.student.StudentTask;
-import com.example.spacelab.model.student.StudentTaskStatus;
 import com.example.spacelab.model.task.Task;
-import com.example.spacelab.model.task.TaskLevel;
 import com.example.spacelab.model.task.TaskStatus;
 import com.example.spacelab.repository.*;
-import com.example.spacelab.service.CourseService;
-import com.example.spacelab.service.FileService;
-import com.example.spacelab.service.StudentService;
-import com.example.spacelab.service.StudentTaskService;
+import com.example.spacelab.service.*;
 import com.example.spacelab.service.specification.CourseSpecifications;
 import com.example.spacelab.util.FilenameUtils;
 import com.example.spacelab.util.FilterForm;
-import com.example.spacelab.util.NumericUtils;
 import com.example.spacelab.util.ValidationUtils;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -53,7 +44,6 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Data
 @Slf4j
@@ -78,6 +68,8 @@ public class CourseServiceImpl implements CourseService {
     private final TaskTrackingService trackingService;
 
     private final FileService fileService;
+
+    private final NotificationService notificationService;
 
     @Override
     public List<Course> getCourses() {
@@ -136,7 +128,7 @@ public class CourseServiceImpl implements CourseService {
                 studentCourse.getIcon(),
                 student.getTasks()
                         .stream()
-                        .filter(st -> st.getTaskReference().getStatus().equals(TaskStatus.ACTIVE))
+                        .filter(st -> st.getTaskReference().getStatus().equals(TaskStatus.ACTIVE) && st.getTaskReference().getCourse().getId().equals(studentCourse.getId()))
                         .sorted((o1, o2) -> Comparators.comparable().compare(o1.getTaskReference().getTaskIndex(), o2.getTaskReference().getTaskIndex()))
                         .map(taskMapper::fromStudentTaskToDTO)
                         .toList()
@@ -185,8 +177,14 @@ public class CourseServiceImpl implements CourseService {
         Course c = mapper.fromEditDTOToCourse(dto);
         c.setStatus(CourseStatus.ACTIVE);
         c = courseRepository.save(c);
-        if(c.getMentor() != null) c.getMentor().getCourses().add(c);
-        if(c.getManager() != null) c.getManager().getCourses().add(c);
+        if(c.getMentor() != null) {
+            c.getMentor().getCourses().add(c);
+            notificationService.sendAssignedToNewCourseNotification(c);
+        }
+        if(c.getManager() != null) {
+            c.getManager().getCourses().add(c);
+            notificationService.sendAssignedToNewCourseNotification(c);
+        }
         updateCourseTaskList(c, dto);
         updateCourseStudents(c, dto);
         updateStudentsCourseTaskList(c);
@@ -217,8 +215,18 @@ public class CourseServiceImpl implements CourseService {
         Set<Student> oldStudentList = c.getStudents();
         Admin mentor = c.getMentor();
         Admin manager = c.getManager();
-        if(mentor != null) mentor.getCourses().add(c);
-        if(manager != null) manager.getCourses().add(c);
+        if(mentor != null) {
+            mentor.getCourses().add(c);
+            if(!mentor.getCourses().contains(c)) {
+                notificationService.sendAssignedToNewCourseNotification(c);
+            }
+        }
+        if(manager != null) {
+            manager.getCourses().add(c);
+            if(!manager.getCourses().contains(c)) {
+                notificationService.sendAssignedToNewCourseNotification(c);
+            }
+        }
         updateCourseTaskList(c, dto);
         updateCourseStudents(c, dto);
         updateStudentsCourseTaskList(c);
@@ -424,19 +432,48 @@ public class CourseServiceImpl implements CourseService {
     private void updateCourseTaskList(Course c, CourseEditDTO dto) {
         log.info("updating course task list");
 
-        c.getTasks().forEach(t -> t.setCourse(null));
-        c.getTasks().clear();
+//        c.getTasks().forEach(t -> t.setCourse(null));
+//        c.getTasks().clear();
 
-        log.info(dto.getStructure().getTasks().toString());
+        List<Task> courseTasks = new ArrayList<>(c.getTasks().stream().toList());
+        List<TaskCourseDTO> updatedTasks = dto.getStructure().getTasks();
 
-        dto.getStructure().getTasks().forEach(newCourseTask -> {
-            taskRepository.findById(newCourseTask.getId()).ifPresent(foundTask -> {
-                foundTask.setTaskIndex(newCourseTask.getTaskIndex());
-                foundTask.setCourse(c);
-                taskRepository.save(foundTask);
+        List<Long> oldTaskIds = courseTasks.stream().map(Task::getId).toList();
+        List<Long> updatedTaskIds = updatedTasks.stream().map(TaskCourseDTO::getId).toList();
+
+        // ids of old tasks to remove
+        courseTasks.stream()
+                        .filter(t -> !updatedTaskIds.contains(t.getId()))
+                        .forEach(t -> {
+                            t.setCourse(null);
+                            c.getTasks().remove(t);
+                        });
+
+        // ids of new tasks to add
+//        updatedTasks.stream()
+//                        .filter(t -> !oldTaskIds.contains(t.getId()))
+//                        .forEach(t -> {
+//                            taskRepository.findById(t.getId()).ifPresent(foundTask -> {
+//                                foundTask.setTaskIndex(t.getTaskIndex());
+//                                foundTask.setCourse(c);
+//                                taskRepository.save(foundTask);
+//                                c.getTasks().add(foundTask);
+//                            });
+//                        });
+
+        updatedTasks.forEach(t -> taskRepository.findById(t.getId()).ifPresent(foundTask -> {
+            foundTask.setTaskIndex(t.getTaskIndex());
+            foundTask.setCourse(c);
+            taskRepository.save(foundTask);
+            if(!oldTaskIds.contains(t.getId())) {
                 c.getTasks().add(foundTask);
-            });
-        });
+            }
+        }));
+
+
+//        log.info(dto.getStructure().getTasks().toString());
+
+
         List<Task> newTaskList = taskRepository.getCourseTasks(c.getId());
         log.info("new task list: {}", newTaskList.stream().map(Task::getId).toList());
     }

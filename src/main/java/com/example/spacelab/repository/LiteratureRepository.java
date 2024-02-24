@@ -1,6 +1,5 @@
 package com.example.spacelab.repository;
 
-import com.example.spacelab.model.lesson.Lesson;
 import com.example.spacelab.model.literature.Literature;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.data.domain.Page;

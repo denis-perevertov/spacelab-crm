@@ -1,12 +1,10 @@
 package com.example.spacelab.dto.course;
 
-import com.example.spacelab.model.course.CourseStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @Data
 @NoArgsConstructor

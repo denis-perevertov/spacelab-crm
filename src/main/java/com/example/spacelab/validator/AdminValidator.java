@@ -1,8 +1,7 @@
 package com.example.spacelab.validator;
 
-import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.dto.admin.AdminEditDTO;
-import com.example.spacelab.model.literature.Literature;
+import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.repository.AdminRepository;
 import com.example.spacelab.repository.CourseRepository;
 import com.example.spacelab.repository.UserRoleRepository;
@@ -13,9 +12,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.Objects;
-import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor

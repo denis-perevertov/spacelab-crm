@@ -1,7 +1,6 @@
 package com.example.spacelab.model.lesson;
 
 import com.example.spacelab.model.student.Student;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.experimental.Accessors;

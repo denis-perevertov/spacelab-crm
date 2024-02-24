@@ -1,8 +1,5 @@
 package com.example.spacelab.dto.task;
 
-import com.example.spacelab.model.task.TaskLevel;
-import com.example.spacelab.model.task.TaskStatus;
-import com.example.spacelab.util.TimeUnit;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -49,7 +46,9 @@ public class TaskSaveDTO {
 
     private List<TaskProgressPointDTO> taskProgressPoints;
 
-    public TaskSaveDTO(Long id, String name, Long parentTaskID, Long courseID, String level, String status, String completionTime, String completionTimeUnit, String skillsDescription, String taskDescription, List<Long> subtasksIDs, List<TaskLiteratureDTO> literatureList, List<TaskProgressPointDTO> taskProgressPoints) {
+    private List<TaskFileDTO> files;
+
+    public TaskSaveDTO(Long id, String name, Long parentTaskID, Long courseID, String level, String status, String completionTime, String completionTimeUnit, String skillsDescription, String taskDescription, List<Long> subtasksIDs, List<TaskLiteratureDTO> literatureList, List<TaskProgressPointDTO> taskProgressPoints, List<TaskFileDTO> files) {
         this.id = id;
         this.name = name.trim();
         this.parentTaskID = parentTaskID;
@@ -63,5 +62,6 @@ public class TaskSaveDTO {
         this.subtasksIDs = subtasksIDs;
         this.literatureList = literatureList;
         this.taskProgressPoints = taskProgressPoints;
+        this.files = files;
     }
 }

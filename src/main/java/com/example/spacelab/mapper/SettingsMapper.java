@@ -1,7 +1,6 @@
 package com.example.spacelab.mapper;
 
 import com.example.spacelab.dto.settings.SettingsDTO;
-import com.example.spacelab.model.settings.HoursSetting;
 import com.example.spacelab.model.settings.Settings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;

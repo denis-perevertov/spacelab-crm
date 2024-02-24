@@ -1,8 +1,11 @@
 package com.example.spacelab.validator;
 
+import com.example.spacelab.dto.task.TaskFileDTO;
 import com.example.spacelab.dto.task.TaskProgressPointDTO;
 import com.example.spacelab.dto.task.TaskSaveDTO;
 import com.example.spacelab.model.task.Task;
+import com.example.spacelab.model.task.TaskFile;
+import com.example.spacelab.util.ValidationUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -67,7 +70,7 @@ public class TaskValidator implements Validator {
             e.rejectValue("taskDescription", "taskDescription.length", "validation.field.length.max");
 
         // todo validate points
-        if(!dto.getTaskProgressPoints().isEmpty()) {
+        if(dto.getTaskProgressPoints() != null && !dto.getTaskProgressPoints().isEmpty()) {
             for(int i = 0; i < dto.getTaskProgressPoints().size(); i++) {
                 TaskProgressPointDTO point = dto.getTaskProgressPoints().get(i);
                 if(point.name().length() > 255) {
@@ -81,6 +84,22 @@ public class TaskValidator implements Validator {
                     }
                 }
 
+            }
+        }
+
+        // todo validate task files
+        if(dto.getFiles() != null && !dto.getFiles().isEmpty()) {
+            for (int i = 0; i < dto.getFiles().size(); i++) {
+                TaskFileDTO file = dto.getFiles().get(i);
+                if(fieldIsEmpty(file.name())) {
+                    e.rejectValue("taskFiles["+i+"]", "taskFiles["+i+"].empty", "validation.field.empty");
+                }
+                else if(fieldMaxLengthIsIncorrect(file.name(), 255)) {
+                    e.rejectValue("taskFiles["+i+"]", "taskFiles["+i+"].length", "validation.field.length.max");
+                }
+                else if(file.file() != null && file.file().getSize() > MAX_FILE_SIZE) {
+                    e.rejectValue("taskFiles["+i+"]", "taskFiles["+i+"].max-size", "validation.file.max-size");
+                }
             }
         }
 

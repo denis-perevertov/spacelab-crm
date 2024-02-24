@@ -1,7 +1,6 @@
 package com.example.spacelab.service.specification;
 
 import com.example.spacelab.model.course.Course;
-import com.example.spacelab.model.course.Course_;
 import com.example.spacelab.model.student.Student;
 import com.example.spacelab.model.student.StudentAccountStatus;
 import com.example.spacelab.model.student.StudentDetails_;
@@ -63,9 +62,18 @@ public class StudentSpecifications {
 
     public static Specification<Student> hasRatingBetween(Integer from, Integer to) {
         if(from == null && to == null) return (root, query, cb) -> null;
-        else if(from == null) return (root, query, cb) -> cb.lessThanOrEqualTo(root.get(Student_.RATING), to);
-        else if(to == null) return (root, query, cb) -> cb.greaterThanOrEqualTo(root.get(Student_.RATING), from);
-        return (root, query, cb) -> cb.between(root.get(Student_.RATING), from, to);
+        else if(from == null) return (root, query, cb) -> cb.and(
+                cb.isNotNull(root.get(Student_.RATING)),
+                cb.lessThanOrEqualTo(root.get(Student_.RATING), to)
+        );
+        else if(to == null) return (root, query, cb) -> cb.and(
+                cb.isNotNull(root.get(Student_.RATING)),
+                cb.greaterThanOrEqualTo(root.get(Student_.RATING), from)
+        );
+        return (root, query, cb) -> cb.and(
+                cb.isNotNull(root.get(Student_.RATING)),
+                cb.between(root.get(Student_.RATING), from, to)
+        );
     }
 
     public static Specification<Student> hasStatus(StudentAccountStatus status) {

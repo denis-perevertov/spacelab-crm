@@ -1,34 +1,31 @@
 package com.example.spacelab.service.impl;
 
 import com.example.spacelab.dto.student.StudentTaskLessonDTO;
-import com.example.spacelab.dto.task.StudentTaskPointDTO;
-import com.example.spacelab.dto.task.StudentTaskTagDTO;
-import com.example.spacelab.dto.task.SubtaskShuffleRequest;
-import com.example.spacelab.dto.task.TaskSubtaskListDTO;
+import com.example.spacelab.dto.task.*;
 import com.example.spacelab.exception.BlockedEntityException;
 import com.example.spacelab.exception.ResourceNotFoundException;
 import com.example.spacelab.exception.TeamworkException;
 import com.example.spacelab.integration.TaskTrackingService;
 import com.example.spacelab.integration.data.*;
+import com.example.spacelab.mapper.TaskMapper;
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.student.Student;
 import com.example.spacelab.model.student.StudentTask;
 import com.example.spacelab.model.student.StudentTaskStatus;
 import com.example.spacelab.model.task.Task;
+import com.example.spacelab.model.task.TaskFile;
 import com.example.spacelab.model.task.TaskLevel;
 import com.example.spacelab.model.task.TaskStatus;
 import com.example.spacelab.repository.CourseRepository;
 import com.example.spacelab.repository.StudentRepository;
 import com.example.spacelab.repository.StudentTaskRepository;
 import com.example.spacelab.repository.TaskRepository;
+import com.example.spacelab.service.FileService;
+import com.example.spacelab.service.NotificationService;
 import com.example.spacelab.service.PDFService;
-import com.example.spacelab.service.StudentTaskService;
 import com.example.spacelab.service.TaskService;
-import com.example.spacelab.service.specification.StudentTaskSpecification;
-import com.example.spacelab.service.specification.StudentTaskSpecifications;
 import com.example.spacelab.service.specification.TaskSpecifications;
 import com.example.spacelab.util.*;
-import com.itextpdf.text.DocumentException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
@@ -39,21 +36,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.comparator.Comparators;
 
-import javax.swing.text.html.Option;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
+import java.util.*;
 
 import static com.example.spacelab.service.specification.StudentTaskSpecifications.*;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 @Service
 @Log4j2
@@ -67,6 +59,11 @@ public class TaskServiceImpl implements TaskService {
     private final PDFService pdfService;
 
     private final TaskTrackingService trackingService;
+
+    private final NotificationService notificationService;
+
+    private final FileService fileService;
+    private final TaskMapper mapper;
 
     @Override
     public List<Task> getTasks() {
@@ -124,6 +121,40 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional
+    public Task createNewTask(TaskSaveDTO dto) {
+        Task task = mapper.fromTaskSaveDTOToTask(dto);
+        task = taskRepository.save(task);
+
+        task.getTaskProgressPoints().clear();
+        task.getTaskProgressPoints().addAll(
+                new ArrayList<>(dto.getTaskProgressPoints().stream().map(mapper::fromDTOToPoint).toList())
+        );
+
+        if(task.getCourse() != null) {
+            // create student task for every student of the course
+            createStudentTasksOnTaskCourseTransfer(task);
+            task.setTaskIndex(task.getCourse().getTasks().size());
+        }
+        List<TaskFileDTO> files = dto.getFiles();
+        if(files != null && !files.isEmpty()) {
+            for(TaskFileDTO file : files) {
+                if(file.id() == null && file.file() != null && !file.file().isEmpty()) {
+                    try {
+                        String filename = FilenameUtils.generateFileName(file.file());
+                        fileService.saveFile(file.file(), filename, "tasks");
+                        task.getFiles().add(new TaskFile().setName(file.name()).setLink(filename));
+                    } catch (Exception e) {
+                        log.warn("could not save file: {}", file.file());
+                        log.warn(e.getMessage());
+                    }
+                }
+            }
+        }
+        return taskRepository.save(task);
+    }
+
+    @Override
+    @Transactional
     public Task editTask(Task taskIn) {
         Task task = taskRepository.save(taskIn);
         // fixme CATCH TRANSFER correctly
@@ -131,6 +162,64 @@ public class TaskServiceImpl implements TaskService {
             createStudentTasksOnTaskCourseTransfer(task);
         }
         return task;
+    }
+
+    @Override
+    @Transactional
+    public Task editTask(TaskSaveDTO dto) {
+        Task task = mapper.fromTaskSaveDTOToTask(dto);
+        task = taskRepository.save(task);
+                                                                // fixme CATCH TRANSFER correctly
+        task.getTaskProgressPoints().clear();
+        task.getTaskProgressPoints().addAll(
+                new ArrayList<>(dto.getTaskProgressPoints().stream().map(mapper::fromDTOToPoint).toList())
+        );
+
+        if(task.getCourse() != null) {
+            createStudentTasksOnTaskCourseTransfer(task);
+        }
+
+//        task.getFiles().clear();
+//        taskRepository.save(task);
+
+        List<TaskFileDTO> files = dto.getFiles();
+        if(files != null && !files.isEmpty()) {
+            for(TaskFileDTO file : files) {
+                // 1. ID == null && file is not empty = download new file
+                if(file.id() == null && file.file() != null && !file.file().isEmpty()) {
+                    try {
+                        String filename = FilenameUtils.generateFileName(file.file());
+                        fileService.saveFile(file.file(), filename, "tasks");
+                        task.getFiles().add(new TaskFile().setName(file.name()).setLink(filename));
+                    } catch (Exception e) {
+                        log.warn("could not save file: {}", file.file());
+                        log.warn(e.getMessage());
+                    }
+                }
+                // 2. ID != null && file is not empty = rewrite file
+                else if(file.id() != null && file.file() != null && !file.file().isEmpty()) {
+                    try {
+                        String filename = FilenameUtils.generateFileName(file.file());
+                        fileService.saveFile(file.file(), filename, "tasks");
+                        task.getFiles().forEach(tf -> {
+                            if(tf.getId().equals(file.id())) {
+                                tf.setName(file.name()).setLink(file.link());
+                            }
+                        });
+                    } catch (Exception e) {
+                        log.warn("could not save file: {}", file.file());
+                        log.warn(e.getMessage());
+                    }
+                }
+                // 3. ID != null && file is empty = leave as is, no changes
+            }
+            // 4. remove file ?
+            // get task file ids to remove
+            List<Long> fileIds = files.stream().map(TaskFileDTO::id).filter(Objects::nonNull).toList();
+            task.getFiles().removeIf(tf -> !fileIds.contains(tf.getId()));
+        }
+
+        return taskRepository.save(task);
     }
 
     @Override
@@ -273,7 +362,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public File generatePDF(Long taskId, String localeCode) throws DocumentException, IOException, URISyntaxException {
+    public File generatePDF(Long taskId, String localeCode) throws IOException, URISyntaxException {
         Task task = getTaskById(taskId);
         return pdfService.generatePDF(task, TranslationService.getLocale(localeCode));
     }

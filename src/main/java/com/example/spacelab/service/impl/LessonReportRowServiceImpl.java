@@ -1,26 +1,22 @@
 package com.example.spacelab.service.impl;
 
+import com.example.spacelab.dto.lesson.LessonReportRowSaveDTO;
 import com.example.spacelab.exception.ResourceNotFoundException;
 import com.example.spacelab.model.lesson.Lesson;
 import com.example.spacelab.model.lesson.LessonReportRow;
 import com.example.spacelab.model.student.Student;
-import com.example.spacelab.model.student.StudentTask;
-import com.example.spacelab.dto.lesson.LessonReportRowSaveDTO;
+import com.example.spacelab.model.student.StudentTaskStatus;
 import com.example.spacelab.repository.LessonReportRowRepository;
 import com.example.spacelab.repository.LessonRepository;
 import com.example.spacelab.repository.StudentTaskRepository;
 import com.example.spacelab.service.LessonReportRowService;
-import com.example.spacelab.model.student.StudentTaskStatus;
 import com.example.spacelab.service.LessonService;
 import com.example.spacelab.service.StudentService;
 import com.example.spacelab.service.TaskService;
-import com.example.spacelab.service.specification.LessonReportSpecifications;
 import com.example.spacelab.util.FilterForm;
 import com.example.spacelab.util.ValidationUtils;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
-import org.joda.time.DateTime;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -30,8 +26,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Map;
 
 import static com.example.spacelab.service.specification.LessonReportSpecifications.*;
 

@@ -1,8 +1,6 @@
 package com.example.spacelab.model.lesson;
 
-import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.model.course.Course;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;

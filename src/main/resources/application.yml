@@ -53,8 +53,10 @@ springdoc:
   override-with-generic-response: false
   api-docs:
     enabled: true
-    path: /api-docs
+    path: /api/docs
   swagger-ui:
+    disable-swagger-default-url: true
+    path: /api/swagger-ui
     tryItOutEnabled: true
     operationsSorter: alpha
     tagsSorter: alpha
@@ -62,8 +64,8 @@ springdoc:
 
 server:
   port: 1489
-#  servlet:
-#    context-path: /spacelab
+  servlet:
+    context-path: /spacelab/admin
   error:
     include-message: always
     include-binding-errors: always

@@ -1,7 +1,6 @@
 package com.example.spacelab.dto.student;
 
 import com.example.spacelab.util.StringUtils;
-import io.netty.util.internal.StringUtil;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -2,7 +2,6 @@ package com.example.spacelab.model;
 
 import com.example.spacelab.model.admin.Admin;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 import java.time.Instant;

@@ -10,6 +10,7 @@ import java.util.List;
 public class AdminLoginInfoDTO {
     private Long id;
     private String fullName;
+    private String avatar;
     private String role;
     private List<Long> courses;
     private List<String> permissions;

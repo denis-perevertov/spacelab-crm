@@ -4,7 +4,6 @@ import com.example.spacelab.model.lesson.LessonReportRow;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 
 public class LessonReportSpecifications {
 

@@ -5,9 +5,10 @@ import com.example.spacelab.model.lesson.LessonReportRow;
 import com.example.spacelab.model.literature.Literature;
 import com.example.spacelab.model.student.Student;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.Accessors;
-import org.hibernate.Hibernate;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -75,6 +76,10 @@ public class Task {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     private List<TaskProgressPoint> taskProgressPoints = new ArrayList<>();
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    private List<TaskFile> files = new ArrayList<>();
 
     @CreationTimestamp
     private LocalDateTime createdAt;

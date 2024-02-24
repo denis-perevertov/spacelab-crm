@@ -1,6 +1,8 @@
 package com.example.spacelab.integration;
 
-import com.example.spacelab.integration.data.*;
+import com.example.spacelab.integration.data.ApiResponse;
+import com.example.spacelab.integration.data.TaskListDescription;
+import com.example.spacelab.integration.data.TimeEntry;
 import com.example.spacelab.integration.teamwork.TeamworkClient;
 import com.example.spacelab.integration.teamwork.data.*;
 import org.junit.jupiter.api.Test;

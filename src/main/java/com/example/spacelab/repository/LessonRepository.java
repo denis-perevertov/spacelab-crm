@@ -2,9 +2,6 @@ package com.example.spacelab.repository;
 
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.lesson.Lesson;
-import com.example.spacelab.model.lesson.LessonStatus;
-import com.example.spacelab.model.student.Student;
-import com.example.spacelab.model.task.Task;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

@@ -6,18 +6,18 @@ import com.example.spacelab.exception.ResourceNotFoundException;
 import com.example.spacelab.mapper.LiteratureMapper;
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.literature.Literature;
+import com.example.spacelab.model.literature.LiteratureType;
 import com.example.spacelab.repository.CourseRepository;
 import com.example.spacelab.repository.LiteratureRepository;
 import com.example.spacelab.service.FileService;
 import com.example.spacelab.service.LiteratureService;
+import com.example.spacelab.service.NotificationService;
 import com.example.spacelab.service.specification.LiteratureSpecifications;
 import com.example.spacelab.util.FilenameUtils;
 import com.example.spacelab.util.FilterForm;
-import com.example.spacelab.model.literature.LiteratureType;
 import com.example.spacelab.util.NumericUtils;
 import com.example.spacelab.util.StringUtils;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
@@ -39,6 +39,8 @@ public class LiteratureServiceImpl implements LiteratureService{
     private final LiteratureRepository literatureRepository;
 
     private final LiteratureMapper literatureMapper;
+
+    private final NotificationService notificationService;
 
     @Qualifier("s3")
     private final FileService fileService;
@@ -92,6 +94,7 @@ public class LiteratureServiceImpl implements LiteratureService{
         Literature lit = literatureRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Literature not found"));
         lit.setIs_verified(true);
         literatureRepository.save(lit);
+        notificationService.sendNewLiteratureInCourseNotification(lit, lit.getCourse());
     }
 
     @Override
@@ -105,7 +108,11 @@ public class LiteratureServiceImpl implements LiteratureService{
         literature.setIs_verified(false);
         log.info("logging lit before save");
         log.info(literature.toString());
-        return literatureRepository.save(literature);
+        literature = literatureRepository.save(literature);
+
+        notificationService.sendNewLiteratureInCourseNotification(literature, literature.getCourse());
+
+        return literature;
     }
 
     @Override
@@ -131,7 +138,11 @@ public class LiteratureServiceImpl implements LiteratureService{
                 log.error("could not save file: {}", ex.getMessage());
             }
         }
-        return literatureRepository.save(lit);
+        lit = literatureRepository.save(lit);
+
+        notificationService.sendNewLiteratureInCourseNotification(lit, lit.getCourse());
+
+        return lit;
     }
 
 

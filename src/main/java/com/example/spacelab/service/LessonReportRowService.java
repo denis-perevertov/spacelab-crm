@@ -1,14 +1,11 @@
 package com.example.spacelab.service;
 
-import com.example.spacelab.model.lesson.LessonReportRow;
 import com.example.spacelab.dto.lesson.LessonReportRowSaveDTO;
+import com.example.spacelab.model.lesson.LessonReportRow;
 import com.example.spacelab.util.FilterForm;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
-
-import java.util.List;
 @Hidden
 public interface LessonReportRowService extends EntityFilterService<LessonReportRow> {
 

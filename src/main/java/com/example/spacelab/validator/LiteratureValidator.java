@@ -1,11 +1,8 @@
 package com.example.spacelab.validator;
 
-import com.example.spacelab.dto.course.CourseSaveUpdatedDTO;
 import com.example.spacelab.dto.literature.LiteratureSaveDTO;
-import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.literature.Literature;
 import com.example.spacelab.model.literature.LiteratureType;
-import com.example.spacelab.repository.AdminRepository;
 import com.example.spacelab.repository.CourseRepository;
 import com.example.spacelab.repository.LiteratureRepository;
 import com.example.spacelab.util.ValidationUtils;
@@ -15,7 +12,6 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
 import java.util.Optional;
 
 @Component

@@ -13,13 +13,11 @@ import com.example.spacelab.repository.UserRoleRepository;
 import com.example.spacelab.service.AdminService;
 import com.example.spacelab.service.FileService;
 import com.example.spacelab.service.specification.AdminSpecifications;
-import com.example.spacelab.service.specification.AdminTestSpec;
 import com.example.spacelab.util.AuthUtil;
 import com.example.spacelab.util.FilenameUtils;
 import com.example.spacelab.util.FilterForm;
 import com.example.spacelab.util.NumericUtils;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,14 +25,11 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Slf4j

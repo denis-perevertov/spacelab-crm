@@ -1,16 +1,13 @@
 package com.example.spacelab.model.role;
 
 import com.example.spacelab.model.UserEntity;
-import com.example.spacelab.model.role.PermissionSet;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.ToString;
 
-import java.security.Permission;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @Data
 @Entity

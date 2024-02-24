@@ -8,6 +8,23 @@ spring:
     username: root
     password: root
 
+springdoc:
+  packages-to-scan: com.example.spacelab.controller
+  packages-to-exclude: com.example.spacelab.repository, com.example.spacelab.service
+  paths-to-match: /api/**
+  override-with-generic-response: false
+  api-docs:
+    enabled: true
+    path: /api/docs
+  swagger-ui:
+    use-root-path: true
+    disable-swagger-default-url: true
+    path: /api/swagger-ui
+    tryItOutEnabled: true
+    operationsSorter: alpha
+    tagsSorter: alpha
+    filter: true
+
 application:
   frontend-admin-panel:
     hostname: denis-perevertov.com/spacelab/admin

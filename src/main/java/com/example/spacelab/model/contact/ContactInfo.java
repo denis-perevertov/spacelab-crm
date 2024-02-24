@@ -3,7 +3,6 @@ package com.example.spacelab.model.contact;
 import com.example.spacelab.model.admin.Admin;
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.ToString;
 
 @Data
 @Entity

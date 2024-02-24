@@ -10,8 +10,6 @@ import com.example.spacelab.mapper.StudentMapper;
 import com.example.spacelab.mapper.TaskMapper;
 import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.model.course.Course;
-import com.example.spacelab.model.lesson.LessonStatus;
-import com.example.spacelab.model.literature.LiteratureType;
 import com.example.spacelab.model.role.PermissionType;
 import com.example.spacelab.model.task.Task;
 import com.example.spacelab.model.task.TaskLevel;
@@ -27,9 +25,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.*;
@@ -42,8 +38,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
@@ -154,7 +148,8 @@ public class TaskController {
     })
     @PreAuthorize("!hasAuthority('tasks.write.NO_ACCESS')")
     @PostMapping
-    public ResponseEntity<?> createNewTask( @RequestBody TaskSaveDTO task, BindingResult bindingResult) {
+    public ResponseEntity<?> createNewTask(@RequestBody TaskSaveDTO task,
+                                           BindingResult bindingResult) {
 
         task.setId(null);
 
@@ -168,7 +163,7 @@ public class TaskController {
             bindingResult.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
             throw new ObjectValidationException(errors);
         }
-        Task newTask = taskService.createNewTask(mapper.fromTaskSaveDTOToTask(task));
+        Task newTask = taskService.createNewTask(task);
         return ResponseEntity.ok(mapper.fromTaskToListDTO(newTask));
     }
 
@@ -206,7 +201,9 @@ public class TaskController {
     })
     @PreAuthorize("!hasAuthority('tasks.edit.NO_ACCESS')")
     @PutMapping("/{id}")
-    public ResponseEntity<?> editTask(@PathVariable @Parameter(example = "1") Long id,  @RequestBody TaskSaveDTO task, BindingResult bindingResult) {
+    public ResponseEntity<?> editTask(@PathVariable @Parameter(example = "1") Long id,
+                                      @RequestBody TaskSaveDTO task,
+                                      BindingResult bindingResult) {
 
         task.setId(id);
         Task t = taskService.getTaskById(id);

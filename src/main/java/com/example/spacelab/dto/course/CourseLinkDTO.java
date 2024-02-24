@@ -1,6 +1,5 @@
 package com.example.spacelab.dto.course;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.experimental.Accessors;
 

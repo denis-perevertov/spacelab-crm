@@ -7,10 +7,8 @@ import com.example.spacelab.model.settings.Settings;
 import com.example.spacelab.service.SettingsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
-import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

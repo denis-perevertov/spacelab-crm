@@ -1,28 +1,33 @@
 package com.example.spacelab;
 
-import com.example.spacelab.controller.AdminController;
-import com.example.spacelab.controller.CourseController;
-import com.example.spacelab.integration.teamwork.TeamworkService;
+import com.example.spacelab.config.Tttt;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.servers.Server;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Controller;
 
-import java.util.Arrays;
-
-@OpenAPIDefinition(servers = {@Server(url = "/spacelab", description = "Default Server URL (w/ https??)")})
+@OpenAPIDefinition(servers = {@Server(url = "www.denis-perevertov.com", description = "AWS Deploy")})
 @SpringBootApplication
 @Controller
+@Slf4j
+@RequiredArgsConstructor
 public class SpacelabApplication {
+
+	private final Tttt config;
 
 	public static void main(String[] args) {
 		SpringApplication.run(SpacelabApplication.class, args);
+	}
+
+	@EventListener(ApplicationReadyEvent.class)
+	void lul() {
+		log.info("CONFIG");
+		log.info(config.toString());
 	}
 
 }

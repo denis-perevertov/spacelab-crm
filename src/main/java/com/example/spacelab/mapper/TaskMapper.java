@@ -1,9 +1,9 @@
 package com.example.spacelab.mapper;
 
 import com.example.spacelab.dto.course.CourseLinkDTO;
+import com.example.spacelab.dto.student.StudentTaskDTO;
 import com.example.spacelab.dto.task.*;
 import com.example.spacelab.exception.MappingException;
-import com.example.spacelab.dto.student.StudentTaskDTO;
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.literature.Literature;
 import com.example.spacelab.model.student.Student;
@@ -271,10 +271,10 @@ public class TaskMapper {
         });
         task.setRecommendedLiterature(recommendedLiterature);
 
-        task.getTaskProgressPoints().clear();
-        task.getTaskProgressPoints().addAll(
-                taskSaveDTO.getTaskProgressPoints().stream().map(this::fromDTOToPoint).toList()
-        );
+//        task.getTaskProgressPoints().clear();
+//        task.getTaskProgressPoints().addAll(
+//                new ArrayList<>(taskSaveDTO.getTaskProgressPoints().stream().map(this::fromDTOToPoint).toList())
+//        );
 
         task.setStatus(TaskStatus.valueOf(taskSaveDTO.getStatus()));
 
@@ -375,6 +375,20 @@ public class TaskMapper {
             dto.setLiteratureList(task.getRecommendedLiterature().stream().map(this::fromLiteratureToTaskLiteratureDTO).toList());
 
             dto.setTaskProgressPoints(task.getTaskProgressPoints().stream().map(this::fromPointToDTO).toList());
+
+            dto.setFiles(
+                    task.getFiles()
+                        .stream()
+                        .map(
+                                f -> new TaskFileDTO(
+                                        f.getId(),
+                                        f.getName(),
+                                        f.getLink(),
+                                        null
+                                )
+                        )
+                        .toList()
+            );
 
         } catch (Exception e) {
             log.severe("Mapping error: " + e.getMessage());

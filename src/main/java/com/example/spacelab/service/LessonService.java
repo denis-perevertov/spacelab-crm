@@ -2,7 +2,6 @@ package com.example.spacelab.service;
 
 import com.example.spacelab.dto.student.StudentLessonDisplayDTO;
 import com.example.spacelab.model.lesson.Lesson;
-import com.example.spacelab.model.task.Task;
 import com.example.spacelab.util.FilterForm;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.data.domain.Page;

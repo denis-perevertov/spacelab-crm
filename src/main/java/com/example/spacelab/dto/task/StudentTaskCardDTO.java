@@ -3,7 +3,6 @@ package com.example.spacelab.dto.task;
 import com.example.spacelab.model.student.StudentTaskStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import java.time.LocalDate;
 import java.time.ZonedDateTime;
 
 public record StudentTaskCardDTO(
