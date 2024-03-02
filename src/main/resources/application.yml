@@ -50,7 +50,7 @@ springdoc:
   packages-to-scan: com.example.spacelab.controller
   packages-to-exclude: com.example.spacelab.repository, com.example.spacelab.service
   paths-to-match: /api/**
-  override-with-generic-response: false
+#  override-with-generic-response: true
   api-docs:
     enabled: true
     path: /api/docs

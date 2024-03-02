@@ -1,12 +1,14 @@
 package com.example.spacelab.exception;
 
 import io.jsonwebtoken.ExpiredJwtException;
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.extern.java.Log;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
@@ -29,6 +31,7 @@ public class GlobalControllerAdvice {
 
     @ExceptionHandler(ObjectValidationException.class)
     @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+    @ResponseBody
     public ResponseEntity<ErrorMessage> validationFailedHandler(ObjectValidationException ex) {
         return new ResponseEntity<>(
                 new ErrorMessage("Validation error", HttpStatus.BAD_REQUEST.value(), ex.getErrors()),
@@ -37,6 +40,7 @@ public class GlobalControllerAdvice {
 
     @ExceptionHandler(ResourceNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseBody
     public ResponseEntity<ErrorMessage> resourceNotFoundHandler(ResourceNotFoundException ex) {
         return new ResponseEntity<>(
                 new ErrorMessage("Resource not found", HttpStatus.NOT_FOUND.value(), Map.of(ex.getResourceClassName(), ex.getMessage())),
@@ -61,6 +65,7 @@ public class GlobalControllerAdvice {
         );
     }
 
+    @Hidden
     @ExceptionHandler({AccessDeniedException.class, AuthenticationException.class})
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ResponseEntity<ErrorMessage> accessDeniedHandler(AccessDeniedException ex) {

@@ -20,7 +20,7 @@ public class UserEntity {
 
     private String userEntityName;
 
-    @ManyToMany(mappedBy = "members")
+    @ManyToMany
     private List<Chat> chats;
 
     @ManyToOne

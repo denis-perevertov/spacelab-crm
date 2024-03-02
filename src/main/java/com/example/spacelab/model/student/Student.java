@@ -54,6 +54,10 @@ public class Student extends UserEntity implements UserDetails {
 
     private String taskTrackingProfileId;
 
+    public String getUserEntityName() {
+        return getFullName();
+    }
+
     public String getFullName() {
         return String.join(" ",
                 this.details.getFirstName(),

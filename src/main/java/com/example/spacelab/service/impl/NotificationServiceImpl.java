@@ -57,6 +57,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    @Async
     public void sendTaskAddedToCourseNotification(Task task, Course course) {
         log.info("Sending task added to course notification...");
         simpMessagingTemplate.convertAndSend(
@@ -73,6 +74,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    @Async
     public void sendTaskRemovedFromCourseNotification(Task task, Course course) {
         log.info("Sending task removed from course notification...");
         simpMessagingTemplate.convertAndSend(
@@ -89,6 +91,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    @Async
     public void sendStudentAddedToCourseNotification(Student student, Course course) {
         log.info("Sending student added to course notification...");
         simpMessagingTemplate.convertAndSend(
@@ -105,6 +108,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    @Async
     public void sendStudentRemovedFromCourseNotififcation(Student student, Course course) {
         log.info("Sending student removed from course notification...");
         simpMessagingTemplate.convertAndSend(
@@ -121,6 +125,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    @Async
     public void sendNewLiteratureInCourseNotification(Literature literature, Course course) {
 //        Notification notification = new CourseEventNotification()
 //                .set

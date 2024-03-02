@@ -1,5 +1,6 @@
 package com.example.spacelab.controller;
 
+import com.example.spacelab.api.LessonAPI;
 import com.example.spacelab.dto.SelectDTO;
 import com.example.spacelab.dto.lesson.LessonInfoDTO;
 import com.example.spacelab.dto.lesson.LessonListDTO;
@@ -30,6 +31,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,12 +41,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
-@Tag(name="Lesson", description = "Lesson controller")
+@Slf4j
 @RestController
-@Log
 @RequiredArgsConstructor
 @RequestMapping("/api/lessons")
-public class LessonController {
+public class LessonController implements LessonAPI {
 
     private final LessonReportRowService lessonReportRowService;
     private final LessonService lessonService;
@@ -55,15 +56,6 @@ public class LessonController {
     private final AuthUtil authUtil;
 
 
-    //Получение списка уроков по фильтру и пагинации
-    @Operation(description = "Get list of lessons paginated by 'page/size' params (default values are 0/10), output depends on permission type(full/partial)", summary = "Get lesson list", tags = {"Lesson"})
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful Operation"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
-            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
-    })
-    @PreAuthorize("!hasAuthority('lessons.read.NO_ACCESS')")
     @GetMapping
     public ResponseEntity<Page<LessonListDTO>> getLesson(@Parameter(name = "Filter object", description = "Collection of all filters for search results", example = "{}") FilterForm filters,
                                                                  @RequestParam(required = false, defaultValue = "0") Integer page,
@@ -89,16 +81,6 @@ public class LessonController {
         return new ResponseEntity<>(lessons, HttpStatus.OK);
     }
 
-    //Получение урока по id
-    @Operation(description = "Get lesson by ID", summary = "Get lesson by ID", tags = {"Lesson"})
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful Operation"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
-            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Lesson not found in DB", content = @Content),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
-    })
-    @PreAuthorize("!hasAuthority('lessons.read.NO_ACCESS')")
     @GetMapping("/{id}")
     public ResponseEntity<LessonInfoDTO> getLessonById(@PathVariable @Parameter(example = "1") Long id) {
 
@@ -108,23 +90,12 @@ public class LessonController {
         return new ResponseEntity<>(less, HttpStatus.OK);
     }
 
-    @PreAuthorize("!hasAuthority('lessons.read.NO_ACCESS')")
     @GetMapping("/{id}/update")
     public ResponseEntity<?> getLessonInfoForUpdate(@PathVariable Long id) {
         authUtil.checkAccessToCourse(lessonService.getLessonById(id).getCourse().getId(), "lessons.edit");
         return ResponseEntity.ok(mapper.fromLessonToEditDTO(lessonService.getLessonById(id)));
     }
 
-    //Создание урока
-    @Operation(description = "Create new lesson w/ PLANNED status; ID field does not matter in write/edit operations", summary = "Create new lesson", tags = {"Lesson"})
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Successful save"),
-            @ApiResponse(responseCode = "400", description = "Bad Request / Validation Error", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
-            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
-            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
-    })
-    @PreAuthorize("!hasAuthority('lessons.write.NO_ACCESS')")
     @PostMapping
     public ResponseEntity<?> createNewLessonBeforeStart(@RequestBody LessonSaveBeforeStartDTO lesson,
                                                              BindingResult bindingResult) {
@@ -146,18 +117,6 @@ public class LessonController {
         return new ResponseEntity<>(l.getId(), HttpStatus.CREATED);
     }
 
-
-    //Редактирование урока
-    @Operation(description = "Edit lesson; ID field does not matter in write/edit operations", summary = "Edit lesson", tags = {"Lesson"})
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful update"),
-            @ApiResponse(responseCode = "400", description = "Bad Request / Validation Error", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorMessage.class)) }),
-            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
-            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Lesson not found in DB", content = @Content),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
-    })
-    @PreAuthorize("!hasAuthority('lessons.edit.NO_ACCESS')")
     @PutMapping("/{id}")
     public ResponseEntity<?> editLessonBeforeStart(@PathVariable @Parameter(example = "1") Long id,
                                                         @RequestBody LessonSaveBeforeStartDTO lesson, BindingResult bindingResult) {
@@ -177,16 +136,6 @@ public class LessonController {
         return new ResponseEntity<>(l.getId(), HttpStatus.OK);
     }
 
-    //Удаление урока
-    @Operation(description = "Delete lesson", summary = "Delete lesson", tags = {"Lesson"})
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful delete"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
-            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Lesson not found in DB", content = @Content),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
-    })
-    @PreAuthorize("!hasAuthority('lessons.delete.NO_ACCESS')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteLesson(@PathVariable @Parameter(example = "1") Long id) {
 
@@ -196,23 +145,12 @@ public class LessonController {
         return new ResponseEntity<>("Deleted", HttpStatus.OK);
     }
 
-    @PreAuthorize("!hasAuthority('lessons.read.NO_ACCESS')")
     @GetMapping("/{id}/get-report-rows")
     public ResponseEntity<?> getLessonReportRows(@PathVariable Long id) {
         authUtil.checkAccessToCourse(lessonService.getLessonById(id).getCourse().getId(), "lessons.read");
         return ResponseEntity.ok(mapper.fromReportRowListToDTOList(lessonService.getLessonById(id).getReportRows()));
     }
 
-    //Сохранение ответа студента на уроке
-    @Operation(description = "Save student's report to lesson report table", summary = "Save Student Info Into Report Table", tags = {"Lesson"})
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful start"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
-            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Lesson not found in DB", content = @Content),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
-    })
-    @PreAuthorize("!hasAuthority('lessons.write.NO_ACCESS')")
     @PostMapping("/save-report-row")
     public ResponseEntity<?> saveLessonReportRowAfterStart(@RequestBody @Valid LessonReportRowSaveDTO dto,
                                                            BindingResult bindingResult) {
@@ -227,17 +165,8 @@ public class LessonController {
         return new ResponseEntity<>(mapper.fromReportRowToDTO(reportRow), HttpStatus.OK);
     }
 
-
     // ========================
 
-    @Operation(description = "Start a lesson (change its status to ACTIVE). Can't start an already completed/active lesson", summary = "Start Lesson", tags = {"Lesson"})
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful Operation"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
-            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error")
-    })
-    @PreAuthorize("!hasAuthority('lessons.write.NO_ACCESS')")
     @GetMapping("/{id}/start")
     public ResponseEntity<String> startLesson(@PathVariable @Parameter(example = "1") Long id) {
         authUtil.checkAccessToCourse(lessonService.getLessonById(id).getCourse().getId(), "lessons.write");
@@ -245,14 +174,6 @@ public class LessonController {
         return new ResponseEntity<>("Lesson started", HttpStatus.ACCEPTED);
     }
 
-    @Operation(description = "Stop a lesson (change its status to COMPLETED). Can't stop an already completed/planned lesson", summary = "Stop Lesson", tags = {"Lesson"})
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful Operation"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
-            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error")
-    })
-    @PreAuthorize("!hasAuthority('lessons.write.NO_ACCESS')")
     @GetMapping("/{id}/complete")
     public ResponseEntity<String> completeLesson(@PathVariable @Parameter(example = "1") Long id) {
         authUtil.checkAccessToCourse(lessonService.getLessonById(id).getCourse().getId(), "lessons.write");
@@ -260,15 +181,12 @@ public class LessonController {
         return new ResponseEntity<>("Lesson completed", HttpStatus.ACCEPTED);
     }
 
-    // получение всех страничек данных у студентов курса занятия
-    @PreAuthorize("!hasAuthority('lessons.read.NO_ACCESS')")
     @GetMapping("/{id}/student-lesson-display-data")
     public ResponseEntity<?> getStudentLessonDisplayData(@PathVariable Long id) {
         authUtil.checkAccessToCourse(lessonService.getLessonById(id).getCourse().getId(), "lessons.read");
         return ResponseEntity.ok(lessonService.getStudentLessonDisplayData(id));
     }
 
-    // Получение списка cтатусов
     @GetMapping("/get-status-list")
     public ResponseEntity<?> getStatusList() {
         return ResponseEntity.ok(Arrays.stream(LessonStatus.values()).map(v -> new SelectDTO(v.name(), v.name())).toList());

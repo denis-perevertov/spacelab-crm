@@ -7,6 +7,7 @@ import com.example.spacelab.dto.chat.ServerChatMessage;
 import com.example.spacelab.exception.ObjectValidationException;
 import com.example.spacelab.mapper.ChatMapper;
 import com.example.spacelab.service.ChatService;
+import com.example.spacelab.validator.ChatValidator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,22 +19,22 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
-@Controller
+@RestController
 @RequiredArgsConstructor
+@RequestMapping("/api/chat")
 public class ChatController {
 
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final ChatService chatService;
     private final ChatMapper chatMapper;
+    private final ChatValidator validator;
 
     @MessageMapping("/chat/{chatId}")
     @SendTo("/topic/chat/{chatId}")
@@ -49,25 +50,28 @@ public class ChatController {
         return user;
     }
 
-//    @MessageMapping("/messages/{msgId}/status")
-//    @SendTo("/topic/")
-
-    @GetMapping("/chat")
-    public ResponseEntity<?> getChatGroups() {
-        return ResponseEntity.ok(chatService.getChatsForLoggedInAdmin().stream().map(chatMapper::fromChatToDTO).toList());
+    @MessageMapping("/user/{userId}/inbox")
+    @SendTo("/queue/user/{userId}")
+    public ServerChatMessage sendPrivateMessage(@DestinationVariable Long userId, @Payload ClientChatMessage clientMsg) {
+        ServerChatMessage msg = chatService.savePrivateMessage(clientMsg);
+        log.info("Received private msg: {}", msg);
+        return msg;
     }
 
-    @PostMapping("/chat/groups")
-    public ResponseEntity<?> saveChatGroup(@ModelAttribute @Valid ChatGroupSaveDTO dto,
+    @GetMapping
+    public ResponseEntity<?> getChatGroups(@RequestParam(required = false) String query) {
+        return ResponseEntity.ok(chatService.getChatsForLoggedInAdmin(query));
+    }
+
+    @PostMapping("/groups")
+    public ResponseEntity<?> saveChatGroup(@ModelAttribute ChatGroupSaveDTO dto,
                                            BindingResult bindingResult) {
-        log.info("dto: {}", dto);
-        log.info(Arrays.toString(dto.admins()));
+        validator.validate(dto, bindingResult);
         if (bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
             bindingResult.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
             throw new ObjectValidationException(errors);
         }
-        chatService.saveChat(dto);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(chatMapper.fromChatToDTO(chatService.saveChatGroup(dto)));
     }
 }

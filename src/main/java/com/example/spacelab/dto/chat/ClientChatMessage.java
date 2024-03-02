@@ -9,11 +9,19 @@ public record ClientChatMessage(
         Long msgId,
         Long chatId,
         Sender sender,
+        Recipient recipient,
         String content,
         ZonedDateTime datetime,
         ChatMessageStatus status
 ) {
     public record Sender(
+            Long id,
+            String name,
+            String avatar,
+            String role
+    ) {}
+
+    public record Recipient (
             Long id,
             String name,
             String avatar,

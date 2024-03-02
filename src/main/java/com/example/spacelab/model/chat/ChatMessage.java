@@ -26,7 +26,12 @@ public class ChatMessage {
     private Chat chat;
 
     @ManyToOne
+    @JoinColumn(name = "sender_id")
     private UserEntity sender;
+
+    @ManyToOne
+    @JoinColumn(name = "recipient_id")
+    private UserEntity recipient;
 
     @Enumerated(EnumType.STRING)
     private ChatMessageStatus status = ChatMessageStatus.CREATED;

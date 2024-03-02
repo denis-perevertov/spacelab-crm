@@ -447,6 +447,7 @@ public class CourseServiceImpl implements CourseService {
                         .forEach(t -> {
                             t.setCourse(null);
                             c.getTasks().remove(t);
+                            notificationService.sendTaskRemovedFromCourseNotification(t, c);
                         });
 
         // ids of new tasks to add
@@ -467,6 +468,7 @@ public class CourseServiceImpl implements CourseService {
             taskRepository.save(foundTask);
             if(!oldTaskIds.contains(t.getId())) {
                 c.getTasks().add(foundTask);
+                notificationService.sendTaskAddedToCourseNotification(foundTask, c);
             }
         }));
 

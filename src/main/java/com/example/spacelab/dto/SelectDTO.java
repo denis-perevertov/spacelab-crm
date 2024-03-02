@@ -13,7 +13,7 @@ public class SelectDTO {
     @Schema(example = "10")
     private String id;
 
-    @Schema(example = "CourseName")
+    @Schema(example = "name")
     private String name;
 
 }

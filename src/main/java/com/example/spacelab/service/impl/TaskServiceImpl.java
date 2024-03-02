@@ -150,7 +150,11 @@ public class TaskServiceImpl implements TaskService {
                 }
             }
         }
-        return taskRepository.save(task);
+        task = taskRepository.save(task);
+        if(task.getCourse() != null) {
+            notificationService.sendTaskAddedToCourseNotification(task, task.getCourse());
+        }
+        return task;
     }
 
     @Override

@@ -11,7 +11,7 @@ import java.util.Optional;
 @Repository
 public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long> {
     Optional<RefreshToken> findByToken(String token);
-    Optional<RefreshToken> findByAdmin(Admin admin);
-    Boolean existsByAdmin(Admin admin);
-    void deleteByAdmin(Admin admin);
+    Optional<RefreshToken> findByPrincipal(Admin admin);
+    Boolean existsByPrincipal(Admin admin);
+    void deleteByPrincipal(Admin admin);
 }

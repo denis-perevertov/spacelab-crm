@@ -35,7 +35,8 @@ public class SwaggerConfig {
                                             .contact(new Contact()
                                                                 .name("Denis Perevertov & Evgeniy Shevchenko")
                                                                 .email("regicuinte@gmail.com")
-                                                                .url("http://denis-perevertov.com"))
+//                                                                .url("http://denis-perevertov.com"))
+                                                                .url("https://slj.avada-media-dev2.od.ua/spacelab/admin/"))
                                             .license(new License()
                                                                 .name("CC License")
                                                                 .url("https://creativecommons.org/share-your-work/cclicenses/")));
