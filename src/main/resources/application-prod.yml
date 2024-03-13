@@ -4,7 +4,7 @@ server:
 
 spring:
   datasource:
-    url: jdbc:mysql://spacelab_db:3306/spacelab2?createDatabaseIfNotExist=true
+    url: jdbc:mysql://slj_spacelab_db_dperevertov:3306/spacelab2?createDatabaseIfNotExist=true
     username: root
     password: root
 
