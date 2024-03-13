@@ -65,11 +65,11 @@ public class DefaultInitializer implements CommandLineRunner {
         Thread.sleep(50); checkForRoles();
         Thread.sleep(50); checkForAdmins();
         Thread.sleep(50); checkForSettings();
-        Thread.sleep(50); checkForCourses();
-        Thread.sleep(50); checkForLiterature();
-        Thread.sleep(50); checkForTasks();
-        Thread.sleep(50); checkForContacts();
-        Thread.sleep(50); checkForStudents();
+//        Thread.sleep(50); checkForCourses();
+//        Thread.sleep(50); checkForLiterature();
+//        Thread.sleep(50); checkForTasks();
+//        Thread.sleep(50); checkForContacts();
+//        Thread.sleep(50); checkForStudents();
 //        Thread.sleep(50); checkForLessons();
     }
 
