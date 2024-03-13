@@ -1,16 +1,15 @@
 package com.example.spacelab.dto.lesson;
 
 import com.example.spacelab.model.lesson.LessonStatus;
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.example.spacelab.util.StringUtils;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.ZonedDateTime;
 
 @Data
+@NoArgsConstructor
 public class LessonSaveBeforeStartDTO {
 
     @Schema(example = "10")
@@ -29,4 +28,13 @@ public class LessonSaveBeforeStartDTO {
 
     @Schema(example = "true")
     private Boolean startsAutomatically;
+
+    public LessonSaveBeforeStartDTO(Long id, ZonedDateTime lessonStartTime, Long courseID, LessonStatus status, String link, Boolean startsAutomatically) {
+        this.id = id;
+        this.lessonStartTime = lessonStartTime;
+        this.courseID = courseID;
+        this.status = status;
+        this.link = StringUtils.trimString(link);
+        this.startsAutomatically = startsAutomatically;
+    }
 }

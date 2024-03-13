@@ -3,8 +3,6 @@ package com.example.spacelab.model.course;
 import com.example.spacelab.util.TimeUnit;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
 import lombok.Data;
 
 import java.time.LocalDate;

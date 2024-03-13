@@ -1,25 +1,19 @@
 package com.example.spacelab.controller;
 
 import com.example.spacelab.dto.SelectDTO;
-import com.example.spacelab.dto.SelectSearchDTO;
 import com.example.spacelab.dto.admin.AdminAvatarDTO;
-import com.example.spacelab.dto.contact.ContactInfoDTO;
 import com.example.spacelab.dto.role.UserRoleAdminListDTO;
-import com.example.spacelab.dto.student.StudentAvatarDTO;
+import com.example.spacelab.dto.role.UserRoleDTO;
+import com.example.spacelab.dto.role.UserRoleEditDTO;
 import com.example.spacelab.exception.ErrorMessage;
 import com.example.spacelab.exception.ObjectValidationException;
 import com.example.spacelab.mapper.RoleMapper;
-import com.example.spacelab.dto.role.UserRoleDTO;
-import com.example.spacelab.dto.role.UserRoleEditDTO;
-import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.model.role.UserRole;
-import com.example.spacelab.model.student.Student;
 import com.example.spacelab.repository.AdminRepository;
 import com.example.spacelab.service.AdminService;
 import com.example.spacelab.service.StudentService;
 import com.example.spacelab.service.UserRoleService;
 import com.example.spacelab.validator.RoleValidator;
-import com.example.spacelab.exception.ValidationErrorMessage;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -32,14 +26,12 @@ import lombok.extern.java.Log;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Tag(name="Role", description = "Role controller")
 @RestController
@@ -163,6 +155,7 @@ public class RoleController {
             @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
+    @PreAuthorize("!hasAuthority('roles.read.NO_ACCESS')")
     @GetMapping("/members")
     public List<UserRoleAdminListDTO> getAllRolesMembers() {
         return userRoleService.getRoles()
@@ -178,6 +171,7 @@ public class RoleController {
                 .toList();
     }
 
+    @PreAuthorize("!hasAuthority('roles.read.NO_ACCESS')")
     @GetMapping("/get-roles-list")
     public List<SelectDTO> getRoleSelect() {
         return userRoleService.getRoles()

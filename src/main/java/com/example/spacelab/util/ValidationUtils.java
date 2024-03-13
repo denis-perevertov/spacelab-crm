@@ -12,6 +12,12 @@ public interface ValidationUtils {
     List<String> ALLOWED_IMAGE_FORMATS = List.of("jpg", "jpeg", "png");
     Long MAX_FILE_SIZE = 20_971_520L;
     Long MAX_IMAGE_SIZE = 5_242_880L;
+    Integer MAX_LESSON_INTERVAL = 30;
+    Integer MIN_LESSON_INTERVAL = 1;
+    Integer MAX_HOURS_NORM = 65;
+    Integer MIN_HOURS_NORM = 10;
+    Integer MAX_GROUP_SIZE = 30;
+    Integer MIN_GROUP_SIZE = 3;
 
     static Map<String, String> getErrorMessages(BindingResult bindingResult) {
         return bindingResult.getFieldErrors()

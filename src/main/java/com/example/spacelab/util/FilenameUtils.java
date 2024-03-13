@@ -39,7 +39,7 @@ public interface FilenameUtils {
         return String.join(
                 "-",
                 UUID.randomUUID().toString(),
-                Objects.requireNonNull(multipartFile.getOriginalFilename()).replaceAll("[-,.!$]", "_")
+                Objects.requireNonNull(multipartFile.getOriginalFilename()).replaceAll("[-,!$]", "_")
         );
     }
 

@@ -4,8 +4,10 @@ import com.example.spacelab.model.UserEntity;
 import com.example.spacelab.model.course.Course;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.*;
-import org.hibernate.Hibernate;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
@@ -51,6 +53,10 @@ public class Student extends UserEntity implements UserDetails {
     private Set<StudentTask> tasks = new HashSet<>();
 
     private String taskTrackingProfileId;
+
+    public String getUserEntityName() {
+        return getFullName();
+    }
 
     public String getFullName() {
         return String.join(" ",

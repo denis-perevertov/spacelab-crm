@@ -1,22 +1,14 @@
 package com.example.spacelab.exception;
 
-import com.example.spacelab.model.admin.Admin;
 import io.jsonwebtoken.ExpiredJwtException;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.extern.java.Log;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
@@ -39,6 +31,7 @@ public class GlobalControllerAdvice {
 
     @ExceptionHandler(ObjectValidationException.class)
     @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+    @ResponseBody
     public ResponseEntity<ErrorMessage> validationFailedHandler(ObjectValidationException ex) {
         return new ResponseEntity<>(
                 new ErrorMessage("Validation error", HttpStatus.BAD_REQUEST.value(), ex.getErrors()),
@@ -47,6 +40,7 @@ public class GlobalControllerAdvice {
 
     @ExceptionHandler(ResourceNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseBody
     public ResponseEntity<ErrorMessage> resourceNotFoundHandler(ResourceNotFoundException ex) {
         return new ResponseEntity<>(
                 new ErrorMessage("Resource not found", HttpStatus.NOT_FOUND.value(), Map.of(ex.getResourceClassName(), ex.getMessage())),
@@ -66,11 +60,12 @@ public class GlobalControllerAdvice {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ResponseEntity<ErrorMessage> badCredentialsInTokenHandler(BadCredentialsException ex) {
         return new ResponseEntity<>(
-                new ErrorMessage("Bad credentials in JWT token!", HttpStatus.UNAUTHORIZED.value(), Map.of("msg", ex.getMessage())),
+                new ErrorMessage("Bad credentials!", HttpStatus.UNAUTHORIZED.value(), Map.of("msg", ex.getMessage())),
                 HttpStatus.UNAUTHORIZED
         );
     }
 
+    @Hidden
     @ExceptionHandler({AccessDeniedException.class, AuthenticationException.class})
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ResponseEntity<ErrorMessage> accessDeniedHandler(AccessDeniedException ex) {

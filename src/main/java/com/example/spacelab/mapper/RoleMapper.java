@@ -1,11 +1,11 @@
 package com.example.spacelab.mapper;
 
+import com.example.spacelab.dto.role.UserRoleDTO;
+import com.example.spacelab.dto.role.UserRoleEditDTO;
 import com.example.spacelab.exception.MappingException;
 import com.example.spacelab.exception.ResourceNotFoundException;
-import com.example.spacelab.dto.role.UserRoleEditDTO;
 import com.example.spacelab.model.role.PermissionSet;
 import com.example.spacelab.model.role.UserRole;
-import com.example.spacelab.dto.role.UserRoleDTO;
 import com.example.spacelab.repository.UserRoleRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;

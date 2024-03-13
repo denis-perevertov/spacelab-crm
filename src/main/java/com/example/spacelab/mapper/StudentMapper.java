@@ -3,7 +3,6 @@ package com.example.spacelab.mapper;
 import com.example.spacelab.dto.course.CourseLinkIconDTO;
 import com.example.spacelab.dto.student.*;
 import com.example.spacelab.exception.MappingException;
-
 import com.example.spacelab.exception.ResourceNotFoundException;
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.student.Student;
@@ -18,7 +17,6 @@ import lombok.extern.java.Log;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Map;
 
 @Component
 @Log

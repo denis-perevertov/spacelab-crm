@@ -1,7 +1,6 @@
 package com.example.spacelab.service.specification;
 
 import com.example.spacelab.model.course.Course;
-import com.example.spacelab.model.lesson.Lesson;
 import com.example.spacelab.model.literature.Literature;
 import com.example.spacelab.model.literature.LiteratureType;
 import jakarta.persistence.criteria.Join;
@@ -27,7 +26,7 @@ public class LiteratureSpecifications {
         if(ids == null) return (root, query, cb) -> null;
         return (root, query, cb) -> {
             Join<Course, Literature> clj = root.join("course");
-            return clj.in("id", ids);
+            return clj.get("id").in(ids);
         };
     }
 

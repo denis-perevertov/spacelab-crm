@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.TemporalAmount;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -34,11 +33,12 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     @Override
     public RefreshToken createRefreshToken(String username) {
         Admin admin = adminRepository.findByEmail(username).orElseThrow(() -> new ResourceNotFoundException("Admin not found!"));
-        Optional<RefreshToken> opt = repository.findByAdmin(admin);
+        Optional<RefreshToken> opt = repository.findByPrincipal(admin);
         RefreshToken token = opt.orElseGet(RefreshToken::new);
         token.setToken(UUID.randomUUID().toString());
         token.setExpiryDate(Instant.now().plus(Duration.ofDays(7)));
-        token.setAdmin(admin);
+        token.setPrincipal(admin);
         return repository.save(token);
     }
+
 }

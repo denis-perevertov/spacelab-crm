@@ -1,6 +1,5 @@
 package com.example.spacelab;
 
-import com.example.spacelab.job.LessonMonitor;
 import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.model.contact.ContactInfo;
 import com.example.spacelab.model.course.Course;
@@ -21,12 +20,12 @@ import com.example.spacelab.model.task.TaskLevel;
 import com.example.spacelab.model.task.TaskStatus;
 import com.example.spacelab.repository.*;
 import com.example.spacelab.service.LessonService;
-import com.example.spacelab.service.specification.LessonSpecifications;
+import com.example.spacelab.service.SettingsService;
+import com.example.spacelab.service.StudentService;
 import com.example.spacelab.util.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,6 +48,9 @@ public class DefaultInitializer implements CommandLineRunner {
     private final TaskRepository taskRepository;
     private final LiteratureRepository literatureRepository;
     private final LessonRepository lessonRepository;
+    private final SettingsRepository settingsRepository;
+
+    private final SettingsService settingsService;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -62,12 +64,13 @@ public class DefaultInitializer implements CommandLineRunner {
 
         Thread.sleep(50); checkForRoles();
         Thread.sleep(50); checkForAdmins();
+        Thread.sleep(50); checkForSettings();
         Thread.sleep(50); checkForCourses();
+        Thread.sleep(50); checkForLiterature();
+        Thread.sleep(50); checkForTasks();
         Thread.sleep(50); checkForContacts();
         Thread.sleep(50); checkForStudents();
-        Thread.sleep(50); checkForTasks();
-        Thread.sleep(50); checkForLiterature();
-        Thread.sleep(50); checkForLessons();
+//        Thread.sleep(50); checkForLessons();
     }
 
 
@@ -268,7 +271,8 @@ public class DefaultInitializer implements CommandLineRunner {
             log.info("Adding default admins");
 
             Admin director = new Admin();
-            director.setRole(roleRepository.getReferenceByName("ADMIN"));
+            UserRole role = roleRepository.getReferenceByName("ADMIN");
+            director.setRole(role);
             director.setFirstName("DEFAULT");
             director.setLastName("ADMIN");
             director.setPhone("+380500000000");
@@ -276,10 +280,13 @@ public class DefaultInitializer implements CommandLineRunner {
             director.setPassword(passwordEncoder.encode("admin"));
             director.setAvatar("placeholder.jpg");
 
-            adminRepository.save(director);
+            director = adminRepository.save(director);
+            role.getUserList().add(director);
+            roleRepository.save(role);
 
             Admin sManager = new Admin();
-            sManager.setRole(roleRepository.getReferenceByName("SENIOR_MANAGER"));
+            role = roleRepository.getReferenceByName("SENIOR_MANAGER");
+            sManager.setRole(role);
             sManager.setFirstName("DEFAULT");
             sManager.setLastName("S.MANAGER");
             sManager.setPhone("+380500000000");
@@ -287,10 +294,13 @@ public class DefaultInitializer implements CommandLineRunner {
             sManager.setPassword(passwordEncoder.encode("seniormanager"));
             sManager.setAvatar("placeholder.jpg");
 
-            adminRepository.save(sManager);
+            sManager = adminRepository.save(sManager);
+            role.getUserList().add(sManager);
+            roleRepository.save(role);
 
             Admin manager = new Admin();
-            manager.setRole(roleRepository.getReferenceByName("MANAGER"));
+            role = roleRepository.getReferenceByName("MANAGER");
+            manager.setRole(role);
             manager.setFirstName("DEFAULT");
             manager.setLastName("MANAGER");
             manager.setPhone("+380500000000");
@@ -298,10 +308,13 @@ public class DefaultInitializer implements CommandLineRunner {
             manager.setPassword(passwordEncoder.encode("manager"));
             manager.setAvatar("placeholder.jpg");
 
-            adminRepository.save(manager);
+            manager = adminRepository.save(manager);
+            role.getUserList().add(manager);
+            roleRepository.save(role);
 
             Admin mentor = new Admin();
-            mentor.setRole(roleRepository.getReferenceByName("MENTOR"));
+            role = roleRepository.getReferenceByName("MENTOR");
+            mentor.setRole(role);
             mentor.setFirstName("DEFAULT");
             mentor.setLastName("MENTOR");
             mentor.setPhone("+380500000000");
@@ -309,8 +322,16 @@ public class DefaultInitializer implements CommandLineRunner {
             mentor.setPassword(passwordEncoder.encode("mentor"));
             mentor.setAvatar("placeholder.jpg");
 
-            adminRepository.save(mentor);
+            mentor = adminRepository.save(mentor);
+            role.getUserList().add(mentor);
+            roleRepository.save(role);
 
+        }
+    }
+    private void checkForSettings() {
+        if(settingsRepository.count() < 1) {
+            log.info("Adding default settings");
+            adminRepository.findAll().forEach(settingsService::createDefaultSettings);
         }
     }
     private void checkForCourses() {

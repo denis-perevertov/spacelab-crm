@@ -5,8 +5,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.File;
-
 @Data
 @NoArgsConstructor
 public class LiteratureInfoDTO {
@@ -22,6 +20,8 @@ public class LiteratureInfoDTO {
 
     @Schema(example = "CourseName")
     private String courseName;
+
+    private String courseIcon;
 
     @Schema(example = "BOOK")
     private LiteratureType type;

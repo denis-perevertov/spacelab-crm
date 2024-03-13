@@ -6,7 +6,6 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.util.List;
-import java.util.Map;
 
 @Data
 public class LessonReportRowSaveDTO {

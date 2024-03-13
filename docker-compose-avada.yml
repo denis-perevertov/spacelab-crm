@@ -1,0 +1,89 @@
+services:
+  db:
+    image: mysql
+    container_name: slj_spacelab_db_dperevertov
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+    networks:
+      - spacelab
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 10
+
+  admin_frontend:
+    image: temporalparadox/spacelab_admin_front:deploy_avada
+    container_name: slj_spacelab_admin_front_dperevertov
+    ports:
+      - "3000:3000"
+    networks:
+      - spacelab
+    depends_on:
+      db:
+        condition: service_healthy
+
+  admin_backend:
+    image: temporalparadox/spacelab_admin_api:deploy_avada
+    container_name: slj_spacelab_admin_api_dperevertov
+    ports:
+      - "1489:1489"
+    links:
+      - "db:spacelab_db"
+      - "db:mysql"
+      - "db:slj_spacelab_db_dperevertov"
+    networks:
+      - spacelab
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    depends_on:
+      db:
+        condition: service_healthy
+
+  cabinet_frontend:
+    image: temporalparadox/spacelab_personal_cabinet_front:deploy_avada
+    container_name: slj_spacelab_personal_cabinet_front_dperevertov
+    ports:
+      - "3001:3000"
+    networks:
+      - spacelab
+    depends_on:
+      db:
+        condition: service_healthy
+
+  cabinet_backend:
+    image: temporalparadox/spacelab_personal_cabinet_api:deploy_avada
+    container_name: slj_spacelab_personal_cabinet_api_dperevertov
+    ports:
+      - "1488:1488"
+    links:
+      - "db:spacelab_db"
+      - "db:mysql"
+      - "db:slj_spacelab_db_dperevertov"
+    networks:
+      - spacelab
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    depends_on:
+      db:
+        condition: service_healthy
+
+  proxy:
+    image: temporalparadox/spacelab_nginx
+    container_name: slj_nginx_dperevertov
+    ports:
+      - "85:80"
+      - "445:443"
+    networks:
+      - spacelab
+    depends_on:
+      - db
+      - admin_backend
+      - admin_frontend
+      - cabinet_backend
+      - cabinet_frontend
+
+networks:
+  spacelab:
+    name: spacelab

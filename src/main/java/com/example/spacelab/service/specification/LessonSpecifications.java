@@ -1,14 +1,11 @@
 package com.example.spacelab.service.specification;
 
-import com.example.spacelab.model.admin.Admin;
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.lesson.Lesson;
 import com.example.spacelab.model.lesson.LessonStatus;
-import com.example.spacelab.model.task.Task;
 import jakarta.persistence.criteria.Join;
 import org.springframework.data.jpa.domain.Specification;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class LessonSpecifications {
@@ -31,7 +28,7 @@ public class LessonSpecifications {
         if(ids == null) return (root, query, cb) -> null;
         return (root, query, cb) -> {
             Join<Course, Lesson> clj = root.join("course");
-            return clj.in("id", ids);
+            return clj.get("id").in(ids);
         };
     }
 

@@ -1,6 +1,5 @@
 package com.example.spacelab.dto.settings;
 
-import com.example.spacelab.model.settings.HoursSetting;
 import com.example.spacelab.model.settings.LanguageSetting;
 import com.example.spacelab.model.settings.ThemeSetting;
 import lombok.AllArgsConstructor;

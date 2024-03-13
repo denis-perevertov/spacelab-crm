@@ -1,7 +1,8 @@
 spring:
   profiles:
-    active: prod
+    active: local
   http:
+    log-request-details: true
     encoding:
       force: false
   datasource:
@@ -20,6 +21,18 @@ spring:
           lob:
             non_contextual_creation: true
         show-sql: true
+  mail:
+    debug: true
+    host: smtp.gmail.com
+    port: 587
+    username: arrow8086527denis@gmail.com
+    password: "pwup vcdq mcpx ntbr"
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
   security:
     user:
       name: user
@@ -34,14 +47,16 @@ spring:
       enabled: ALWAYS
 
 springdoc:
-  packages-to-scan: com.example.spacelab.controller, com.example.spacelab.model
-  packages-to-exclude: com.example.spacelab.repository
+  packages-to-scan: com.example.spacelab.controller
+  packages-to-exclude: com.example.spacelab.repository, com.example.spacelab.service
   paths-to-match: /api/**
-  override-with-generic-response: false
+#  override-with-generic-response: true
   api-docs:
     enabled: true
-    path: /api-docs
+    path: /api/docs
   swagger-ui:
+    disable-swagger-default-url: true
+    path: /api/swagger-ui
     tryItOutEnabled: true
     operationsSorter: alpha
     tagsSorter: alpha
@@ -50,30 +65,35 @@ springdoc:
 server:
   port: 1489
   servlet:
-    context-path: /spacelab
+    context-path: /spacelab/admin
   error:
     include-message: always
     include-binding-errors: always
 
 application:
   frontend-admin-panel:
-    port: 3001
+    hostname: localhost:3000/spacelab/admin
   frontend-personal-cabinet:
-    port: 3000
+    hostname: localhost:3001/spacelab/cabinet
   teamwork:
-    apiVersion: ${TEAMWORK_VERSION}
-    baseUrl: ${TEAMWORK_BASE_URL}
-    projectId: ${TEAMWORK_PROJECT_ID}
-    token: ${TEAMWORK_TOKEN}
+    apiVersion: v3
+    baseUrl: https://denisscompany18.teamwork.com
+    projectId: 641861
+    token: twp_QrGASGXS0eiIr83897z18EQXoWzV
   aws:
     bucket:
       name: spacelab-dp-bucket
-    accessKey: ${AWS_ACCESS_KEY}
-    secretKey: ${AWS_SECRET_KEY}
+    accessKey: AKIAZ6H5HK6QAOMKNFFW
+    secretKey: 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
+  email:
+    forgot-password-code-length: 5
 
-#logging:
-#  level:
-#    org:
-#      springframework: DEBUG
+logging:
+  level:
+    org:
+      springframework:
+        web: DEBUG
+      hibernate:
+        SQL: INFO
 #  pattern:
 #    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%15thread] %-60([Class: %c{1})] :: %-60([Method: %logger{0}.%M]) - %msg - line %L%n"

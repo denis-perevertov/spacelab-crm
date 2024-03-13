@@ -1,6 +1,5 @@
 package com.example.spacelab.dto.course;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -9,4 +8,5 @@ import lombok.experimental.Accessors;
 public class CourseLinkDTO {
     private Long id;
     private String name;
+    private String icon;
 }

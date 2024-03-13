@@ -1,6 +1,6 @@
 package com.example.spacelab.controller;
 
-import com.example.spacelab.dto.statistics.CourseStatisticsDTO;
+import com.example.spacelab.api.StatisticsAPI;
 import com.example.spacelab.integration.TaskTrackingService;
 import com.example.spacelab.mapper.LessonMapper;
 import com.example.spacelab.mapper.StudentMapper;
@@ -16,7 +16,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
@@ -25,7 +28,7 @@ import java.util.Map;
 @Transactional
 @RequiredArgsConstructor
 @RequestMapping("/api/statistics")
-public class StatisticsController {
+public class StatisticsController implements StatisticsAPI {
 
     private final CourseService courseService;
     private final StudentService studentService;
@@ -90,23 +93,31 @@ public class StatisticsController {
 
     @GetMapping("/active-students-count")
     public ResponseEntity<?> getActiveStudentsCount() {
-
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(studentService.getActiveStudentsCount());
     }
     @GetMapping("/active-courses-count")
     public ResponseEntity<?> getActiveCoursesCount() {
-
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(courseService.getActiveCoursesCount());
     }
     @GetMapping("/completed-lessons-count")
     public ResponseEntity<?> getCompletedLessonsCount() {
-
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(lessonService.getCompletedLessonsCount());
     }
     @GetMapping("/active-tasks-count")
     public ResponseEntity<?> getActiveTasksCount() {
-
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(taskService.getActiveTasksCount());
+    }
+    @GetMapping("/hired-students-count")
+    public ResponseEntity<?> getHiredStudentsCount() {
+        return ResponseEntity.ok(studentService.getHiredStudentsCount());
+    }
+    @GetMapping("/expelled-students-count")
+    public ResponseEntity<?> getExpelledStudentsCount() {
+        return ResponseEntity.ok(studentService.getExpelledStudentsCount());
+    }
+    @GetMapping("/total-students-count")
+    public ResponseEntity<?> getTotalStudentsCount() {
+        return ResponseEntity.ok(studentService.getTotalStudentsCount());
     }
 
     @GetMapping("/admin-panel-cards")
@@ -150,30 +161,30 @@ public class StatisticsController {
         return ResponseEntity.ok(courseService.getCoursesByLessonCount(limit, sort));
     }
 
-    @GetMapping("/courses-by-learning-time")
-    public ResponseEntity<?> getCoursesByLearningTime() {
+//    @GetMapping("/courses-by-learning-time")
+//    public ResponseEntity<?> getCoursesByLearningTime() {
+//
+//        return ResponseEntity.ok().build();
+//    }
+//
+//    @GetMapping("/students-by-learning-time-total")
+//    public ResponseEntity<?> getStudentsByLearningTime() {
+//
+//        return ResponseEntity.ok().build();
+//    }
+//
+//    @GetMapping("/student-rating-timeline")
+//    public ResponseEntity<?> getStudentRatingByTime(@RequestParam Long[] studentIds) {
+//
+//        return ResponseEntity.ok().build();
+//    }
 
-        return ResponseEntity.ok().build();
-    }
-
-    @GetMapping("/students-by-learning-time-total")
-    public ResponseEntity<?> getStudentsByLearningTime() {
-
-        return ResponseEntity.ok().build();
-    }
-
-    @GetMapping("/student-rating-timeline")
-    public ResponseEntity<?> getStudentRatingByTime(@RequestParam Long[] studentIds) {
-
-        return ResponseEntity.ok().build();
-    }
-
-    @GetMapping("/registered-students-timeline")
-    public ResponseEntity<?> getRegisteredStudentsByTime(@RequestParam(required = false) ZonedDateTime from,
-                                                         @RequestParam(required = false) ZonedDateTime to) {
-
-        return ResponseEntity.ok().build();
-    }
+//    @GetMapping("/registered-students-timeline")
+//    public ResponseEntity<?> getRegisteredStudentsByTime(@RequestParam(required = false) ZonedDateTime from,
+//                                                         @RequestParam(required = false) ZonedDateTime to) {
+//
+//        return ResponseEntity.ok().build();
+//    }
 
     // doughnut chart
     @GetMapping("/students-by-gender")
@@ -207,11 +218,11 @@ public class StatisticsController {
         return ResponseEntity.ok(studentService.getStudentHiredRatio());
     }
 
-    @GetMapping("/admins-by-lessons")
-    public ResponseEntity<?> getAdminsByCompletedLessons() {
-
-        return ResponseEntity.ok().build();
-    }
+//    @GetMapping("/admins-by-lessons")
+//    public ResponseEntity<?> getAdminsByCompletedLessons() {
+//
+//        return ResponseEntity.ok().build();
+//    }
 
     // get 100 top students
     @GetMapping("/students-by-rating")

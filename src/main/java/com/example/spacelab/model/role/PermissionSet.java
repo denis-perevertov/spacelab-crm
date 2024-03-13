@@ -1,7 +1,8 @@
 package com.example.spacelab.model.role;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.persistence.*;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Transient;
 import lombok.Data;
 
 import java.util.List;

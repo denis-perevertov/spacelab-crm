@@ -1,12 +1,10 @@
 package com.example.spacelab.service.specification;
 
 import com.example.spacelab.model.course.Course;
-import com.example.spacelab.model.student.Student;
 import com.example.spacelab.model.task.Task;
 import com.example.spacelab.model.task.TaskLevel;
 import com.example.spacelab.model.task.TaskStatus;
 import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.Order;
 import org.springframework.data.jpa.domain.Specification;
 
 public class TaskSpecifications {
@@ -28,7 +26,7 @@ public class TaskSpecifications {
         if(ids == null) return (root, query, cb) -> null;
         return (root, query, cb) -> {
             Join<Course, Task> ctj = root.join("course");
-            return ctj.in("id", ids);
+            return ctj.get("id").in(ids);
         };
     }
 

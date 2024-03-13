@@ -1,15 +1,13 @@
 package com.example.spacelab.controller;
 
-import com.example.spacelab.dto.admin.AdminDTO;
+import com.example.spacelab.dto.contact.ContactInfoDTO;
+import com.example.spacelab.dto.contact.ContactInfoEditDTO;
 import com.example.spacelab.exception.ErrorMessage;
 import com.example.spacelab.exception.ObjectValidationException;
 import com.example.spacelab.mapper.ContactInfoMapper;
 import com.example.spacelab.model.contact.ContactInfo;
-import com.example.spacelab.dto.contact.ContactInfoDTO;
-import com.example.spacelab.dto.contact.ContactInfoEditDTO;
 import com.example.spacelab.service.ContactInfoService;
 import com.example.spacelab.validator.ContactValidator;
-import com.example.spacelab.exception.ValidationErrorMessage;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -26,7 +24,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -86,6 +83,15 @@ public class ContactController {
     }
 
     // Получение дто контакта для создания/редактирования
+    @Operation(description = "Get contact info DTO for edit", summary = "Get Contact Edit Info", tags = {"Contact"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful Operation"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Access Denied", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Contact not found in DB", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content)
+    })
+    @PreAuthorize("!hasAuthority('settings.read.NO_ACCESS')")
     @GetMapping("/{id}/edit")
     public ResponseEntity<ContactInfoEditDTO> getContactForEdit(@PathVariable Long id) {
         return new ResponseEntity<>(contactMapper.fromContactToEditDTO(contactService.getContact(id)), HttpStatus.OK);

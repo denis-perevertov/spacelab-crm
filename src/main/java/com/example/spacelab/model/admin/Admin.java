@@ -7,8 +7,10 @@ import com.example.spacelab.model.lesson.Lesson;
 import com.example.spacelab.model.settings.Settings;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.*;
-import org.hibernate.Hibernate;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -47,7 +49,7 @@ public class Admin extends UserEntity implements UserDetails {
 
     @ToString.Exclude
     @JsonIgnore
-    @OneToOne(mappedBy = "admin")
+    @OneToOne(mappedBy = "admin", cascade = CascadeType.ALL, orphanRemoval = true)
     private Settings settings;
 
     @Override
@@ -57,6 +59,11 @@ public class Admin extends UserEntity implements UserDetails {
 
     public String getFullName() {
         return this.firstName + " " + this.lastName;
+    }
+
+    @Override
+    public String getUserEntityName() {
+        return this.getFullName();
     }
 
     @Override
@@ -97,4 +104,6 @@ public class Admin extends UserEntity implements UserDetails {
     public int hashCode() {
         return Objects.hash(super.hashCode(), firstName, lastName, phone, email, password, confirmPassword);
     }
+
+
 }

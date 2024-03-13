@@ -12,7 +12,6 @@ import com.example.spacelab.model.literature.Literature;
 import com.example.spacelab.model.student.Student;
 import com.example.spacelab.model.task.Task;
 import com.example.spacelab.repository.*;
-import com.example.spacelab.util.ProgramDuration;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -391,7 +390,7 @@ public class CourseMapper {
     }
 
     public Course fromEditDTOToCourse(CourseEditDTO dto) {
-        Course course = (dto.getId() != null) ? courseRepository.findById(dto.getId()).orElse(new Course()) : new Course();
+        Course course = (dto.getId() != null) ? courseRepository.findById(dto.getId()).orElseThrow() : new Course();
 
         try {
             course.setName(dto.getName());
@@ -432,14 +431,16 @@ public class CourseMapper {
     }
 
     public CourseAdminIconDTO fromCourseToCourseAdminDTO(Course c) {
+        Admin mentor = c.getMentor();
+        Admin manager = c.getManager();
         return new CourseAdminIconDTO(
                 c.getId(),
                 c.getName(),
                 c.getIcon(),
-                c.getMentor().getId(),
-                c.getMentor().getFullName(),
-                c.getManager().getId(),
-                c.getManager().getFullName()
+                mentor != null ? mentor.getId() : null,
+                mentor != null ? mentor.getFullName() : null,
+                manager != null ? manager.getId() : null,
+                manager != null ? manager.getFullName() : null
         );
     }
 

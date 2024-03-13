@@ -8,12 +8,13 @@ import com.example.spacelab.model.student.StudentTask;
 import com.example.spacelab.model.student.StudentTaskStatus;
 import com.example.spacelab.model.task.Task;
 import com.example.spacelab.util.FilterForm;
+import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
-
+@Hidden
 public interface StudentTaskService {
 
     List<StudentTask> getStudentTasks(Long id);

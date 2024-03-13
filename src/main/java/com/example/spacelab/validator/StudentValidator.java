@@ -1,8 +1,8 @@
 package com.example.spacelab.validator;
 
+import com.example.spacelab.dto.student.StudentEditDTO;
 import com.example.spacelab.dto.student.StudentTaskUnlockRequest;
 import com.example.spacelab.model.student.Student;
-import com.example.spacelab.dto.student.StudentEditDTO;
 import com.example.spacelab.model.task.Task;
 import com.example.spacelab.repository.StudentRepository;
 import com.example.spacelab.repository.TaskRepository;
@@ -19,7 +19,8 @@ import static com.example.spacelab.util.ValidationUtils.*;
 @RequiredArgsConstructor
 public class StudentValidator implements Validator {
 
-    private final static String PHONE_PATTERN = "^([+]?[\\s0-9]+)?(\\d{3}|[(]?[0-9]+[)])?([-]?[\\s]?[0-9])+$";
+//    private final static String PHONE_PATTERN = "^([+]?[\\s0-9]+)?(\\d{3}|[(]?[0-9]+[)])?([-]?[\\s]?[0-9])+$";
+    private final static String PHONE_PATTERN = "^(38)?0(99|50|66|97|96|98)\\d{7}$";
     private final static String EMAIL_PATTERN = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$";
     private final static String TELEGRAM_PATTERN = "^@[A-Za-z0-9_.]{3,}$";
 

@@ -4,18 +4,17 @@ import com.example.spacelab.dto.literature.*;
 import com.example.spacelab.exception.MappingException;
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.literature.Literature;
+import com.example.spacelab.model.literature.LiteratureType;
 import com.example.spacelab.repository.LiteratureRepository;
 import com.example.spacelab.service.CourseService;
-import com.example.spacelab.model.literature.LiteratureType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 @Log
@@ -36,6 +35,7 @@ public class LiteratureMapper {
             if (course != null) {
                 dto.setCourseId(course.getId());
                 dto.setCourseName(course.getName());
+                dto.setCourseIcon(course.getIcon());
             }
 
             dto.setType(literature.getType());
@@ -119,6 +119,7 @@ public class LiteratureMapper {
             dto.setName(literature.getName());
             dto.setCourseID(literature.getCourse().getId());
             dto.setCourseName(literature.getCourse().getName());
+            dto.setCourseIcon(literature.getCourse().getIcon());
             dto.setType(literature.getType());
             dto.setAuthor(literature.getAuthor());
             dto.setKeywords(literature.getKeywords());

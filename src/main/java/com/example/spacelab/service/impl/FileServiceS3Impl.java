@@ -2,7 +2,6 @@ package com.example.spacelab.service.impl;
 
 import com.example.spacelab.service.FileService;
 import com.example.spacelab.service.s3.S3Client;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
@@ -13,9 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.Objects;
 
 @Slf4j

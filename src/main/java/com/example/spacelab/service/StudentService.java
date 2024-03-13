@@ -8,10 +8,11 @@ import com.example.spacelab.integration.data.TimeTotalResponse;
 import com.example.spacelab.model.course.Course;
 import com.example.spacelab.model.lesson.Lesson;
 import com.example.spacelab.model.lesson.LessonReportRow;
-import com.example.spacelab.model.student.StudentInviteRequest;
 import com.example.spacelab.model.student.Student;
+import com.example.spacelab.model.student.StudentInviteRequest;
 import com.example.spacelab.model.student.StudentTask;
 import com.example.spacelab.util.FilterForm;
+import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -20,7 +21,7 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-
+@Hidden
 public interface StudentService extends StudentCardService,
                                         EntityFilterService<Student> {
 
