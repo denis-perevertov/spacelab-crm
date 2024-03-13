@@ -48,7 +48,7 @@ jobs:
         context: .
         file: ./Dockerfile
         push: true
-        tags: $DOCKER_IMAGE
+        tags: ${{ env.DOCKER_IMAGE }}
 
 
   deploy:
@@ -66,7 +66,7 @@ jobs:
             host: ${{ secrets.SERVER_HOST }}
             username: ${{ secrets.SERVER_USERNAME }}
             password: ${{ secrets.SERVER_PASSWORD }}
-            script: sudo docker stop $DOCKER_CONTAINER_NAME
+            script: sudo docker stop ${{ env.DOCKER_CONTAINER_NAME }}
 
       - uses: appleboy/ssh-action@v0.1.10
         name: Delete old container
@@ -75,7 +75,7 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USERNAME }}
           password: ${{ secrets.SERVER_PASSWORD }}
-          script: sudo docker rm $DOCKER_CONTAINER_NAME
+          script: sudo docker rm ${{ env.DOCKER_CONTAINER_NAME }}
 
       - uses: appleboy/ssh-action@v0.1.10
         name: Delete old image
@@ -84,7 +84,7 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USERNAME }}
           password: ${{ secrets.SERVER_PASSWORD }}
-          script: sudo docker rmi $DOCKER_IMAGE
+          script: sudo docker rmi ${{ env.DOCKER_IMAGE }}
 
       - uses: appleboy/ssh-action@v0.1.10
         name: Create new container with updated image
@@ -93,5 +93,5 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USERNAME }}
           password: ${{ secrets.SERVER_PASSWORD }}
-          script: sudo docker run -p $HOST_PORT:$DOCKER_PORT -P --name $DOCKER_CONTAINER_NAME --network $DOCKER_CONTAINER_NETWORK -e SPRING_PROFILES_ACTIVE=prod -d $DOCKER_IMAGE
+          script: sudo docker run -p ${{ env.HOST_PORT }}:${{ env.DOCKER_PORT }} -P --name ${{ env.DOCKER_CONTAINER_NAME }} --network ${{ env.DOCKER_CONTAINER_NETWORK }} -e SPRING_PROFILES_ACTIVE=prod -d ${{ env.DOCKER_IMAGE }}
 
