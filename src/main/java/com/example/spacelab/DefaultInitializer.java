@@ -21,6 +21,7 @@ import com.example.spacelab.model.task.TaskStatus;
 import com.example.spacelab.repository.*;
 import com.example.spacelab.service.LessonService;
 import com.example.spacelab.service.SettingsService;
+import com.example.spacelab.service.StudentService;
 import com.example.spacelab.util.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
@@ -64,11 +65,11 @@ public class DefaultInitializer implements CommandLineRunner {
         Thread.sleep(50); checkForRoles();
         Thread.sleep(50); checkForAdmins();
         Thread.sleep(50); checkForSettings();
-//        Thread.sleep(50); checkForCourses();
-//        Thread.sleep(50); checkForContacts();
-//        Thread.sleep(50); checkForStudents();
-//        Thread.sleep(50); checkForTasks();
-//        Thread.sleep(50); checkForLiterature();
+        Thread.sleep(50); checkForCourses();
+        Thread.sleep(50); checkForLiterature();
+        Thread.sleep(50); checkForTasks();
+        Thread.sleep(50); checkForContacts();
+        Thread.sleep(50); checkForStudents();
 //        Thread.sleep(50); checkForLessons();
     }
 

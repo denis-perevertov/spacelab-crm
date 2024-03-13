@@ -72,9 +72,9 @@ server:
 
 application:
   frontend-admin-panel:
-    hostname: localhost:3001
+    hostname: localhost:3000/spacelab/admin
   frontend-personal-cabinet:
-    hostname: localhost:3000
+    hostname: localhost:3001/spacelab/cabinet
   teamwork:
     apiVersion: v3
     baseUrl: https://denisscompany18.teamwork.com

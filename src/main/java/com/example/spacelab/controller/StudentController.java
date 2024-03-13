@@ -174,7 +174,8 @@ public class StudentController implements StudentAPI {
         }
 
         String token = studentService.createInviteStudentToken(studentMapper.fromDTOToInviteRequest(inviteRequest));
-        String url = req.getScheme() + "://" + hostname + "/register?invite_key=" + token;
+//        String url = req.getScheme() + "://" + hostname + "/register?invite_key=" + token;
+        String url = hostname + "/register?invite_key=" + token;
         return new ResponseEntity<>(url, HttpStatus.CREATED);
 
     }
